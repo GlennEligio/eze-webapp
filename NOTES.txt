@@ -14,7 +14,6 @@ Item
 
 User
  - id
- - userId
  - name
  - username
  - password
@@ -28,3 +27,27 @@ Transaction
  - acceptedBy
  - status
  - remarks
+
+
+Services
+1. API Gateway
+	- port 8080
+2. Item Service
+	- port 8060
+3. User Service
+	- port 8040
+4. Transaction Service
+	- port 8020
+
+
+Functionalities
+1. CRUD Operation in User, Item, Transaction
+
+
+TODOS:
+1. Transaction Service
+2. Backend REST API documentation
+3. Api Gateway
+4. Spring Security for ROLE based authentication and authorization
+5. Frontend
+6. Deployment
