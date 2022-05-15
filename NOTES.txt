@@ -1,0 +1,30 @@
+EZE
+
+Resources to handle
+1. Item
+2. User
+3. Transaction
+
+Item
+ - id
+ - itemID (barcode)
+ - currentAmount
+ - totalAmount
+ - description
+
+User
+ - id
+ - userId
+ - name
+ - username
+ - password
+ - role
+
+Transaction
+ - id
+ - transactionId
+ - items
+ - requestedBy
+ - acceptedBy
+ - status
+ - remarks
