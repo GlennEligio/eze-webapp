@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -29,13 +30,13 @@ public class ItemController {
     }
 
     @PostMapping("/items")
-    public ResponseEntity<Item> createItem(@RequestBody Item item){
+    public ResponseEntity<Item> createItem(@Valid @RequestBody Item item){
         Item newItem = service.createItem(item);
         return ResponseEntity.status(HttpStatus.CREATED).body(newItem);
     }
 
     @PutMapping("/items")
-    public ResponseEntity<Object> updateItem(@RequestBody Item item){
+    public ResponseEntity<Object> updateItem(@Valid @RequestBody Item item){
         service.updateItem(item);
         return ResponseEntity.ok().build();
     }

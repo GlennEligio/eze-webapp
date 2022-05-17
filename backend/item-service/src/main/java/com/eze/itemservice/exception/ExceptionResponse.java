@@ -3,12 +3,12 @@ package com.eze.itemservice.exception;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @AllArgsConstructor
 @Data
 public class ExceptionResponse {
-    private Date timestamp;
     private String message;
+    private LocalDateTime timestamp;
     private String details;
 }

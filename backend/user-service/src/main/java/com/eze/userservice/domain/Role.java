@@ -3,7 +3,7 @@ package com.eze.userservice.domain;
 import java.util.stream.Stream;
 
 public enum Role {
-    SADMIN("SADMIN"), ADMIN("ADMIN"), USER("USER");
+    SADMIN("ROLE_SADMIN"), ADMIN("ROLE_ADMIN"), USER("ROLE_USER");
 
     private final String roleName;
 

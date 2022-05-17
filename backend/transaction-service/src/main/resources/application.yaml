@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: transaction-service
+  datasource:
+    url: jdbc:mysql://localhost:3306/eze-transaction
+    username: root
+    password: P4ssw0rd
+    platform: mysql
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+server:
+  port: 8020

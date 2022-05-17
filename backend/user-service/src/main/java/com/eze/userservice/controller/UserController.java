@@ -2,12 +2,11 @@ package com.eze.userservice.controller;
 
 import com.eze.userservice.domain.User;
 import com.eze.userservice.service.UserService;
-import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.transaction.Transactional;
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -31,12 +30,12 @@ public class UserController {
     }
 
     @PostMapping("/users")
-    public ResponseEntity<User> createUser(@RequestBody User user){
+    public ResponseEntity<User> createUser(@Valid @RequestBody User user){
         return ResponseEntity.status(HttpStatus.CREATED).body(service.createUser(user));
     }
 
     @PutMapping("/users")
-    public ResponseEntity<Object> updateUser(@RequestBody User user) {
+    public ResponseEntity<Object> updateUser(@Valid @RequestBody User user) {
         service.updateUser(user);
         return ResponseEntity.ok().build();
     }
