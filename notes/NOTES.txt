@@ -27,6 +27,7 @@ Transaction
  - acceptedBy
  - status
  - remarks
+ - dateCreated
 
 
 Services
@@ -45,9 +46,15 @@ Functionalities
 
 
 TODOS:
-1. Transaction Service
-2. Backend REST API documentation
-3. Api Gateway
-4. Spring Security for ROLE based authentication and authorization
-5. Frontend
-6. Deployment
+DONE - Transaction Service
+Add feature to change Status of Transaction in Transaction Service
+Backend REST API documentation
+Api Gateway
+Spring Security for ROLE based authentication and authorization
+Frontend
+Deployment
+
+
+SOURCES:
+1. Ecommerce database design example
+	> https://fabric.inc/blog/ecommerce-database-design-example/

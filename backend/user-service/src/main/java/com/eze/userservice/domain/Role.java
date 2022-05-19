@@ -15,7 +15,6 @@ public enum Role {
         return this.roleName;
     }
 
-
     public static Role of(String roleName) {
         return Stream.of(Role.values())
                 .filter(p -> p.getRoleName().equals(roleName))
