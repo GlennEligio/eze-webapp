@@ -3,6 +3,8 @@ package com.eze.transactionservice.domain;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -32,10 +34,8 @@ public class Transaction {
     @Enumerated(EnumType.STRING)
     private Status status;
 
-    @Column(columnDefinition = "TIMESTAMP")
     private LocalDateTime dateCreated;
 
-    @Column(columnDefinition = "TIMESTAMP")
     private LocalDateTime dateResolved;
 
     private Boolean deleteFlag = false;

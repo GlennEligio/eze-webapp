@@ -22,7 +22,10 @@ User
 Transaction
  - id
  - transactionId
- - items
+ - transactionItems
+	- item
+		- itemCode
+	- amount
  - requestedBy
  - acceptedBy
  - status

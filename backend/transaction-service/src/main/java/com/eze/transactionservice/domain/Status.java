@@ -3,7 +3,7 @@ package com.eze.transactionservice.domain;
 import java.util.stream.Stream;
 
 public enum Status {
-    ACCEPTED("ACCEPTED"), PENDING("PENDING"), DENIED("DENIED");
+    ACCEPTED("accepted"), PENDING("pending"), DENIED("denied");
 
     private final String statusName;
 
@@ -21,5 +21,4 @@ public enum Status {
                 .findFirst()
                 .orElseThrow(IllegalArgumentException::new);
     }
-
 }
