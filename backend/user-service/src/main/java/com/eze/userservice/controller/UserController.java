@@ -1,7 +1,11 @@
 package com.eze.userservice.controller;
 
+import com.eze.userservice.config.EzeUserDetails;
 import com.eze.userservice.domain.User;
+import com.eze.userservice.dto.LoginUserDto;
+import com.eze.userservice.dto.UserWithTokenDto;
 import com.eze.userservice.service.UserService;
+import com.eze.userservice.util.JwtUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,9 +18,11 @@ import java.util.List;
 public class UserController {
 
     private final UserService service;
+    private final JwtUtil jwtUtil;
 
-    public UserController(UserService service) {
+    public UserController(UserService service, JwtUtil jwtUtil) {
         this.service = service;
+        this.jwtUtil = jwtUtil;
     }
 
     @GetMapping("/users")
@@ -31,6 +37,7 @@ public class UserController {
 
     @PostMapping("/users")
     public ResponseEntity<User> createUser(@Valid @RequestBody User user){
+        user.setDeleteFlag(false);
         return ResponseEntity.status(HttpStatus.CREATED).body(service.createUser(user));
     }
 
@@ -44,5 +51,23 @@ public class UserController {
     public ResponseEntity<Object> deleteUser(@PathVariable("username") String username){
         service.deleteUser(username);
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/users/login")
+    public ResponseEntity<UserWithTokenDto> login(@RequestBody LoginUserDto user){
+        User authenticatedUser = service.authenticateUser(user.getUsername(), user.getPassword());
+        EzeUserDetails userDetails = new EzeUserDetails(authenticatedUser);
+        String accessToken = jwtUtil.generateAccessToken(userDetails);
+        String refreshToken = jwtUtil.generateRefreshToken(userDetails);
+        return ResponseEntity.ok(new UserWithTokenDto(authenticatedUser.getUsername(), authenticatedUser.getRole(), accessToken, refreshToken));
+    }
+
+    @GetMapping("/users/refresh/{refreshToken}")
+    public ResponseEntity<UserWithTokenDto> refreshToken(@PathVariable("refreshToken") String refreshToken){
+        String username = jwtUtil.extractUsername(refreshToken);
+        User authenticatedUser = service.findUser(username);
+        EzeUserDetails userDetails = new EzeUserDetails(authenticatedUser);
+        String accessToken = jwtUtil.generateAccessToken(userDetails);
+        return ResponseEntity.ok(new UserWithTokenDto(authenticatedUser.getUsername(), authenticatedUser.getRole(), accessToken, refreshToken));
     }
 }

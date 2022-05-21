@@ -50,10 +50,10 @@ Functionalities
 
 TODOS:
 DONE - Transaction Service
-Add feature to change Status of Transaction in Transaction Service
+DONE - Add feature to change Status of Transaction in Transaction Service
+Spring Security for ROLE based authentication and authorization
 Backend REST API documentation
 Api Gateway
-Spring Security for ROLE based authentication and authorization
 Frontend
 Deployment
 
