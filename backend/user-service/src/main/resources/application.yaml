@@ -11,8 +11,14 @@ spring:
       ddl-auto: update
 
 
+
 server:
   port: 8040
 
 user-service:
   secretKey: eze-webapp
+
+eureka:eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka

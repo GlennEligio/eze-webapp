@@ -3,6 +3,7 @@ package com.eze.userservice.controller;
 import com.eze.userservice.config.EzeUserDetails;
 import com.eze.userservice.domain.User;
 import com.eze.userservice.dto.LoginUserDto;
+import com.eze.userservice.dto.UserDto;
 import com.eze.userservice.dto.UserWithTokenDto;
 import com.eze.userservice.service.UserService;
 import com.eze.userservice.util.JwtUtil;
@@ -69,5 +70,12 @@ public class UserController {
         EzeUserDetails userDetails = new EzeUserDetails(authenticatedUser);
         String accessToken = jwtUtil.generateAccessToken(userDetails);
         return ResponseEntity.ok(new UserWithTokenDto(authenticatedUser.getUsername(), authenticatedUser.getRole(), accessToken, refreshToken));
+    }
+
+    @GetMapping("user/validate/{accessToken}")
+    public ResponseEntity<UserDto> validateToken(@PathVariable("accessToken") String accessToken){
+        String username = jwtUtil.extractUsername(accessToken);
+        User authenticateUser = service.findUser(username);
+        return ResponseEntity.ok(new UserDto(authenticateUser.getUsername(), authenticateUser.getRole().toString()));
     }
 }

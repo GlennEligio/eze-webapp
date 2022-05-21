@@ -76,7 +76,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<User> userOp = repository.findByUsernameAndDeleteFlagFalse(username);
-        log.info(userOp.get().getRole().toString());
         return new EzeUserDetails(userOp.orElseThrow(() -> new ApiException("User not authenticated", HttpStatus.FORBIDDEN)));
     }
 
