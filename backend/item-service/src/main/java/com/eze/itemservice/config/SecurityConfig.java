@@ -1,45 +1,35 @@
-package com.eze.userservice.config;
+package com.eze.itemservice.config;
 
-import com.eze.userservice.filter.JwtRequestFilter;
-import com.eze.userservice.service.UserServiceImpl;
+import com.eze.itemservice.filter.AuthRequestFilter;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
 import java.time.Duration;
-import java.util.Arrays;
 import java.util.List;
 
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-    private final UserServiceImpl service;
-    private final PasswordEncoder passwordEncoder;
-    private final JwtRequestFilter filter;
+    private final AuthRequestFilter filter;
 
-    public SecurityConfig(UserServiceImpl service, PasswordEncoder passwordEncoder, JwtRequestFilter jwtRequestFilter) {
-        this.service = service;
-        this.passwordEncoder = passwordEncoder;
-        this.filter = jwtRequestFilter;
-    }
-
-    @Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(service).passwordEncoder(passwordEncoder);
+    public SecurityConfig(AuthRequestFilter filter) {
+        this.filter  = filter;
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.csrf().disable()
-                .authorizeRequests().antMatchers("/api/v1/users/login", "/api/v1/users/refresh/**", "/api/v1/users/validate/**").permitAll()
+        http.csrf().disable();
+        http.authorizeRequests().antMatchers(HttpMethod.GET, "/api/*/items").hasAnyAuthority("USER", "ADMIN", "SADMIN")
                 .anyRequest().hasAnyAuthority("ADMIN", "SADMIN");
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         http.addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class);
@@ -49,13 +39,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     public CorsFilter corsFilter() {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        CorsConfiguration corsConfiguration = new CorsConfiguration();
-        corsConfiguration.setAllowedOrigins(List.of("*"));
-        corsConfiguration.setAllowedHeaders(Arrays.asList("GET", "PUT", "POST", "DELETE", "OPTIONS"));
-        corsConfiguration.setExposedHeaders(List.of("*"));
-        corsConfiguration.setAllowedMethods(List.of("*"));
-        corsConfiguration.setMaxAge(Duration.ofMinutes(10));
-        source.registerCorsConfiguration("/**", corsConfiguration);
+        CorsConfiguration corsConfig = new CorsConfiguration();
+        corsConfig.setAllowedHeaders(List.of("*"));
+        corsConfig.setAllowedMethods(List.of("*"));
+        corsConfig.setAllowedOrigins(List.of("*"));
+        corsConfig.setMaxAge(Duration.ofMinutes(10));
+        source.registerCorsConfiguration("/**", corsConfig);
         return new CorsFilter(source);
     }
+
 }

@@ -72,7 +72,7 @@ public class UserController {
         return ResponseEntity.ok(new UserWithTokenDto(authenticatedUser.getUsername(), authenticatedUser.getRole(), accessToken, refreshToken));
     }
 
-    @GetMapping("user/validate/{accessToken}")
+    @GetMapping("/users/validate/{accessToken}")
     public ResponseEntity<UserDto> validateToken(@PathVariable("accessToken") String accessToken){
         String username = jwtUtil.extractUsername(accessToken);
         User authenticateUser = service.findUser(username);

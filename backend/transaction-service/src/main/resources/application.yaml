@@ -15,3 +15,8 @@ spring:
 
 server:
   port: 8020
+
+eureka:eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka

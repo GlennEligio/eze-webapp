@@ -37,4 +37,4 @@ server:
   port: 8080
 
 user-service:
-  url: lb://localhost:8060/api/v1/users
+  url: lb://user-service/api/v1/users
