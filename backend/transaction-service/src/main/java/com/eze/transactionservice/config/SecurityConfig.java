@@ -1,6 +1,7 @@
 package com.eze.transactionservice.config;
 
 import com.eze.transactionservice.filter.AuthRequestFilter;
+import com.eze.transactionservice.filter.ExceptionHandlerFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -18,19 +19,22 @@ import java.util.List;
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-    private final AuthRequestFilter filter;
+    private final AuthRequestFilter authRequestFilter;
+    private final ExceptionHandlerFilter exceptionHandlerFilter;
 
-    public SecurityConfig(AuthRequestFilter filter) {
-        this.filter  = filter;
+    public SecurityConfig(AuthRequestFilter authRequestFilter, ExceptionHandlerFilter exceptionHandlerFilter) {
+        this.authRequestFilter  = authRequestFilter;
+        this.exceptionHandlerFilter = exceptionHandlerFilter;
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.csrf().disable();
-        http.authorizeRequests().antMatchers(HttpMethod.GET, "/api/*/items").hasAnyAuthority("USER", "ADMIN", "SADMIN")
+        http.authorizeRequests().antMatchers(HttpMethod.GET, "/api/*/transactions").hasAnyAuthority("USER", "ADMIN", "SADMIN")
                 .anyRequest().hasAnyAuthority("ADMIN", "SADMIN");
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-        http.addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(authRequestFilter, UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(exceptionHandlerFilter, AuthRequestFilter.class);
         http.cors();
     }
 

@@ -1,6 +1,7 @@
 package com.eze.itemservice.config;
 
 import com.eze.itemservice.filter.AuthRequestFilter;
+import com.eze.itemservice.filter.ExceptionHandlerFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,10 +21,12 @@ import java.util.List;
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-    private final AuthRequestFilter filter;
+    private final AuthRequestFilter authRequestFilter;
+    private final ExceptionHandlerFilter exceptionHandlerFilter;
 
-    public SecurityConfig(AuthRequestFilter filter) {
-        this.filter  = filter;
+    public SecurityConfig(AuthRequestFilter authRequestFilter, ExceptionHandlerFilter exceptionHandlerFilter) {
+        this.authRequestFilter  = authRequestFilter;
+        this.exceptionHandlerFilter = exceptionHandlerFilter;
     }
 
     @Override
@@ -32,7 +35,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.authorizeRequests().antMatchers(HttpMethod.GET, "/api/*/items").hasAnyAuthority("USER", "ADMIN", "SADMIN")
                 .anyRequest().hasAnyAuthority("ADMIN", "SADMIN");
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-        http.addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(authRequestFilter, UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(exceptionHandlerFilter, AuthRequestFilter.class);
         http.cors();
     }
 

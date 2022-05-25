@@ -1,6 +1,8 @@
 package com.eze.itemservice.filter;
 
+import com.eze.itemservice.exception.ApiException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -24,7 +26,11 @@ public class AuthRequestFilter extends OncePerRequestFilter {
         String role = request.getHeader("X-auth-role");
         String username = request.getHeader("X-auth-username");
 
-        if (role != null && username != null && SecurityContextHolder.getContext().getAuthentication() == null){
+        if(role == null || username == null) {
+            throw new ApiException("Incomplete Authentication headers", HttpStatus.FORBIDDEN);
+        }
+
+        if (SecurityContextHolder.getContext().getAuthentication() == null){
             List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(role));
             UsernamePasswordAuthenticationToken token = new UsernamePasswordAuthenticationToken(username, null, authorities);
             SecurityContextHolder.getContext().setAuthentication(token);
