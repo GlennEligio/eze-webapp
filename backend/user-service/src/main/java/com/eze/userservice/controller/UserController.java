@@ -7,6 +7,7 @@ import com.eze.userservice.dto.UserDto;
 import com.eze.userservice.dto.UserWithTokenDto;
 import com.eze.userservice.service.UserService;
 import com.eze.userservice.util.JwtUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1")
 public class UserController {
@@ -60,6 +62,7 @@ public class UserController {
         EzeUserDetails userDetails = new EzeUserDetails(authenticatedUser);
         String accessToken = jwtUtil.generateAccessToken(userDetails);
         String refreshToken = jwtUtil.generateRefreshToken(userDetails);
+
         return ResponseEntity.ok(new UserWithTokenDto(authenticatedUser.getUsername(), authenticatedUser.getRole(), accessToken, refreshToken));
     }
 
@@ -76,6 +79,6 @@ public class UserController {
     public ResponseEntity<UserDto> validateToken(@PathVariable("accessToken") String accessToken){
         String username = jwtUtil.extractUsername(accessToken);
         User authenticateUser = service.findUser(username);
-        return ResponseEntity.ok(new UserDto(authenticateUser.getUsername(), authenticateUser.getRole().toString()));
+        return ResponseEntity.ok(new UserDto(authenticateUser.getUsername(), authenticateUser.getRole().name()));
     }
 }

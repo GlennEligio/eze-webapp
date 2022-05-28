@@ -51,7 +51,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     }
 
     @Override
-    public void updateUser(User user) {
+    public User updateUser(User user) {
         Optional<User> userOp = repository.findByUsernameAndDeleteFlagFalse(user.getUsername());
         if(userOp.isEmpty()){
             throw new ApiException("User with username " + user.getUsername() + " does not exist", HttpStatus.NOT_FOUND);
@@ -60,23 +60,24 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         updatedUser.setName(user.getName());
         updatedUser.setPassword(user.getPassword());
         updatedUser.setRole(user.getRole());
-        repository.save(updatedUser);
+        return repository.save(updatedUser);
     }
 
     @Transactional
     @Override
-    public void deleteUser(String username) {
+    public Boolean deleteUser(String username) {
         Optional<User> userOp = repository.findByUsernameAndDeleteFlagFalse(username);
         if(userOp.isEmpty()){
             throw new ApiException("User with username " + username + " does not exist", HttpStatus.NOT_FOUND);
         }
         repository.softDelete(username);
+        return true;
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<User> userOp = repository.findByUsernameAndDeleteFlagFalse(username);
-        return new EzeUserDetails(userOp.orElseThrow(() -> new ApiException("User not authenticated", HttpStatus.FORBIDDEN)));
+        return new EzeUserDetails(userOp.orElseThrow(() -> new ApiException("User not authenticated", HttpStatus.UNAUTHORIZED)));
     }
 
     @Override
@@ -86,7 +87,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             throw new ApiException("User with username " + username + " does not exist", HttpStatus.NOT_FOUND);
         }
         if(!passwordEncoder.matches(password, userOp.get().getPassword())){
-            throw new ApiException("Incorrect username/password", HttpStatus.FORBIDDEN);
+            throw new ApiException("Incorrect username/password", HttpStatus.UNAUTHORIZED);
         }
         return userOp.get();
     }

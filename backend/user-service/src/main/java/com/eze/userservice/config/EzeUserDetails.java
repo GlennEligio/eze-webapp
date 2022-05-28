@@ -1,6 +1,7 @@
 package com.eze.userservice.config;
 
 import com.eze.userservice.domain.User;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -12,6 +13,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Slf4j
+@Data
 public class EzeUserDetails implements UserDetails {
 
     private final String username;
@@ -23,7 +25,7 @@ public class EzeUserDetails implements UserDetails {
         this.username = user.getUsername();
         this.password = user.getPassword();
         this.isActive = user.getDeleteFlag();
-        this.authorities = Stream.of(user.getRole().toString())
+        this.authorities = Stream.of(user.getRole().name())
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
     }
