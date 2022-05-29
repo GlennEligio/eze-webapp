@@ -32,10 +32,11 @@ public class Item {
 
     private Boolean deleteFlag;
 
-    public Item(String itemCode, BigInteger currentAmount, BigInteger totalAmount, String description) {
+    public Item(String itemCode, BigInteger currentAmount, BigInteger totalAmount, String description, Boolean deleteFlag) {
         this.itemCode = itemCode;
         this.currentAmount = currentAmount;
         this.totalAmount = totalAmount;
         this.description = description;
+        this.deleteFlag = deleteFlag;
     }
 }

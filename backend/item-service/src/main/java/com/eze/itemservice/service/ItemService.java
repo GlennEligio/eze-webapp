@@ -8,6 +8,6 @@ public interface ItemService {
     List<Item> findItems();
     Item findItem(String itemCode);
     Item createItem(Item item);
-    void updateItem(Item item);
-    void deleteItem(String itemCode);
+    Item updateItem(Item item);
+    Boolean deleteItem(String itemCode);
 }
