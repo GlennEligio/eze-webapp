@@ -1,10 +1,9 @@
 package com.eze.transactionservice.domain;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -38,9 +37,9 @@ public class Transaction {
 
     private LocalDateTime dateResolved;
 
-    private Boolean deleteFlag = false;
+    private Boolean deleteFlag;
 
-    public Transaction(String transactionId, List<TransactionItem> transactionItems, String requestedBy, String acceptedBy, Status status, LocalDateTime dateCreated, LocalDateTime dateResolved) {
+    public Transaction(String transactionId, List<TransactionItem> transactionItems, String requestedBy, String acceptedBy, Status status, LocalDateTime dateCreated, LocalDateTime dateResolved, Boolean deleteFlag) {
         this.transactionId = transactionId;
         this.transactionItems = transactionItems;
         this.requestedBy = requestedBy;
@@ -48,5 +47,6 @@ public class Transaction {
         this.status = status;
         this.dateCreated = dateCreated;
         this.dateResolved = dateResolved;
+        this.deleteFlag = deleteFlag;
     }
 }

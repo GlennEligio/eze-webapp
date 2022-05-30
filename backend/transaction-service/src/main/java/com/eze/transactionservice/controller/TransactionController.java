@@ -33,7 +33,6 @@ public class TransactionController {
 
     @PostMapping("/transactions")
     public ResponseEntity<Transaction> createTransaction(@Valid @RequestBody Transaction transaction){
-        transaction.setDateCreated(LocalDateTime.now());
         return ResponseEntity.status(HttpStatus.CREATED).body(service.createTransaction(transaction));
     }
 

@@ -14,11 +14,6 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 
     Optional<Transaction> findByTransactionIdAndDeleteFlagFalse(String transactionId);
 
-    @Query("SELECT t FROM Transaction t " +
-            "WHERE t.transactionId=?1 " +
-            "AND t.deleteFlag=false")
-    List<Transaction> findByTransactionId(String transactionId);
-
     @Query("UPDATE Transaction t SET t.deleteFlag=true WHERE t.transactionId=?1")
     @Modifying
     void softDelete(String transactionId);

@@ -48,7 +48,7 @@ class ItemControllerTest {
         mapper = new ObjectMapper();
         headers = new MultiValueMapAdapter<>(new HashMap<>());
         headers.add("X-auth-username", "randomUsername");
-        headers.add("X-auth-role", "ADMIN");
+        headers.add("X-auth-role", "ROLE_ADMIN");
         BASE_URI = "/api/v1/items";
     }
 

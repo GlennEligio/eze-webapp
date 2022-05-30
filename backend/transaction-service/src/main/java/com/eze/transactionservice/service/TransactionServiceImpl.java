@@ -7,13 +7,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class TransactionServiceImpl implements TransactionService{
 
-    private TransactionRepository repository;
+    private final TransactionRepository repository;
 
     public TransactionServiceImpl(TransactionRepository repository){
         this.repository = repository;
@@ -21,7 +22,7 @@ public class TransactionServiceImpl implements TransactionService{
 
     @Override
     public List<Transaction> findAllTransactions() {
-        return repository.findAll();
+        return repository.findByDeleteFlagFalse();
     }
 
     @Override
@@ -36,11 +37,13 @@ public class TransactionServiceImpl implements TransactionService{
         if (transactionOp.isPresent()){
             throw new ApiException("Transaction with transaction id " + transaction.getTransactionId() + " already exist", HttpStatus.BAD_REQUEST);
         }
+        transaction.setDeleteFlag(false);
+        transaction.setDateCreated(LocalDateTime.now());
         return repository.save(transaction);
     }
 
     @Override
-    public void updateTransaction(Transaction transaction) {
+    public Transaction updateTransaction(Transaction transaction) {
         Optional<Transaction> transactionOp = repository.findByTransactionIdAndDeleteFlagFalse(transaction.getTransactionId());
         Transaction updatedTransaction = transactionOp.orElseThrow(() -> new ApiException("No transaction with transaction id " + transaction.getTransactionId() + " was found", HttpStatus.NOT_FOUND));
         updatedTransaction.setTransactionItems(transaction.getTransactionItems());
@@ -49,13 +52,14 @@ public class TransactionServiceImpl implements TransactionService{
         updatedTransaction.setDateCreated(transaction.getDateCreated());
         updatedTransaction.setDateResolved(transaction.getDateResolved());
         updatedTransaction.setStatus(transaction.getStatus());
-        repository.save(updatedTransaction);
+        return repository.save(updatedTransaction);
     }
 
     @Transactional
     @Override
-    public void deleteTransaction(String transactionId) {
+    public Boolean deleteTransaction(String transactionId) {
         Optional<Transaction> transactionOp = repository.findByTransactionIdAndDeleteFlagFalse(transactionId);
         repository.softDelete(transactionOp.orElseThrow(() -> new ApiException("No transaction with transaction id " + transactionId + " was found", HttpStatus.NOT_FOUND)).getTransactionId());
+        return true;
     }
 }

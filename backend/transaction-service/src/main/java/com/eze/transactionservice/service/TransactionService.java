@@ -8,6 +8,6 @@ public interface TransactionService {
     List<Transaction> findAllTransactions();
     Transaction findTransaction(String transactionId);
     Transaction createTransaction (Transaction transaction);
-    void updateTransaction (Transaction transaction);
-    void deleteTransaction (String transactionId);
+    Transaction updateTransaction (Transaction transaction);
+    Boolean deleteTransaction (String transactionId);
 }
