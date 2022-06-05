@@ -39,7 +39,7 @@ class TransactionServiceTest {
         TransactionItem transItem1 = new TransactionItem(2L, item1);
         transaction0 = new Transaction("transactionId0",
                 List.of(transItem1, transItem0),
-                "accepter0",
+                "acceptor0",
                 "requester0",
                 Status.PENDING,
                 LocalDateTime.now(),
@@ -47,7 +47,7 @@ class TransactionServiceTest {
                 false);
         Transaction transaction1 = new Transaction("transactionId1",
                 List.of(transItem1, transItem0),
-                "accepter1",
+                "acceptor1",
                 "requester1",
                 Status.PENDING,
                 LocalDateTime.now(),
@@ -55,7 +55,7 @@ class TransactionServiceTest {
                 false);
         Transaction transaction2 = new Transaction("transactionId2",
                 List.of(transItem1, transItem0),
-                "accepter2",
+                "acceptor2",
                 "requester2",
                 Status.PENDING,
                 LocalDateTime.now(),
@@ -147,5 +147,47 @@ class TransactionServiceTest {
         when(transactionRepository.findByTransactionIdAndDeleteFlagFalse(invalidTxId)).thenReturn(Optional.empty());
 
         assertThrows(ApiException.class, () -> transactionService.deleteTransaction(invalidTxId));
+    }
+
+    @DisplayName("fetch professor Transaction with valid prof id and status and returns transaction with same prof id and status")
+    @Test
+    void findProfessorTransactions_withValidProfIdAndStatus_returnsTransactionWithSameProfIdAndStatus() {
+        String validProfId = transaction0.getAcceptedBy();
+        Status status = transaction0.getStatus();
+
+        when(transactionRepository.findTransactionByAcceptedBy(validProfId, status)).thenReturn(List.of(transaction0));
+
+        assertEquals(0, transactionService.findProfessorTransactions(validProfId, status.getStatusName()).stream()
+                .filter(t -> !t.getAcceptedBy().equals(validProfId) || !t.getStatus().equals(status)).count());
+    }
+
+    @DisplayName("fetch professor Transaction with invalid status and throws exception")
+    @Test
+    void findProfessorTransactions_invalidStatus_throwsException() {
+        String validProfId = transaction0.getAcceptedBy();
+        String invalidStatus = "invalidStatus";
+
+        assertThrows(ApiException.class, () -> transactionService.findProfessorTransactions(validProfId, invalidStatus));
+    }
+
+    @DisplayName("fetch student Transaction with valid student id and status and returns transaction with same student id and status")
+    @Test
+    void findStudentTransactions_withValidStudentIdAndStatus_returnsTransactionWithSameStudentIdAndStatus() {
+        String validStudentId = transaction0.getRequestedBy();
+        Status status = transaction0.getStatus();
+
+        when(transactionRepository.findTransactionByAcceptedBy(validStudentId, status)).thenReturn(List.of(transaction0));
+
+        assertEquals(0, transactionService.findStudentTransactions(validStudentId, status.getStatusName()).stream()
+                .filter(t -> !t.getAcceptedBy().equals(validStudentId) || !t.getStatus().equals(status)).count());
+    }
+
+    @DisplayName("fetch student Transaction with invalid status and throws exception")
+    @Test
+    void findStudentTransactions_invalidStatus_throwsException() {
+        String validStudentId = transaction0.getRequestedBy();
+        String invalidStatus = "invalidStatus";
+
+        assertThrows(ApiException.class, () -> transactionService.findStudentTransactions(validStudentId, invalidStatus));
     }
 }

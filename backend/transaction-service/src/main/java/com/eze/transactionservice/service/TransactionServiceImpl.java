@@ -1,17 +1,21 @@
 package com.eze.transactionservice.service;
 
+import com.eze.transactionservice.domain.Status;
 import com.eze.transactionservice.domain.Transaction;
 import com.eze.transactionservice.exception.ApiException;
 import com.eze.transactionservice.repository.TransactionRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 @Service
+@Slf4j
 public class TransactionServiceImpl implements TransactionService{
 
     private final TransactionRepository repository;
@@ -61,5 +65,23 @@ public class TransactionServiceImpl implements TransactionService{
         Optional<Transaction> transactionOp = repository.findByTransactionIdAndDeleteFlagFalse(transactionId);
         repository.softDelete(transactionOp.orElseThrow(() -> new ApiException("No transaction with transaction id " + transactionId + " was found", HttpStatus.NOT_FOUND)).getTransactionId());
         return true;
+    }
+
+    @Override
+    public List<Transaction> findProfessorTransactions(String profId, String status) {
+        if(status.equals(Status.DENIED.getStatusName())
+                || status.equals(Status.ACCEPTED.getStatusName())
+                || status.equals(Status.PENDING.getStatusName())){return repository.findTransactionByAcceptedBy(profId, Status.valueOf(status.toUpperCase(Locale.ROOT)));
+        }
+        throw new ApiException("Wrong status name used, can only use [pending, denied, accepted]", HttpStatus.BAD_REQUEST);
+    }
+
+    @Override
+    public List<Transaction> findStudentTransactions(String studentId, String status) {
+        if(status.equals(Status.DENIED.getStatusName())
+                || status.equals(Status.ACCEPTED.getStatusName())
+                || status.equals(Status.PENDING.getStatusName())){return repository.findTransactionByRequestedBy(studentId, Status.valueOf(status.toUpperCase(Locale.ROOT)));
+        }
+        throw new ApiException("Wrong status name used, can only use [pending, denied, accepted]", HttpStatus.BAD_REQUEST);
     }
 }

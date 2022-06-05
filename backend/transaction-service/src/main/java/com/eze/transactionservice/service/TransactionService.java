@@ -10,4 +10,6 @@ public interface TransactionService {
     Transaction createTransaction (Transaction transaction);
     Transaction updateTransaction (Transaction transaction);
     Boolean deleteTransaction (String transactionId);
+    List<Transaction> findProfessorTransactions(String profId, String status);
+    List<Transaction> findStudentTransactions(String studentId, String status);
 }

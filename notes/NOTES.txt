@@ -67,3 +67,5 @@ Deployment
 SOURCES:
 1. Ecommerce database design example
 	> https://fabric.inc/blog/ecommerce-database-design-example/
+2. WebAuthn in Java - Spring Boot
+ 	> https://developer.okta.com/blog/2022/04/26/webauthn-java

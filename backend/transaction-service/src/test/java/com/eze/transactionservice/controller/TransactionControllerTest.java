@@ -15,10 +15,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.util.StdDateFormat;
 import com.fasterxml.jackson.datatype.jsr310.JSR310Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -250,5 +247,61 @@ public class TransactionControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.delete(BASE_URI + "/" + transaction0.getTransactionId())
                         .headers(HttpHeaders.readOnlyHttpHeaders(headers)))
                 .andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
+
+    @DisplayName("fetch professor Transaction using valid prof Id and status and returns 200 OK with transactions")
+    @Test
+    @WithMockUser(roles = "USER")
+    void getTransactionProfessor_withValidProfIdAndStatus_returnsOkWithTransactions() throws Exception {
+        String validProfId = transaction0.getAcceptedBy();
+        String validStatus = transaction0.getStatus().getStatusName();
+        List<Transaction> expectedTransactions = List.of(transaction0);
+        when(service.findProfessorTransactions(validProfId, validStatus)).thenReturn(expectedTransactions);
+
+        mockMvc.perform(MockMvcRequestBuilders.get(BASE_URI + "/professor/" + validProfId + "/" + validStatus)
+                .headers(HttpHeaders.readOnlyHttpHeaders(headers)))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().json(mapper.writeValueAsString(expectedTransactions)));
+    }
+
+    @DisplayName("fetch professor Transaction using invalid status and returns 400 BAD REQUEST")
+    @Test
+    @WithMockUser(roles = "USER")
+    void getTransactionProfessor_withInvalid_returnsBadRequest() throws Exception {
+        String validProfId = transaction0.getAcceptedBy();
+        String invalidStatus = "invalidStatus";
+        when(service.findProfessorTransactions(validProfId, invalidStatus)).thenThrow(new ApiException("Wrong status name used, can only use [pending, denied, accepted]", HttpStatus.BAD_REQUEST));
+
+        mockMvc.perform(MockMvcRequestBuilders.get(BASE_URI + "/professor/" + validProfId + "/" + invalidStatus)
+                        .headers(HttpHeaders.readOnlyHttpHeaders(headers)))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
+    }
+
+    @DisplayName("fetch student Transaction using valid student Id and status and returns 200 OK with transactions")
+    @Test
+    @WithMockUser(roles = "USER")
+    void getTransactionStudent_withValidStudentIdAndStatus_returnsOkWithTransactions() throws Exception {
+        String validStudentId = transaction0.getRequestedBy();
+        String validStatus = transaction0.getStatus().getStatusName();
+        List<Transaction> expectedTransactions = List.of(transaction0);
+        when(service.findStudentTransactions(validStudentId, validStatus)).thenReturn(expectedTransactions);
+
+        mockMvc.perform(MockMvcRequestBuilders.get(BASE_URI + "/student/" + validStudentId + "/" + validStatus)
+                        .headers(HttpHeaders.readOnlyHttpHeaders(headers)))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().json(mapper.writeValueAsString(expectedTransactions)));
+    }
+
+    @DisplayName("fetch student Transaction using invalid status and returns 400 BAD REQUEST")
+    @Test
+    @WithMockUser(roles = "USER")
+    void getTransactionStudent_withInvalid_returnsBadRequest() throws Exception {
+        String validStudentId = transaction0.getRequestedBy();
+        String invalidStatus = "invalidStatus";
+        when(service.findStudentTransactions(validStudentId, invalidStatus)).thenThrow(new ApiException("Wrong status name used, can only use [pending, denied, accepted]", HttpStatus.BAD_REQUEST));
+
+        mockMvc.perform(MockMvcRequestBuilders.get(BASE_URI + "/student/" + validStudentId + "/" + invalidStatus)
+                        .headers(HttpHeaders.readOnlyHttpHeaders(headers)))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest());
     }
 }

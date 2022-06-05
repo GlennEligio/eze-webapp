@@ -36,7 +36,7 @@ class TransactionRepositoryTest {
         TransactionItem transItem1 = new TransactionItem(2L, item1);
         transaction0 = new Transaction("transactionId0",
                 List.of(transItem1, transItem0),
-                "accepter0",
+                "acceptor0",
                 "requester0",
                 Status.PENDING,
                 LocalDateTime.now(),
@@ -44,17 +44,17 @@ class TransactionRepositoryTest {
                 false);
         Transaction transaction1 = new Transaction("transactionId1",
                 List.of(transItem1, transItem0),
-                "accepter1",
+                "acceptor1",
                 "requester1",
-                Status.PENDING,
+                Status.DENIED,
                 LocalDateTime.now(),
                 LocalDateTime.now(),
                 false);
         Transaction transaction2 = new Transaction("transactionId2",
                 List.of(transItem1, transItem0),
-                "accepter2",
+                "acceptor2",
                 "requester2",
-                Status.PENDING,
+                Status.ACCEPTED,
                 LocalDateTime.now(),
                 LocalDateTime.now(),
                 false);
@@ -94,5 +94,27 @@ class TransactionRepositoryTest {
 
         Optional<Transaction> transactionOp = transactionRepository.findByTransactionIdAndDeleteFlagFalse(transaction0.getTransactionId());
         assertTrue(transactionOp.isEmpty());
+    }
+
+    @DisplayName("fetch transaction using specific requester id value and status and returns only Transactions with same requestedBy and status")
+    @Test
+    void findTransactionsByRequestedBy_usingValidRequestByAndStatus_returnsTransactionsWithCorrectRequestedByAndStatus() {
+        String validRequestedBy = "requester0";
+        Status validStatus = Status.PENDING;
+
+        List<Transaction> transactions = transactionRepository.findTransactionByRequestedBy(validRequestedBy, validStatus);
+
+        assertEquals(0, transactions.stream().filter(t -> !t.getStatus().equals(validStatus) || !t.getRequestedBy().equals(validRequestedBy)).count());
+    }
+
+    @DisplayName("fetch transaction using specific acceptor id value and status and returns only Transactions with same acceptedBy and status")
+    @Test
+    void findTransactionsByAcceptedBy_usingValidAcceptedByAndStatus_returnsTransactionsWithCorrectAcceptedByAndStatus() {
+        String validAcceptedBy = "acceptor1";
+        Status validStatus = Status.PENDING;
+
+        List<Transaction> transactions = transactionRepository.findTransactionByRequestedBy(validAcceptedBy, validStatus);
+
+        assertEquals(0, transactions.stream().filter(t -> !t.getStatus().equals(validStatus) || !t.getAcceptedBy().equals(validAcceptedBy)).count());
     }
 }
