@@ -1,7 +1,10 @@
 package com.eze.itemservice.repository;
 
 import static org.junit.jupiter.api.Assertions.*;
+
+import com.eze.itemservice.domain.Category;
 import com.eze.itemservice.domain.Item;
+import org.antlr.stringtemplate.language.Cat;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -30,9 +33,10 @@ class ItemRepositoryTest {
 
     @BeforeEach
     void setup(){
-        item0 = new Item("itemCode0", BigInteger.valueOf(100), BigInteger.valueOf(100), "description0", false);
-        Item item1 = new Item("itemCode1", BigInteger.valueOf(200), BigInteger.valueOf(200), "description1", false);
-        Item item2 = new Item( "itemCode2", BigInteger.valueOf(100), BigInteger.valueOf(100), "description2", true);
+        Category category = new Category("C1", "KEY");
+        item0 = new Item("itemCode0", BigInteger.valueOf(100), BigInteger.valueOf(100), "description0", category, false);
+        Item item1 = new Item("itemCode1", BigInteger.valueOf(200), BigInteger.valueOf(200), "description1", category, false);
+        Item item2 = new Item( "itemCode2", BigInteger.valueOf(100), BigInteger.valueOf(100), "description2", category, true);
         List<Item> items = List.of(item0, item1, item2);
         items.forEach(testEntityManager::persist);
     }
