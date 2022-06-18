@@ -19,7 +19,7 @@ public class TransactionItem {
 
     private Long amount;
 
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToOne(fetch = FetchType.EAGER, cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinColumn(name = "item_id")
     private Item item;
 

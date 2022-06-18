@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Optional;
 
 @DataJpaTest
-@DisplayName("Item Repository")
+@DisplayName("ItemRepositoryTest")
 class ItemRepositoryTest {
 
     private final TestEntityManager testEntityManager;
@@ -33,7 +33,7 @@ class ItemRepositoryTest {
 
     @BeforeEach
     void setup(){
-        Category category = new Category("C1", "KEY");
+        Category category = new Category("KEY", "KEY");
         item0 = new Item("itemCode0", BigInteger.valueOf(100), BigInteger.valueOf(100), "description0", category, false);
         Item item1 = new Item("itemCode1", BigInteger.valueOf(200), BigInteger.valueOf(200), "description1", category, false);
         Item item2 = new Item( "itemCode2", BigInteger.valueOf(100), BigInteger.valueOf(100), "description2", category, true);
@@ -69,6 +69,17 @@ class ItemRepositoryTest {
         Optional<Item> itemOp = itemRepository.findByItemCodeAndDeleteFlagFalse(invalidItemCode);
 
         assertTrue(itemOp.isEmpty());
+    }
+
+    @DisplayName("fetch Items with valid Category code and returns Items with same category code")
+    @Test
+    void findItemByCategoryCode_withValidCategoryCode_returnsItemsWithSameCategoryCode() {
+        String validCategoryCode = "KEY";
+
+        assertEquals(0, itemRepository.findItemByCategory(validCategoryCode)
+                .stream()
+                .filter(item -> !item.getCategory().getCategoryCode().equals(validCategoryCode))
+                .count());
     }
 
     @DisplayName("soft deletes an Item with valid itemCode and changes its deleteFlag value")

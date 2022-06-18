@@ -6,6 +6,7 @@ import java.util.List;
 
 public interface ItemService {
     List<Item> findItems();
+    List<Item> findItemsByCategory(String category);
     Item findItem(String itemCode);
     Item createItem(Item item);
     Item updateItem(Item item);

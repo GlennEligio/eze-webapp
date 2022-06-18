@@ -5,13 +5,13 @@ import static org.mockito.Mockito.*;
 import com.eze.itemservice.domain.Category;
 import com.eze.itemservice.domain.Item;
 import com.eze.itemservice.exception.ApiException;
+import com.eze.itemservice.service.CategoryService;
 import com.eze.itemservice.service.ItemService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -28,6 +28,7 @@ import org.springframework.util.MultiValueMapAdapter;
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @WebMvcTest
 class ItemControllerTest {
@@ -35,11 +36,15 @@ class ItemControllerTest {
     @MockBean
     private ItemService itemService;
 
+    @MockBean
+    private CategoryService categoryService;
+
     @Autowired
     private MockMvc mockMvc;
 
     private Item item0;
     private List<Item> items;
+    private List<Category> categories;
     private static String BASE_URI;
     private static ObjectMapper mapper;
     private static MultiValueMap<String, String> headers;
@@ -55,11 +60,14 @@ class ItemControllerTest {
 
     @BeforeEach
     void setup() {
-        Category category = new Category("C1", "KEY");
-        item0 = new Item("itemCode0", BigInteger.valueOf(100), BigInteger.valueOf(100), "description0", category, false);
-        Item item1 = new Item("itemCode1", BigInteger.valueOf(200), BigInteger.valueOf(200), "description1", category, false);
-        Item item2 = new Item("itemCode2", BigInteger.valueOf(100), BigInteger.valueOf(100), "description2", category, true);
+        Category cat0 = new Category("KEY", "KEY");
+        Category cat1 = new Category("TOOLS", "TOOLS");
+        Category cat2 = new Category("CONSUMABLE", "CONSUMABLE");
+        item0 = new Item("itemCode0", BigInteger.valueOf(100), BigInteger.valueOf(100), "description0", cat0, false);
+        Item item1 = new Item("itemCode1", BigInteger.valueOf(200), BigInteger.valueOf(200), "description1", cat1, false);
+        Item item2 = new Item("itemCode2", BigInteger.valueOf(100), BigInteger.valueOf(100), "description2", cat2, true);
         items = List.of(item0, item1, item2);
+        categories = List.of(cat0, cat1, cat2);
     }
 
     @DisplayName("fetch Items with Items present returns 200 OK with items")
@@ -72,6 +80,24 @@ class ItemControllerTest {
                         .headers(HttpHeaders.readOnlyHttpHeaders(headers)))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.content().json(mapper.writeValueAsString(items)));
+    }
+
+    @DisplayName("fetch Items using a Category code returns 200 OK with Items with same Category code")
+    @Test
+    @WithMockUser(roles = "USER")
+    void getAllItems_withCategoryCodeReqParam_returnItems() throws Exception {
+        List<Item> filteredItems = items
+                .stream()
+                .filter(i -> i.getCategory().getCategoryCode().equals("KEY"))
+                .collect(Collectors.toList());
+
+        when(itemService.findItemsByCategory("KEY")).thenReturn(filteredItems);
+
+        mockMvc.perform(MockMvcRequestBuilders.get(BASE_URI)
+                        .headers(HttpHeaders.readOnlyHttpHeaders(headers))
+                        .param("category", "KEY"))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().json(mapper.writeValueAsString(filteredItems)));
     }
 
     @DisplayName("fetch Item with valid ItemCode returns 200 OK with Item")
@@ -210,5 +236,17 @@ class ItemControllerTest {
                         .content(mapper.writeValueAsString(item0))
                         .headers(HttpHeaders.readOnlyHttpHeaders(headers)))
                 .andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
+
+    @DisplayName("fetching Item Category codes and returns 200 OK")
+    @Test
+    @WithMockUser(roles = "USER")
+    void getItemCategories_withCategoriesPresent_returnsOk() throws Exception{
+        when(categoryService.findCategories()).thenReturn(categories);
+
+        mockMvc.perform(MockMvcRequestBuilders.get(BASE_URI + "/categories")
+                .headers(HttpHeaders.readOnlyHttpHeaders(headers)))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.content().json(mapper.writeValueAsString(categories)));
     }
 }

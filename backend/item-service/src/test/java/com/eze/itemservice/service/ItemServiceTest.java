@@ -34,7 +34,7 @@ class ItemServiceTest {
 
     @BeforeEach
     void setup(){
-        Category category = new Category("C1", "KEY");
+        Category category = new Category("KEY", "KEY");
         item0 = new Item("itemCode0", BigInteger.valueOf(100), BigInteger.valueOf(100), "description0", category, false);
         Item item1 = new Item("itemCode1", BigInteger.valueOf(200), BigInteger.valueOf(200), "description1", category, false);
         Item item2 = new Item( "itemCode2", BigInteger.valueOf(100), BigInteger.valueOf(100), "description2", category, true);
@@ -70,6 +70,18 @@ class ItemServiceTest {
         when(itemRepository.findByItemCodeAndDeleteFlagFalse(invalidItemCode)).thenReturn(Optional.empty());
 
         assertThrows(ApiException.class, () -> itemService.findItem(invalidItemCode));
+    }
+
+    @DisplayName("find Items with valid Category code and returns Items with the same code")
+    @Test
+    void findItemByCategoryCode_withValidCategoryCode_returnsItemsWithSameCategoryCode() {
+        String validCategoryCode = "KEY";
+        when(itemRepository.findItemByCategory("KEY")).thenReturn(items);
+
+        assertEquals(0, itemRepository.findItemByCategory(validCategoryCode)
+                .stream()
+                .filter(items -> !items.getCategory().getCategoryCode().equals(validCategoryCode))
+                .count());
     }
 
     @DisplayName("create new Item and return created Item")

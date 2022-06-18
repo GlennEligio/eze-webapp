@@ -29,6 +29,11 @@ public class ItemServiceImpl implements ItemService{
     }
 
     @Override
+    public List<Item> findItemsByCategory(String category) {
+        return itemRepository.findItemByCategory(category);
+    }
+
+    @Override
     public Item findItem(String itemCode) {
         Optional<Item> itemOp = itemRepository.findByItemCodeAndDeleteFlagFalse(itemCode);
         return itemOp.orElseThrow(() -> new ApiException("Item not found", HttpStatus.NOT_FOUND));
