@@ -75,8 +75,8 @@ class TransactionServiceTest {
     @DisplayName("find Transaction with valid TransactionId and return Transaction")
     @Test
     void findTransaction_withValidTransactionId_returnsTransaction() {
-        String validTxId = transaction0.getTransactionId();
-        when(transactionRepository.findByTransactionIdAndDeleteFlagFalse(validTxId)).thenReturn(Optional.of(transaction0));
+        String validTxId = transaction0.getTransactionCode();
+        when(transactionRepository.findByTransactionCodeAndDeleteFlagFalse(validTxId)).thenReturn(Optional.of(transaction0));
 
         assertDoesNotThrow(() -> transactionService.findTransaction(validTxId));
         assertNotNull(transactionService.findTransaction(validTxId));
@@ -86,7 +86,7 @@ class TransactionServiceTest {
     @Test
     void findTransaction_withInvalidTransactionId_throwsException() {
         String invalidTxId = "invalidTxId";
-        when(transactionRepository.findByTransactionIdAndDeleteFlagFalse(invalidTxId)).thenReturn(Optional.empty());
+        when(transactionRepository.findByTransactionCodeAndDeleteFlagFalse(invalidTxId)).thenReturn(Optional.empty());
 
         assertThrows(ApiException.class, () -> transactionService.findTransaction(invalidTxId));
     }
@@ -94,8 +94,8 @@ class TransactionServiceTest {
     @DisplayName("create new Transaction and return the Transaction")
     @Test
     void createTransaction_withNewTransaction_returnTransaction() {
-        String validTxId = transaction0.getTransactionId();
-        when(transactionRepository.findByTransactionIdAndDeleteFlagFalse(validTxId)).thenReturn(Optional.empty());
+        String validTxId = transaction0.getTransactionCode();
+        when(transactionRepository.findByTransactionCodeAndDeleteFlagFalse(validTxId)).thenReturn(Optional.empty());
         when(transactionRepository.save(transaction0)).thenReturn(transaction0);
 
         assertDoesNotThrow(() -> transactionService.createTransaction(transaction0));
@@ -105,8 +105,8 @@ class TransactionServiceTest {
     @DisplayName("create existing Transaction and throws exception")
     @Test
     void createTransaction_withExistingTransaction_throwsException() {
-        String invalidTxId = transaction0.getTransactionId();
-        when(transactionRepository.findByTransactionIdAndDeleteFlagFalse(invalidTxId)).thenReturn(Optional.of(transaction0));
+        String invalidTxId = transaction0.getTransactionCode();
+        when(transactionRepository.findByTransactionCodeAndDeleteFlagFalse(invalidTxId)).thenReturn(Optional.of(transaction0));
 
         assertThrows(ApiException.class, () -> transactionService.createTransaction(transaction0));
     }
@@ -115,8 +115,8 @@ class TransactionServiceTest {
     @DisplayName("update existing Transaction and returns updated Transaction")
     @Test
     void updateTransaction_withExistingTransaction_returnsUpdatedTransaction() {
-        String validTxId = transaction0.getTransactionId();
-        when(transactionRepository.findByTransactionIdAndDeleteFlagFalse(validTxId)).thenReturn(Optional.of(transaction0));
+        String validTxId = transaction0.getTransactionCode();
+        when(transactionRepository.findByTransactionCodeAndDeleteFlagFalse(validTxId)).thenReturn(Optional.of(transaction0));
         when(transactionRepository.save(transaction0)).thenReturn(transaction0);
 
         assertNotNull(transactionService.updateTransaction(transaction0));
@@ -125,8 +125,8 @@ class TransactionServiceTest {
     @DisplayName("updated non-existing Transaction and throws exception")
     @Test
     void updateTransaction_withNonExistingTransaction_throwsException() {
-        String invalidTxId = transaction0.getTransactionId();
-        when(transactionRepository.findByTransactionIdAndDeleteFlagFalse(invalidTxId)).thenReturn(Optional.empty());
+        String invalidTxId = transaction0.getTransactionCode();
+        when(transactionRepository.findByTransactionCodeAndDeleteFlagFalse(invalidTxId)).thenReturn(Optional.empty());
 
         assertThrows(ApiException.class, () -> transactionService.updateTransaction(transaction0));
     }
@@ -134,8 +134,8 @@ class TransactionServiceTest {
     @DisplayName("delete existing Transaction and returns true")
     @Test
     void deleteTransaction_withValidTransactionId_returnsTrue() {
-        String validTxId = transaction0.getTransactionId();
-        when(transactionRepository.findByTransactionIdAndDeleteFlagFalse(validTxId)).thenReturn(Optional.of(transaction0));
+        String validTxId = transaction0.getTransactionCode();
+        when(transactionRepository.findByTransactionCodeAndDeleteFlagFalse(validTxId)).thenReturn(Optional.of(transaction0));
 
         assertTrue(transactionService.deleteTransaction(validTxId));
     }
@@ -143,8 +143,8 @@ class TransactionServiceTest {
     @DisplayName("delete non-existing Transaction and throwsException")
     @Test
     void deleteTransaction_withInvalidTransactionId_throwsException() {
-        String invalidTxId = transaction0.getTransactionId();
-        when(transactionRepository.findByTransactionIdAndDeleteFlagFalse(invalidTxId)).thenReturn(Optional.empty());
+        String invalidTxId = transaction0.getTransactionCode();
+        when(transactionRepository.findByTransactionCodeAndDeleteFlagFalse(invalidTxId)).thenReturn(Optional.empty());
 
         assertThrows(ApiException.class, () -> transactionService.deleteTransaction(invalidTxId));
     }

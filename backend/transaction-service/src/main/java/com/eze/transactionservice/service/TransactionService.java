@@ -6,10 +6,10 @@ import java.util.List;
 
 public interface TransactionService {
     List<Transaction> findAllTransactions();
-    Transaction findTransaction(String transactionId);
+    Transaction findTransaction(String transactionCode);
     Transaction createTransaction (Transaction transaction);
     Transaction updateTransaction (Transaction transaction);
-    Boolean deleteTransaction (String transactionId);
+    Boolean deleteTransaction (String transactionCode);
     List<Transaction> findProfessorTransactions(String profId, String status);
     List<Transaction> findStudentTransactions(String studentId, String status);
 }

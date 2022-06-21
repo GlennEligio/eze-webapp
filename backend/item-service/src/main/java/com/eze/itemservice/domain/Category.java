@@ -18,8 +18,8 @@ public class Category {
     @Column(name = "category_id")
     private Long id;
 
-    @NotEmpty
     @Column(unique = true)
+    @NotEmpty
     private String categoryCode;
 
     @NotBlank
@@ -27,6 +27,10 @@ public class Category {
 
     public Category(String categoryCode, String name) {
         this.categoryCode = categoryCode;
+        this.name = name;
+    }
+
+    public Category(String name) {
         this.name = name;
     }
 }

@@ -2,8 +2,10 @@ package com.eze.transactionservice.domain;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.Length;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -13,6 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@Builder
 public class Transaction {
 
     @Column(name = "trans_id")
@@ -20,7 +23,8 @@ public class Transaction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String transactionId;
+    @Length(max = 24, min = 24)
+    private String transactionCode;
 
     @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "trans_id")
@@ -40,7 +44,17 @@ public class Transaction {
     private Boolean deleteFlag;
 
     public Transaction(String transactionId, List<TransactionItem> transactionItems, String requestedBy, String acceptedBy, Status status, LocalDateTime dateCreated, LocalDateTime dateResolved, Boolean deleteFlag) {
-        this.transactionId = transactionId;
+        this.transactionCode = transactionId;
+        this.transactionItems = transactionItems;
+        this.requestedBy = requestedBy;
+        this.acceptedBy = acceptedBy;
+        this.status = status;
+        this.dateCreated = dateCreated;
+        this.dateResolved = dateResolved;
+        this.deleteFlag = deleteFlag;
+    }
+
+    public Transaction(List<TransactionItem> transactionItems, String requestedBy, String acceptedBy, Status status, LocalDateTime dateCreated, LocalDateTime dateResolved, Boolean deleteFlag) {
         this.transactionItems = transactionItems;
         this.requestedBy = requestedBy;
         this.acceptedBy = acceptedBy;

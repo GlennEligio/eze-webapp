@@ -2,6 +2,7 @@ package com.eze.transactionservice.controller;
 
 import com.eze.transactionservice.domain.Status;
 import com.eze.transactionservice.domain.Transaction;
+import com.eze.transactionservice.dtos.TransactionDto;
 import com.eze.transactionservice.service.TransactionService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -10,9 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -36,13 +35,32 @@ public class TransactionController {
     }
 
     @PostMapping("/transactions")
-    public ResponseEntity<Transaction> createTransaction(@Valid @RequestBody Transaction transaction){
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.createTransaction(transaction));
+    public ResponseEntity<Transaction> createTransaction(@RequestBody TransactionDto transaction){
+        Transaction newTransaction = Transaction.builder()
+                .transactionItems(transaction.getTransactionItems())
+                .requestedBy(transaction.getRequestedBy())
+                .acceptedBy(transaction.getAcceptedBy())
+                .status(transaction.getStatus())
+                .deleteFlag(transaction.getDeleteFlag())
+                .dateCreated(transaction.getDateCreated())
+                .dateResolved(transaction.getDateResolved())
+                .build();
+        return ResponseEntity.status(HttpStatus.CREATED).body(service.createTransaction(newTransaction));
     }
 
     @PutMapping("/transactions")
-    public ResponseEntity<Object> updateTransaction(@Valid @RequestBody Transaction transaction) {
-        service.updateTransaction(transaction);
+    public ResponseEntity<Object> updateTransaction(@RequestBody TransactionDto transaction) {
+        Transaction updatedTransaction = Transaction.builder()
+                .transactionCode(transaction.getTransactionCode())
+                .requestedBy(transaction.getRequestedBy())
+                .acceptedBy(transaction.getAcceptedBy())
+                .status(transaction.getStatus())
+                .dateCreated(transaction.getDateCreated())
+                .dateResolved(transaction.getDateResolved())
+                .transactionItems(transaction.getTransactionItems())
+                .deleteFlag(transaction.getDeleteFlag())
+                .build();
+        service.updateTransaction(updatedTransaction);
         return ResponseEntity.ok().build();
     }
 

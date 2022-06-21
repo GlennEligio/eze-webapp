@@ -57,6 +57,8 @@ DONE - Transaction Service, Item Service, User Service
 DONE - Add feature to change Status of Transaction in Transaction Service
 DONE - Spring Security for ROLE based authentication and authorization - all services
 DONE - Api Gateway and Discovery Server
+Add BSON's ObjectID hexstring as a Candidate key in Item, Transaction, User service entitiies
+Use MapStruct to create DTOs
 Import/Export User,Item,Transaction data through Excel files
 Backend REST API documentation
 Displaying Data in the Frontend

@@ -13,7 +13,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 
     List<Transaction> findByDeleteFlagFalse();
 
-    Optional<Transaction> findByTransactionIdAndDeleteFlagFalse(String transactionId);
+    Optional<Transaction> findByTransactionCodeAndDeleteFlagFalse(String transactionId);
 
     @Query("SELECT t FROM Transaction t " +
             "WHERE t.acceptedBy=?1 " +
@@ -28,7 +28,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     List<Transaction> findTransactionByRequestedBy(String requestedBy, Status status);
 
 
-    @Query("UPDATE Transaction t SET t.deleteFlag=true WHERE t.transactionId=?1")
+    @Query("UPDATE Transaction t SET t.deleteFlag=true WHERE t.transactionCode=?1")
     @Modifying
-    void softDelete(String transactionId);
+    void softDelete(String transactionCode);
 }

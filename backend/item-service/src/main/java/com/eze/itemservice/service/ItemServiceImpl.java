@@ -5,6 +5,7 @@ import com.eze.itemservice.domain.Item;
 import com.eze.itemservice.exception.ApiException;
 import com.eze.itemservice.repository.CategoryRepository;
 import com.eze.itemservice.repository.ItemRepository;
+import org.bson.types.ObjectId;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -39,18 +40,29 @@ public class ItemServiceImpl implements ItemService{
         return itemOp.orElseThrow(() -> new ApiException("Item not found", HttpStatus.NOT_FOUND));
     }
 
+    // TODO: Update Unit Test to test the categoryCode null check
     @Override
     public Item createItem(Item item) {
         Optional<Item> itemOp = itemRepository.findByItemCodeAndDeleteFlagFalse(item.getItemCode());
         if(itemOp.isPresent()){
             throw new ApiException("Item with same item code already exist", HttpStatus.BAD_REQUEST);
         }
-        Optional<Category> catOp = categoryRepository.findByCategoryCode(item.getCategory().getCategoryCode());
-        catOp.ifPresent(item::setCategory);
+        item.setItemCode(new ObjectId().toHexString());
         item.setDeleteFlag(false);
+
+        if(item.getCategory().getCategoryCode() != null) {
+            Optional<Category> catOp = categoryRepository.findByCategoryCode(item.getCategory().getCategoryCode());
+            catOp.ifPresent(item::setCategory);
+        } else {
+            Category category = item.getCategory();
+            category.setCategoryCode(new ObjectId().toHexString());
+            item.setCategory(categoryRepository.save(category));
+        }
+
         return itemRepository.save(item);
     }
 
+    // TODO: Update Unit Test to test the categoryCode null check
     @Override
     public Item updateItem(Item item) {
         Optional<Item> itemOp = itemRepository.findByItemCodeAndDeleteFlagFalse(item.getItemCode());
@@ -62,8 +74,15 @@ public class ItemServiceImpl implements ItemService{
         updatedItem.setCurrentAmount(item.getCurrentAmount());
         updatedItem.setTotalAmount(item.getTotalAmount());
 
-        Optional<Category> categoryOp = categoryRepository.findByCategoryCode(item.getCategory().getCategoryCode());
-        categoryOp.ifPresent(updatedItem::setCategory);
+        if(item.getCategory().getCategoryCode() != null) {
+            Optional<Category> catOp = categoryRepository.findByCategoryCode(item.getCategory().getCategoryCode());
+            catOp.ifPresent(item::setCategory);
+        } else {
+            Category category = item.getCategory();
+            category.setCategoryCode(new ObjectId().toHexString());
+            updatedItem.setCategory(categoryRepository.save(category));
+        }
+
 
         return itemRepository.save(updatedItem);
     }

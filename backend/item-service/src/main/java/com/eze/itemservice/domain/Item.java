@@ -3,7 +3,6 @@ package com.eze.itemservice.domain;
 import lombok.*;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Positive;
 import java.math.BigInteger;
 
@@ -11,6 +10,7 @@ import java.math.BigInteger;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Builder
 public class Item {
 
     @Id
@@ -18,7 +18,6 @@ public class Item {
     @Column(name = "item_id")
     private Long id;
 
-    @NotEmpty
     @Column(unique = true)
     private String itemCode;
 

@@ -110,7 +110,7 @@ public class TransactionControllerTest {
     @Test
     @WithMockUser(roles = "USER")
     void getTransaction_withValidTransactionId_returnOk() throws Exception {
-        String validTxId = transaction0.getTransactionId();
+        String validTxId = transaction0.getTransactionCode();
         when(service.findTransaction(validTxId)).thenReturn(transaction0);
 
         mockMvc.perform(MockMvcRequestBuilders.get(BASE_URI + "/" + validTxId)
@@ -123,7 +123,7 @@ public class TransactionControllerTest {
     @Test
     @WithMockUser(roles = "USER")
     void getTransaction_withInvalidTransactionId_returnNotFound() throws Exception {
-        String invalidTxId = transaction0.getTransactionId();
+        String invalidTxId = transaction0.getTransactionCode();
         when(service.findTransaction(invalidTxId)).thenThrow(new ApiException("Transaction not found", HttpStatus.NOT_FOUND));
 
         mockMvc.perform(MockMvcRequestBuilders.get(BASE_URI + "/" + invalidTxId)
@@ -220,9 +220,9 @@ public class TransactionControllerTest {
     @Test
     @WithMockUser(roles = "USER")
     void deleteTransaction_withUserAccount_returnsForbidden() throws Exception {
-        when(service.deleteTransaction(transaction0.getTransactionId())).thenReturn(true);
+        when(service.deleteTransaction(transaction0.getTransactionCode())).thenReturn(true);
 
-        mockMvc.perform(MockMvcRequestBuilders.delete(BASE_URI + "/" + transaction0.getTransactionId())
+        mockMvc.perform(MockMvcRequestBuilders.delete(BASE_URI + "/" + transaction0.getTransactionCode())
                         .headers(HttpHeaders.readOnlyHttpHeaders(headers)))
                 .andExpect(MockMvcResultMatchers.status().isForbidden());
     }
@@ -231,9 +231,9 @@ public class TransactionControllerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     void deleteTransaction_withExistingTransaction_returnsOk() throws Exception {
-        when(service.deleteTransaction(transaction0.getTransactionId())).thenReturn(true);
+        when(service.deleteTransaction(transaction0.getTransactionCode())).thenReturn(true);
 
-        mockMvc.perform(MockMvcRequestBuilders.delete(BASE_URI + "/" + transaction0.getTransactionId())
+        mockMvc.perform(MockMvcRequestBuilders.delete(BASE_URI + "/" + transaction0.getTransactionCode())
                         .headers(HttpHeaders.readOnlyHttpHeaders(headers)))
                 .andExpect(MockMvcResultMatchers.status().isOk());
     }
@@ -242,9 +242,9 @@ public class TransactionControllerTest {
     @Test
     @WithMockUser(roles = "ADMIN")
     void deleteTransaction_withNonExistingTransaction_returnsNotFound() throws Exception {
-        when(service.deleteTransaction(transaction0.getTransactionId())).thenThrow(new ApiException("Transaction not found", HttpStatus.NOT_FOUND));
+        when(service.deleteTransaction(transaction0.getTransactionCode())).thenThrow(new ApiException("Transaction not found", HttpStatus.NOT_FOUND));
 
-        mockMvc.perform(MockMvcRequestBuilders.delete(BASE_URI + "/" + transaction0.getTransactionId())
+        mockMvc.perform(MockMvcRequestBuilders.delete(BASE_URI + "/" + transaction0.getTransactionCode())
                         .headers(HttpHeaders.readOnlyHttpHeaders(headers)))
                 .andExpect(MockMvcResultMatchers.status().isNotFound());
     }

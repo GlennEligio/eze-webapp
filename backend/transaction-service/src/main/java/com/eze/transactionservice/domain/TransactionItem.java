@@ -17,11 +17,20 @@ public class TransactionItem {
     @Column(name = "trans_item_id")
     private Long id;
 
+    @Column(unique = true)
+    private String transactionItemCode;
+
     private Long amount;
 
     @OneToOne(fetch = FetchType.EAGER, cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinColumn(name = "item_id")
     private Item item;
+
+    public TransactionItem(String transactionItemCode, Long amount, Item item) {
+        this.transactionItemCode = transactionItemCode;
+        this.amount = amount;
+        this.item = item;
+    }
 
     public TransactionItem(Long amount, Item item) {
         this.amount = amount;

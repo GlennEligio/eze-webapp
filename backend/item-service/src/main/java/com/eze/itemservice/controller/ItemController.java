@@ -2,13 +2,13 @@ package com.eze.itemservice.controller;
 
 import com.eze.itemservice.domain.Category;
 import com.eze.itemservice.domain.Item;
+import com.eze.itemservice.dtos.ItemDto;
 import com.eze.itemservice.service.CategoryService;
 import com.eze.itemservice.service.ItemService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -37,14 +37,25 @@ public class ItemController {
     }
 
     @PostMapping("/items")
-    public ResponseEntity<Item> createItem(@Valid @RequestBody Item item){
-        Item newItem = itemService.createItem(item);
+    public ResponseEntity<Item> createItem(@RequestBody ItemDto item){
+        Item itemToCreate = new Item();
+        itemToCreate.setDescription(item.getDescription());
+        itemToCreate.setCategory(item.getCategory());
+        itemToCreate.setCurrentAmount(item.getCurrentAmount());
+        itemToCreate.setTotalAmount(item.getTotalAmount());
+        Item newItem = itemService.createItem(itemToCreate);
         return ResponseEntity.status(HttpStatus.CREATED).body(newItem);
     }
 
     @PutMapping("/items")
-    public ResponseEntity<Object> updateItem(@Valid @RequestBody Item item){
-        itemService.updateItem(item);
+    public ResponseEntity<Object> updateItem(@RequestBody ItemDto item){
+        Item itemToUpdate = Item.builder()
+                .itemCode(item.getItemCode())
+                .category(item.getCategory())
+                .currentAmount(item.getCurrentAmount())
+                .totalAmount(item.getTotalAmount())
+                .build();
+        itemService.updateItem(itemToUpdate);
         return ResponseEntity.ok().build();
     }
 

@@ -72,8 +72,8 @@ class TransactionRepositoryTest {
     @DisplayName("find Transaction with valid TransactionId and returns Transaction")
     @Test
     void findByTransactionIdAndDeleteFlagFalse_withValidTransactionId_returnTransaction() {
-        String validTransactionId = transaction0.getTransactionId();
-        Optional<Transaction> transactionOp = transactionRepository.findByTransactionIdAndDeleteFlagFalse(validTransactionId);
+        String validTransactionId = transaction0.getTransactionCode();
+        Optional<Transaction> transactionOp = transactionRepository.findByTransactionCodeAndDeleteFlagFalse(validTransactionId);
 
         assertTrue(transactionOp.isPresent());
     }
@@ -82,7 +82,7 @@ class TransactionRepositoryTest {
     @Test
     void findByTransactionIdAndDeleteFlagFalse_withInvalidTransactionId_returnsNoTransaction() {
         String invalidTransactionId = "someInvalidId";
-        Optional<Transaction> transactionOp = transactionRepository.findByTransactionIdAndDeleteFlagFalse(invalidTransactionId);
+        Optional<Transaction> transactionOp = transactionRepository.findByTransactionCodeAndDeleteFlagFalse(invalidTransactionId);
 
         assertTrue(transactionOp.isEmpty());
     }
@@ -90,9 +90,9 @@ class TransactionRepositoryTest {
     @DisplayName("soft deletes with valid TransactionId and changes the deleteFlag of the Transaction")
     @Test
     void softDelete_withValidTransactionId_changesTransactionDeleteFlag() {
-        transactionRepository.softDelete(transaction0.getTransactionId());
+        transactionRepository.softDelete(transaction0.getTransactionCode());
 
-        Optional<Transaction> transactionOp = transactionRepository.findByTransactionIdAndDeleteFlagFalse(transaction0.getTransactionId());
+        Optional<Transaction> transactionOp = transactionRepository.findByTransactionCodeAndDeleteFlagFalse(transaction0.getTransactionCode());
         assertTrue(transactionOp.isEmpty());
     }
 
