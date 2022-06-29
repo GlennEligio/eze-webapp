@@ -11,10 +11,16 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 @Slf4j
@@ -90,5 +96,28 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             throw new ApiException("Incorrect username/password", HttpStatus.UNAUTHORIZED);
         }
         return userOp.get();
+    }
+
+    // TODO: Add Unit test
+    @Override
+    public Boolean addAvatar(String username, MultipartFile avatar) throws IOException {
+        Optional<User> userOp = repository.findByUsernameAndDeleteFlagFalse(username);
+        if(userOp.isEmpty()){
+            throw new ApiException("User with username " + username + " does not exist", HttpStatus.NOT_FOUND);
+        }
+
+        Pattern pattern = Pattern.compile("\\.(jpeg|png|jpg)$");
+        Matcher matcher = pattern.matcher(Objects.requireNonNull(avatar.getOriginalFilename()));
+        if(!matcher.find()) {
+            throw new ApiException("File must be either .jpeg, .jpg, or .png", HttpStatus.BAD_REQUEST);
+        }
+        if(avatar.getSize() > 1048577) {
+            throw new ApiException("File must be less than 1mb", HttpStatus.BAD_REQUEST);
+        }
+
+        User user = userOp.get();
+        user.setAvatar(avatar.getBytes());
+        repository.save(user);
+        return true;
     }
 }

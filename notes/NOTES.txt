@@ -21,8 +21,10 @@ User
 
 Transaction
  - id
- - transactionId
+ - transactionCode
  - transactionItems
+	- id
+	- transactionCode
 	- item
 		- itemCode
 	- amount
@@ -47,9 +49,13 @@ Services
 Functionalities
 001. CRUD Operation in User, Item, Transaction
 002. User login/register and authentication/authorization using username/password
-003. Import/Export User,Item,Transaction data through Excel files
-004. Fetch Item using Barcode
-005. Authenticate User using fingerprint
+003. Delete own User using JWT
+004. Update own User using JWT data
+005. Update Transaction status
+006. Fetch Item using Barcode
+007. Fetch Transactions of a specific Professor/Student
+008. Authenticate User using fingerprint
+009. Import/Export User,Item,Transaction data through Excel files
 
 
 TODOS:
@@ -57,8 +63,7 @@ DONE - Transaction Service, Item Service, User Service
 DONE - Add feature to change Status of Transaction in Transaction Service
 DONE - Spring Security for ROLE based authentication and authorization - all services
 DONE - Api Gateway and Discovery Server
-Add BSON's ObjectID hexstring as a Candidate key in Item, Transaction, User service entitiies
-Use MapStruct to create DTOs
+DONE - Add BSON's ObjectID hexstring as a Candidate key in Item, Transaction, User service entitiies
 Import/Export User,Item,Transaction data through Excel files
 Backend REST API documentation
 Displaying Data in the Frontend
@@ -71,3 +76,5 @@ SOURCES:
 	> https://fabric.inc/blog/ecommerce-database-design-example/
 2. WebAuthn in Java - Spring Boot
  	> https://developer.okta.com/blog/2022/04/26/webauthn-java
+3. Filtering with Spring JPA
+	> https://stackoverflow.com/questions/20280708/filtering-database-rows-with-spring-data-jpa-and-spring-mvc

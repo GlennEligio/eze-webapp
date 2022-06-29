@@ -1,18 +1,14 @@
 package com.eze.userservice.controller;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
 import com.eze.userservice.config.EzeUserDetails;
 import com.eze.userservice.domain.Role;
 import com.eze.userservice.domain.User;
 import com.eze.userservice.dto.LoginUserDto;
-import com.eze.userservice.dto.UserDto;
+import com.eze.userservice.dto.UserWithRole;
 import com.eze.userservice.dto.UserWithTokenDto;
 import com.eze.userservice.exception.ApiException;
 import com.eze.userservice.service.UserServiceImpl;
 import com.eze.userservice.util.JwtUtil;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -22,8 +18,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
@@ -231,7 +225,7 @@ class UserControllerTest {
         String accessToken = "someRandomToken";
         when(jwtUtil.extractUsername(accessToken)).thenReturn(user0.getUsername());
         when(userService.findUser(user0.getUsername())).thenReturn(user0);
-        UserDto userDto = new UserDto(user0.getUsername(), user0.getRole().name());
+        UserWithRole userDto = new UserWithRole(user0.getUsername(), user0.getRole().name());
 
         mockMvc.perform(MockMvcRequestBuilders.get(BASE_URI + "validate/" + accessToken))
                 .andExpect(MockMvcResultMatchers.status().isOk())

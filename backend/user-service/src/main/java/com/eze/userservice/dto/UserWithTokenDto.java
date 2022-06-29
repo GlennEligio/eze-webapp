@@ -2,6 +2,7 @@ package com.eze.userservice.dto;
 
 import com.eze.userservice.domain.Role;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 
 @Data

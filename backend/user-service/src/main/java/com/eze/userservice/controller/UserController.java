@@ -1,19 +1,28 @@
 package com.eze.userservice.controller;
 
 import com.eze.userservice.config.EzeUserDetails;
+import com.eze.userservice.domain.Role;
 import com.eze.userservice.domain.User;
 import com.eze.userservice.dto.LoginUserDto;
 import com.eze.userservice.dto.UserDto;
+import com.eze.userservice.dto.UserWithRole;
 import com.eze.userservice.dto.UserWithTokenDto;
+import com.eze.userservice.exception.ApiException;
 import com.eze.userservice.service.UserService;
 import com.eze.userservice.util.JwtUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.List;
+import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Slf4j
 @RestController
@@ -66,6 +75,23 @@ public class UserController {
         return ResponseEntity.ok(new UserWithTokenDto(authenticatedUser.getUsername(), authenticatedUser.getRole(), accessToken, refreshToken));
     }
 
+    // TODO: Add Unit test
+    @PostMapping("/users/register")
+    public ResponseEntity<UserWithTokenDto> register(@RequestBody UserDto user) {
+        User newUser = User.builder()
+                .name(user.getName())
+                .username(user.getUsername())
+                .password(user.getPassword())
+                .deleteFlag(false)
+                .role(Role.USER)
+                .build();
+        User addedUser = service.createUser(newUser);
+        EzeUserDetails userDetails = new EzeUserDetails(addedUser);
+        String accessToken = jwtUtil.generateAccessToken(userDetails);
+        String refreshToken = jwtUtil.generateRefreshToken(userDetails);
+        return ResponseEntity.ok(new UserWithTokenDto(addedUser.getUsername(), addedUser.getRole(), accessToken, refreshToken));
+    }
+
     @GetMapping("/users/refresh/{refreshToken}")
     public ResponseEntity<UserWithTokenDto> refreshToken(@PathVariable("refreshToken") String refreshToken){
         String username = jwtUtil.extractUsername(refreshToken);
@@ -76,9 +102,20 @@ public class UserController {
     }
 
     @GetMapping("/users/validate/{accessToken}")
-    public ResponseEntity<UserDto> validateToken(@PathVariable("accessToken") String accessToken){
+    public ResponseEntity<UserWithRole> validateToken(@PathVariable("accessToken") String accessToken){
         String username = jwtUtil.extractUsername(accessToken);
         User authenticateUser = service.findUser(username);
-        return ResponseEntity.ok(new UserDto(authenticateUser.getUsername(), authenticateUser.getRole().name()));
+        return ResponseEntity.ok(new UserWithRole(authenticateUser.getUsername(), authenticateUser.getRole().name()));
     }
+
+    // TODO: Add Unit test
+    @PostMapping("/users/{username}/avatar")
+    public ResponseEntity<Object> upload(@RequestParam("avatar") MultipartFile avatar,
+                                         @PathVariable("username") String username) throws IOException {
+        service.addAvatar(username, avatar);
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/users/{username}/avatar")
+    public ResponseEntity<Object> download(Http)
 }
