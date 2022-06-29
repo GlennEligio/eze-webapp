@@ -13,9 +13,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.imageio.ImageIO;
 import javax.transaction.Transactional;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
+import java.awt.image.BufferedImage;
+import java.io.*;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -115,8 +116,12 @@ public class UserServiceImpl implements UserService, UserDetailsService {
             throw new ApiException("File must be less than 1mb", HttpStatus.BAD_REQUEST);
         }
 
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        BufferedImage bufferedImage = ImageIO.read(avatar.getInputStream());
+        ImageIO.write(bufferedImage, "jpg", outputStream);
+
         User user = userOp.get();
-        user.setAvatar(avatar.getBytes());
+        user.setAvatar(outputStream.toByteArray());
         repository.save(user);
         return true;
     }

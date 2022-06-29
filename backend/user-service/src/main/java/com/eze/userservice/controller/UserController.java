@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -92,6 +93,7 @@ public class UserController {
         return ResponseEntity.ok(new UserWithTokenDto(addedUser.getUsername(), addedUser.getRole(), accessToken, refreshToken));
     }
 
+    // TODO: Add Unit test
     @GetMapping("/users/refresh/{refreshToken}")
     public ResponseEntity<UserWithTokenDto> refreshToken(@PathVariable("refreshToken") String refreshToken){
         String username = jwtUtil.extractUsername(refreshToken);
@@ -117,5 +119,8 @@ public class UserController {
     }
 
     @GetMapping("/users/{username}/avatar")
-    public ResponseEntity<Object> download(Http)
+    public ResponseEntity<byte[]> download(@PathVariable("username") String username) {
+        User user = service.findUser(username);
+        return ResponseEntity.ok().header("Content-Type", "image/jpg").body(user.getAvatar());
+    }
 }
