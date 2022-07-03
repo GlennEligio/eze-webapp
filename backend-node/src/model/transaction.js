@@ -8,6 +8,11 @@ const transactionSchema = new mongoose.Schema({
         required: true,
         ref: "Equipment",
       },
+      amount: {
+        type: Number,
+        required: true,
+        min: 1,
+      },
     },
   ],
   borrower: {
@@ -22,7 +27,6 @@ const transactionSchema = new mongoose.Schema({
   },
   borrowedAt: {
     type: Date,
-    required: true,
   },
   returnedAt: {
     type: Date,

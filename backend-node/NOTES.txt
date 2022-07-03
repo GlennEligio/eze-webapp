@@ -1,0 +1,81 @@
+EZE
+
+Resources to handle
+1. Account
+2. Equipment
+3. Student
+4. Schedule
+5. Transaction
+6. Professor
+
+Account
+ - fullname
+ - username
+ - email
+ - password
+ - type
+ - profile
+ - createdAt & updatedAt
+
+Equipment
+ - name
+ - barcode
+ - status
+ - defectiveSince
+
+Student
+ - studentNumber
+ - fullname
+ - yearAndSection
+ - contactNumber
+ - birthday
+ - address
+ - email
+ - guardian
+ - guardianNumber
+ - yearLevel
+ - image
+
+Schedule
+ - subjectCode
+ - subjectName
+ - day
+ - time
+ - room
+ - professor
+ - yearLevel
+ - yearAndSection 
+
+Transaction
+ - equipments
+ - borrower
+ - professor
+ - borrowedAt
+ - returnAt
+
+Professor
+ - name
+ - contactNumber
+
+
+Functionalities
+001. CRUD Operation of all resources
+002. Validation to all properties of resources
+003. App wide exception handling
+004. User login/register and authentication/authorization using username/password
+005. Delete own User using JWT
+006. Update own User using JWT data
+007. Update Transaction status
+008. Fetch Equipment using Barcode
+009. Fetch Transactions of a specific Professor/Student
+010. Authenticate User using fingerprint
+011. Import/Export User,Item,Transaction data through Excel files
+
+
+SOURCES:
+1. Ecommerce database design example
+	> https://fabric.inc/blog/ecommerce-database-design-example/
+2. WebAuthn in Java - Spring Boot
+ 	> https://developer.okta.com/blog/2022/04/26/webauthn-java
+3. Filtering with Spring JPA
+	> https://stackoverflow.com/questions/20280708/filtering-database-rows-with-spring-data-jpa-and-spring-mvc

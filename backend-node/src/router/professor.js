@@ -21,11 +21,11 @@ router.get("/professors/:id", async (req, res) => {
     }
     res.send(professor);
   } catch (error) {
-    res.status(500).send();
+    res.status(500).send(error);
   }
 });
 
-router.post("/professor", async (req, res) => {
+router.post("/professors", async (req, res) => {
   try {
     const professor = new Professor(req.body);
     const newProf = await professor.save();
@@ -61,7 +61,7 @@ router.patch("/professor/:id", async (req, res) => {
   }
 });
 
-router.delete("/professor/:id", async (req, res) => {
+router.delete("/professors/:id", async (req, res) => {
   try {
     const professor = await Professor.findByIdAndDelete(req.params.id);
     if (!professor) {
