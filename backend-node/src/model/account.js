@@ -30,12 +30,6 @@ const accountSchema = new mongoose.Schema(
       required: true,
       trim: true,
       minLength: 7,
-      validate(value) {
-        if (value.includes("password")) {
-          throw new Error(`Password can not include "password"`);
-        }
-        return true;
-      },
     },
     type: {
       type: String,

@@ -1,11 +1,31 @@
 const express = require("express");
+const { ObjectId } = require("mongodb");
 const Transaction = require("../model/transaction");
 
 const router = express.Router();
 
+// GET /transactions?status=pending
+// GET /transactions?limit=2&skip=3
+// GET /transactions?sortBy=createdAt:desc
 router.get("/transactions", async (req, res) => {
+  const match = { ...req.query };
+  const sort = {};
+  delete match.limit;
+  delete match.skip;
+  delete match.sortBy;
+
+  if (req.query.sortBy) {
+    const sortOption = req.query.sortBy.split(":");
+    sort[sortOption[0]] = sortOption[1] === "desc" ? -1 : 1;
+  }
+
   try {
-    const transactions = await Transaction.find({})
+    const transactions = await Transaction.find(match)
+      .setOptions({
+        sort,
+        limit: req.query.limit,
+        skip: req.query.skip,
+      })
       .populate({ path: "equipments.equipment", select: "name" })
       .populate({ path: "professor", select: "name" })
       .populate({ path: "borrower", select: "fullname" });
@@ -35,6 +55,7 @@ router.get("/transactions/:id", async (req, res) => {
 router.post("/transactions", async (req, res) => {
   try {
     const transaction = new Transaction(req.body);
+    transaction.borrowedAt = new Date();
 
     await transaction.save();
     res.send(transaction);

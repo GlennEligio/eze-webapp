@@ -16,13 +16,21 @@ const studentSchema = new mongoose.Schema({
   yearAndSection: {
     type: String,
     required: true,
+    trim: true,
   },
   contactNumber: {
     type: String,
     trim: true,
+    validate(value) {
+      if (!value.match(/^(09|\+639)\d{9}$/)) {
+        throw new Error("Please enter a valid phone number");
+      }
+      return true;
+    },
   },
   birthday: {
     type: String,
+    trim: true,
   },
   address: {
     type: String,
@@ -46,6 +54,12 @@ const studentSchema = new mongoose.Schema({
   guardianNumber: {
     type: String,
     trim: true,
+    validate(value) {
+      if (!value.match(/^(09|\+639)\d{9}$/)) {
+        throw new Error("Please enter a valid phone number");
+      }
+      return true;
+    },
   },
   yearLevel: {
     type: String,

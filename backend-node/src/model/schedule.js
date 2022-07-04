@@ -1,13 +1,14 @@
 const mongoose = require("mongoose");
 
-// TODO: Finish schema
 const scheduleSchema = new mongoose.Schema({
   subjectCode: {
     type: String,
+    trim: true,
     required: true,
   },
   subjectName: {
     type: String,
+    trim: true,
     required: true,
   },
   day: {
@@ -22,11 +23,6 @@ const scheduleSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  professor: {
-    type: mongoose.Schema.Types.ObjectId,
-    required: true,
-    ref: "Professor",
-  },
   yearLevel: {
     type: String,
     required: true,
@@ -34,6 +30,11 @@ const scheduleSchema = new mongoose.Schema({
   yearAndSection: {
     type: String,
     required: true,
+  },
+  professor: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: "Professor",
   },
 });
 

@@ -59,17 +59,19 @@ Professor
 
 
 Functionalities
-001. CRUD Operation of all resources
-002. Validation to all properties of resources
-003. App wide exception handling
-004. User login/register and authentication/authorization using username/password
-005. Delete own User using JWT
-006. Update own User using JWT data
-007. Update Transaction status
-008. Fetch Equipment using Barcode
-009. Fetch Transactions of a specific Professor/Student
-010. Authenticate User using fingerprint
-011. Import/Export User,Item,Transaction data through Excel files
+001. CRUD Operation of all resources - DONE
+002. Validation to all properties of resources - DONE
+003. Fetch all pending Transactions
+004. Fetch professor Transactions
+005. App wide exception handling
+006. User login/register and authentication/authorization using username/password
+007. Delete own User using JWT
+008. Update own User using JWT data
+009. Update Transaction status
+010. Fetch Equipment using Barcode
+011. Fetch Transactions of a specific Professor/Student
+012. Authenticate User using fingerprint
+013. Import/Export User,Item,Transaction data through Excel files
 
 
 SOURCES:

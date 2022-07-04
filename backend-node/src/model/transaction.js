@@ -31,6 +31,11 @@ const transactionSchema = new mongoose.Schema({
   returnedAt: {
     type: Date,
   },
+  status: {
+    type: String,
+    trim: true,
+    required: true,
+  },
 });
 
 const Transaction = mongoose.model("Transaction", transactionSchema);

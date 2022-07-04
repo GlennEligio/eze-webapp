@@ -6,7 +6,6 @@ const router = express.Router();
 router.get("/accounts", async (req, res) => {
   try {
     const users = await Account.find({});
-
     res.send(users);
   } catch (e) {
     res.status(500).send(e);
