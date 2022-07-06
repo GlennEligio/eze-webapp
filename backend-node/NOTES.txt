@@ -61,8 +61,8 @@ Professor
 Functionalities
 001. CRUD Operation of all resources - DONE
 002. Validation to all properties of resources - DONE
-003. Fetch all pending Transactions
-004. Fetch professor Transactions
+003. Fetch all pending Transactions - DONE
+004. Fetch professor Transactions - DONE
 005. App wide exception handling
 006. User login/register and authentication/authorization using username/password
 007. Delete own User using JWT
@@ -72,6 +72,7 @@ Functionalities
 011. Fetch Transactions of a specific Professor/Student
 012. Authenticate User using fingerprint
 013. Import/Export User,Item,Transaction data through Excel files
+014. Migrate source code into TypeScript
 
 
 SOURCES:

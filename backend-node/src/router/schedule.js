@@ -1,43 +1,47 @@
 const express = require("express");
 const Schedule = require("../model/schedule");
+const ApiError = require("../error/ApiError");
 
 const router = express.Router();
 
-router.get("/schedules", async (req, res) => {
+router.get("/schedules", async (req, res, next) => {
   try {
     const schedules = await Schedule.find({}).populate({
       path: "professor",
       select: "name",
     });
     res.send(schedules);
-  } catch (error) {
-    res.status(500).send(error);
+  } catch (e) {
+    next(e);
   }
 });
 
-router.get("/schedules/:id", async (req, res) => {
+router.get("/schedules/:id", async (req, res, next) => {
   try {
     const schedule = await Schedule.findById(req.params.id).populate({
       path: "professor",
       select: "name",
     });
+    if (!schedule) {
+      throw new ApiError(404, "No schedule with same id was found");
+    }
     res.send(schedule);
-  } catch (error) {
-    res.status(500).send(error);
+  } catch (e) {
+    next(e);
   }
 });
 
-router.post("/schedules", async (req, res) => {
-  const schedule = new Schedule(req.body);
+router.post("/schedules", async (req, res, next) => {
   try {
+    const schedule = new Schedule(req.body);
     await schedule.save();
     res.send(schedule);
-  } catch (error) {
-    res.status(500).send(error);
+  } catch (e) {
+    next(e);
   }
 });
 
-router.patch("/schedules/:id", async (req, res) => {
+router.patch("/schedules/:id", async (req, res, next) => {
   try {
     const updates = Object.keys(req.body);
     const allowedUpdates = [
@@ -55,34 +59,35 @@ router.patch("/schedules/:id", async (req, res) => {
     );
 
     if (!isValidUpdate) {
-      res.status(400).send();
-      return;
+      throw new ApiError(
+        400,
+        "Update object includes properties that is not allowed"
+      );
     }
 
     const schedule = await Schedule.findById(req.params.id);
 
     if (!schedule) {
-      res.status(404).send();
+      throw new ApiError(404, "No schedule of the same id was found");
     }
 
     updates.forEach((update) => (schedule[update] = req.body[update]));
     await schedule.save();
     res.send(schedule);
-  } catch (error) {
-    res.status(500).send(error);
+  } catch (e) {
+    next(e);
   }
 });
 
-router.delete("/schedules/:id", async (req, res) => {
+router.delete("/schedules/:id", async (req, res, next) => {
   try {
     const schedule = await Schedule.findByIdAndDelete(req.params.id);
     if (!schedule) {
-      res.status(404).send();
-      return;
+      throw new ApiError(404, "No schedule of the same id was found");
     }
     res.send(schedule);
-  } catch (error) {
-    res.status(500).send();
+  } catch (e) {
+    next(e);
   }
 });
 

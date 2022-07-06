@@ -1,88 +1,86 @@
 const express = require("express");
 const Student = require("../model/student");
+const ApiError = require("../error/ApiError");
 
 const router = express.Router();
 
-router.get("/students", async (req, res) => {
+router.get("/students", async (req, res, next) => {
   try {
     const students = await Student.find({});
     res.send(students);
-  } catch (error) {
-    res.status(500).send(error);
+  } catch (e) {
+    next(e);
   }
 });
 
-router.get("/students/:id", async (req, res) => {
+router.get("/students/:id", async (req, res, next) => {
   try {
     const student = await Student.findById(req.params.id);
     if (!student) {
-      res.status(404).send();
-      return;
+      throw new ApiError(404, "No student with same id was found");
     }
     res.send(student);
-  } catch (error) {
-    res.status(500).send(error);
+  } catch (e) {
+    next(e);
   }
 });
 
-router.post("/students", async (req, res) => {
-  const student = new Student(req.body);
+router.post("/students", async (req, res, next) => {
   try {
+    const student = new Student(req.body);
     const newStudent = await student.save();
     res.send(newStudent);
-  } catch (error) {
-    res.status(400).send(error);
+  } catch (e) {
+    next(e);
   }
 });
 
-router.patch("/students/:id", async (req, res) => {
-  const updates = Object.keys(req.body);
-  const allowedUpdates = [
-    "studentNumber",
-    "fullname",
-    "yearAndSection",
-    "contactNumber",
-    "birthday",
-    "address",
-    "email",
-    "guardian",
-    "guardianNumber",
-    "yearLevel",
-  ];
-  const isValidUpdate = updates.every((update) =>
-    allowedUpdates.includes(update)
-  );
-
-  if (!isValidUpdate) {
-    res
-      .status(400)
-      .send("Update object includes properties that is not allowed");
-  }
-
+router.patch("/students/:id", async (req, res, next) => {
   try {
+    const updates = Object.keys(req.body);
+    const allowedUpdates = [
+      "studentNumber",
+      "fullname",
+      "yearAndSection",
+      "contactNumber",
+      "birthday",
+      "address",
+      "email",
+      "guardian",
+      "guardianNumber",
+      "yearLevel",
+    ];
+    const isValidUpdate = updates.every((update) =>
+      allowedUpdates.includes(update)
+    );
+
+    if (!isValidUpdate) {
+      throw new ApiError(
+        400,
+        "Update object includes properties that is not allowed"
+      );
+    }
     const student = await Student.findById(req.params.id);
     if (!student) {
-      res.status(404).send();
-      return;
+      throw new ApiError(404, "Student with same id was not found");
     }
     updates.forEach((update) => (student[update] = req.body[update]));
     await student.save();
     res.send(student);
-  } catch (error) {
-    res.status(500).send(error);
+  } catch (e) {
+    next(e);
   }
 });
 
-router.delete("/students/:id", async (req, res) => {
+router.delete("/students/:id", async (req, res, next) => {
   try {
     const student = await Student.findByIdAndDelete(req.params.id);
     if (!student) {
-      res.status(404).send();
-      return;
+      throw new ApiError(404, "Student with same id was not found");
     }
     res.send(student);
-  } catch (error) {
-    res.status(500).send();
+  } catch (e) {
+    next(e);
   }
 });
 
