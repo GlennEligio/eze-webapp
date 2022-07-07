@@ -4,7 +4,7 @@ const ApiError = require("../error/ApiError");
 
 const router = express.Router();
 
-router.get("/accounts", async (req, res, next) => {
+router.get("/", async (req, res, next) => {
   try {
     const users = await Account.find({});
     res.send(users);
@@ -13,7 +13,7 @@ router.get("/accounts", async (req, res, next) => {
   }
 });
 
-router.get("/accounts/:id", async (req, res, next) => {
+router.get("/:id", async (req, res, next) => {
   try {
     const user = await Account.findById(req.params.id);
     if (!user) {
@@ -26,7 +26,7 @@ router.get("/accounts/:id", async (req, res, next) => {
   }
 });
 
-router.post("/accounts", async (req, res, next) => {
+router.post("/", async (req, res, next) => {
   try {
     const user = new Account(req.body);
     await user.save();
@@ -37,7 +37,7 @@ router.post("/accounts", async (req, res, next) => {
 });
 
 // TODO: template for centralized error handling
-router.patch("/accounts/:id", async (req, res, next) => {
+router.patch("/:id", async (req, res, next) => {
   try {
     const updates = Object.keys(req.body);
     const allowedUpdates = [
@@ -71,13 +71,45 @@ router.patch("/accounts/:id", async (req, res, next) => {
   }
 });
 
-router.delete("/accounts/:id", async (req, res, next) => {
+router.delete("/:id", async (req, res, next) => {
   try {
     const account = await Account.findByIdAndDelete(req.params.id);
     if (!account) {
       throw new ApiError(404, "No account found with specified id");
     }
     res.send(account);
+  } catch (e) {
+    next(e);
+  }
+});
+
+router.post("/register", async (req, res, next) => {
+  try {
+    const account = new Account(req.body);
+    const newAccount = await account.save();
+    res.status(201).send(newAccount);
+  } catch (e) {
+    next(e);
+  }
+});
+
+router.post("/login", async (req, res, next) => {
+  try {
+    const JWT_SECRET = process.env.JWT_SECRET;
+    const creds = req.body;
+    if (!creds.username || !creds.password) {
+      throw new ApiError(401, "Username or password is missing");
+    }
+
+    const account = await Account.findCredentials(
+      creds.username,
+      creds.password
+    );
+    const token = await account.generateToken();
+    res.send({
+      account,
+      token,
+    });
   } catch (e) {
     next(e);
   }

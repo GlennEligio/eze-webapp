@@ -63,7 +63,7 @@ Functionalities
 002. Validation to all properties of resources - DONE
 003. Fetch all pending Transactions - DONE
 004. Fetch professor Transactions - DONE
-005. App wide exception handling
+005. App wide exception handling - DONE
 006. User login/register and authentication/authorization using username/password
 007. Delete own User using JWT
 008. Update own User using JWT data

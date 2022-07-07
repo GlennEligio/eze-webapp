@@ -4,7 +4,7 @@ const ApiError = require("../error/ApiError");
 
 const router = express.Router();
 
-router.get("/equipments", async (req, res, next) => {
+router.get("/", async (req, res, next) => {
   try {
     const equipments = await Equipment.find({});
     res.send(equipments);
@@ -13,7 +13,7 @@ router.get("/equipments", async (req, res, next) => {
   }
 });
 
-router.get("/equipments/:id", async (req, res, next) => {
+router.get("/:id", async (req, res, next) => {
   try {
     const equipment = await Equipment.findById(req.params.id);
     if (!equipment) {
@@ -25,7 +25,7 @@ router.get("/equipments/:id", async (req, res, next) => {
   }
 });
 
-router.post("/equipments", async (req, res, next) => {
+router.post("/", async (req, res, next) => {
   try {
     const equipment = new Equipment(req.body);
     equipment.defectiveSince = new Date();
@@ -36,7 +36,7 @@ router.post("/equipments", async (req, res, next) => {
   }
 });
 
-router.patch("/equipments/:id", async (req, res, next) => {
+router.patch("/:id", async (req, res, next) => {
   try {
     const updates = Object.keys(req.body);
     const allowedUpdates = ["name", "barcode", "status", "defectiveSince"];
@@ -63,7 +63,7 @@ router.patch("/equipments/:id", async (req, res, next) => {
   }
 });
 
-router.delete("/equipments/:id", async (req, res, next) => {
+router.delete("/:id", async (req, res, next) => {
   try {
     const equipment = await Equipment.findByIdAndDelete(req.params.id);
     if (!equipment) {

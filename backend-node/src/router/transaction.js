@@ -4,7 +4,7 @@ const ApiError = require("../error/ApiError");
 
 const router = express.Router();
 
-router.get("/transactions", async (req, res, next) => {
+router.get("/", async (req, res, next) => {
   try {
     const match = { ...req.query };
     const sort = {};
@@ -32,7 +32,7 @@ router.get("/transactions", async (req, res, next) => {
   }
 });
 
-router.get("/transactions/:id", async (req, res, next) => {
+router.get("/:id", async (req, res, next) => {
   try {
     const transaction = await Transaction.findById(req.params.id)
       .populate({ path: "equipments.equipment", select: "name" })
@@ -47,7 +47,7 @@ router.get("/transactions/:id", async (req, res, next) => {
   }
 });
 
-router.post("/transactions", async (req, res, next) => {
+router.post("/", async (req, res, next) => {
   try {
     const transaction = new Transaction(req.body);
     transaction.borrowedAt = new Date();
@@ -59,7 +59,7 @@ router.post("/transactions", async (req, res, next) => {
   }
 });
 
-router.patch("/transactions/:id", async (req, res, next) => {
+router.patch("/:id", async (req, res, next) => {
   try {
     const updates = Object.keys(req.body);
     console.log(updates);
@@ -94,7 +94,7 @@ router.patch("/transactions/:id", async (req, res, next) => {
   }
 });
 
-router.delete("/transactions/:id", async (req, res, next) => {
+router.delete("/:id", async (req, res, next) => {
   try {
     const transaction = await Transaction.findByIdAndDelete(req.params.id);
     if (!transaction) {

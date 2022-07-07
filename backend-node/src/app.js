@@ -7,16 +7,18 @@ const professorRouter = require("./router/professor");
 const transactionRouter = require("./router/transaction");
 const scheduleRouter = require("./router/schedule");
 const errorHandler = require("./error/errorHandler");
+const auth = require("./middleware/auth");
 
 const app = express();
 
 app.use(express.json());
-app.use(accountRouter);
-app.use(equipmentRouter);
-app.use(studentRouter);
-app.use(professorRouter);
-app.use(transactionRouter);
-app.use(scheduleRouter);
+app.use(auth);
+app.use("/accounts", accountRouter);
+app.use("/equipments", equipmentRouter);
+app.use("/students", studentRouter);
+app.use("/professors", professorRouter);
+app.use("/transactions", transactionRouter);
+app.use("/schedules", scheduleRouter);
 app.use(errorHandler);
 
 module.exports = app;

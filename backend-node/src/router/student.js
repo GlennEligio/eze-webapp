@@ -4,7 +4,7 @@ const ApiError = require("../error/ApiError");
 
 const router = express.Router();
 
-router.get("/students", async (req, res, next) => {
+router.get("/", async (req, res, next) => {
   try {
     const students = await Student.find({});
     res.send(students);
@@ -13,7 +13,7 @@ router.get("/students", async (req, res, next) => {
   }
 });
 
-router.get("/students/:id", async (req, res, next) => {
+router.get("/:id", async (req, res, next) => {
   try {
     const student = await Student.findById(req.params.id);
     if (!student) {
@@ -25,7 +25,7 @@ router.get("/students/:id", async (req, res, next) => {
   }
 });
 
-router.post("/students", async (req, res, next) => {
+router.post("/", async (req, res, next) => {
   try {
     const student = new Student(req.body);
     const newStudent = await student.save();
@@ -35,7 +35,7 @@ router.post("/students", async (req, res, next) => {
   }
 });
 
-router.patch("/students/:id", async (req, res, next) => {
+router.patch("/:id", async (req, res, next) => {
   try {
     const updates = Object.keys(req.body);
     const allowedUpdates = [
@@ -72,7 +72,7 @@ router.patch("/students/:id", async (req, res, next) => {
   }
 });
 
-router.delete("/students/:id", async (req, res, next) => {
+router.delete("/:id", async (req, res, next) => {
   try {
     const student = await Student.findByIdAndDelete(req.params.id);
     if (!student) {

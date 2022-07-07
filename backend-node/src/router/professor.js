@@ -4,7 +4,7 @@ const ApiError = require("../error/ApiError");
 
 const router = express.Router();
 
-router.get("/professors", async (req, res, next) => {
+router.get("/", async (req, res, next) => {
   try {
     const professors = await Professor.find({});
     res.send(professors);
@@ -13,7 +13,7 @@ router.get("/professors", async (req, res, next) => {
   }
 });
 
-router.get("/professors/:id", async (req, res, next) => {
+router.get("/:id", async (req, res, next) => {
   try {
     const professor = await Professor.findById(req.params.id);
     if (!professor) {
@@ -25,7 +25,7 @@ router.get("/professors/:id", async (req, res, next) => {
   }
 });
 
-router.post("/professors", async (req, res, next) => {
+router.post("/", async (req, res, next) => {
   try {
     const professor = new Professor(req.body);
     const newProf = await professor.save();
@@ -35,7 +35,7 @@ router.post("/professors", async (req, res, next) => {
   }
 });
 
-router.patch("/professor/:id", async (req, res, next) => {
+router.patch("/:id", async (req, res, next) => {
   try {
     const updates = Object.keys(req.body);
     const allowedUpdates = ["name", "contactNumber"];
@@ -62,7 +62,7 @@ router.patch("/professor/:id", async (req, res, next) => {
   }
 });
 
-router.delete("/professors/:id", async (req, res, next) => {
+router.delete("/:id", async (req, res, next) => {
   try {
     const professor = await Professor.findByIdAndDelete(req.params.id);
     if (!professor) {
