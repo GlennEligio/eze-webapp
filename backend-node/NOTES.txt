@@ -16,6 +16,8 @@ Account
  - type
  - profile
  - createdAt & updatedAt
+ - tokens
+	- token
 
 Equipment
  - name
@@ -64,15 +66,16 @@ Functionalities
 003. Fetch all pending Transactions - DONE
 004. Fetch professor Transactions - DONE
 005. App wide exception handling - DONE
-006. User login/register and authentication/authorization using username/password
-007. Delete own User using JWT
-008. Update own User using JWT data
-009. Update Transaction status
-010. Fetch Equipment using Barcode
-011. Fetch Transactions of a specific Professor/Student
-012. Authenticate User using fingerprint
-013. Import/Export User,Item,Transaction data through Excel files
-014. Migrate source code into TypeScript
+006. User login/register and authentication/authorization using username/password - DONE
+007. Create logic to limit Routes access based on Account type
+008. Delete own Account using JWT
+009. Update own Acount using JWT data
+010. Update Transaction status
+011. Fetch Equipment using Barcode
+012. Fetch Transactions of a specific Professor/Student
+013. Authenticate User using fingerprint
+014. Import/Export User,Item,Transaction data through Excel files
+015. Migrate source code into TypeScript
 
 
 SOURCES:
