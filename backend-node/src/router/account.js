@@ -36,7 +36,6 @@ router.post("/", async (req, res, next) => {
   }
 });
 
-// TODO: template for centralized error handling
 router.patch("/:id", async (req, res, next) => {
   try {
     const updates = Object.keys(req.body);
@@ -110,6 +109,31 @@ router.post("/login", async (req, res, next) => {
       account,
       token,
     });
+  } catch (e) {
+    next(e);
+  }
+});
+
+router.post("/logout", async (req, res, next) => {
+  try {
+    const account = req.account;
+    const accountToken = req.token;
+    account.tokens = account.tokens.filter(
+      (token) => token.token !== accountToken
+    );
+    await account.save();
+    res.send();
+  } catch (e) {
+    next(e);
+  }
+});
+
+router.post("/logoutAll", async (req, res, next) => {
+  try {
+    const account = req.account;
+    account.tokens = [];
+    await account.save();
+    res.send();
   } catch (e) {
     next(e);
   }
