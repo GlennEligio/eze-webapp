@@ -1,6 +1,8 @@
 const express = require("express");
+const XLSX = require("xlsx");
 const Transaction = require("../model/transaction");
 const ApiError = require("../error/ApiError");
+const { uploadExcel } = require("../middleware/file");
 
 const router = express.Router();
 
@@ -27,6 +29,74 @@ router.get("/", async (req, res, next) => {
       .populate({ path: "professor", select: "name" })
       .populate({ path: "borrower", select: "fullname" });
     res.send(transactions);
+  } catch (e) {
+    next(e);
+  }
+});
+
+router.get("/download", async (req, res, next) => {
+  try {
+    const transactions = await Transaction.find({});
+    const transactionsJSON = JSON.stringify(transactions);
+    const transactionsObj = JSON.parse(transactionsJSON);
+    const transformedTransactions = transactionsObj.map((transaction) => {
+      for (const equipment of transaction.equipments) {
+        transaction[equipment.equipment] = equipment.amount;
+      }
+      delete transaction.equipments;
+      return transaction;
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(transformedTransactions);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Transactions");
+
+    const buffer = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" });
+    res.set("Content-Disposition", "attachment; filename=transactions.xlsx");
+    res.set("Content-Type", "application/octet-stream");
+    res.send(buffer);
+  } catch (e) {
+    next(e);
+  }
+});
+
+router.post("/upload", uploadExcel.single("excel"), async (req, res, next) => {
+  try {
+    const excelBuffer = req.file.buffer;
+    const workbook = XLSX.read(excelBuffer, { type: "buffer" });
+    const transactionsJson = XLSX.utils.sheet_to_json(
+      workbook.Sheets.Transactions
+    );
+    const transformedTransactions = transactionsJson.map((transaction) => {
+      let newTransaction = {
+        borrower: transaction.borrower,
+        professor: transaction.professor,
+        borrowedAt: transaction.borrowedAt,
+        returnedAt: transaction.returnedAt,
+        status: transaction.status,
+        equipments: [],
+      };
+      delete transaction.borrower;
+      delete transaction.professor;
+      delete transaction.borrowedAt;
+      delete transaction.returnedAt;
+      delete transaction.status;
+      delete transaction._id;
+
+      const equipmentsId = Object.keys(transaction);
+      for (const id of equipmentsId) {
+        newTransaction.equipments.push({
+          equipment: id,
+          amount: transaction[id],
+        });
+      }
+      return newTransaction;
+    });
+    for (const transaction of transformedTransactions) {
+      const transactionToSave = new Transaction(transaction);
+      await transactionToSave.save();
+    }
+    res.send();
   } catch (e) {
     next(e);
   }

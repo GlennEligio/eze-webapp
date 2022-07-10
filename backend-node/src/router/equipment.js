@@ -1,6 +1,8 @@
 const express = require("express");
+const XLSX = require("xlsx");
 const Equipment = require("../model/equipment");
 const ApiError = require("../error/ApiError");
+const { uploadExcel } = require("../middleware/file");
 
 const router = express.Router();
 
@@ -13,6 +15,40 @@ router.get("/", async (req, res, next) => {
   }
 });
 
+router.get("/download", async (req, res, next) => {
+  try {
+    const equipments = await Equipment.find({});
+    const equipmentsJSON = JSON.stringify(equipments);
+    const equipmentsObj = JSON.parse(equipmentsJSON);
+
+    const worksheet = XLSX.utils.json_to_sheet(equipmentsObj);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Equipments");
+
+    const buffer = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" });
+    res.set("Content-Disposition", "attachment; filename=equipments.xlsx");
+    res.set("Content-Type", "application/octet-stream");
+    res.send(buffer);
+  } catch (e) {
+    next(e);
+  }
+});
+
+router.post("/upload", uploadExcel.single("excel"), async (req, res, next) => {
+  try {
+    const excelBuffer = req.file.buffer;
+    const workbook = XLSX.read(excelBuffer, { type: "buffer" });
+    const equipmentsJson = XLSX.utils.sheet_to_json(workbook.Sheets.Equipments);
+    for (const equipmentJson of equipmentsJson) {
+      const equipment = new Equipment(equipmentJson);
+      await equipment.save();
+    }
+    res.send();
+  } catch (e) {
+    next(e);
+  }
+});
+
 router.get("/:id", async (req, res, next) => {
   try {
     const equipment = await Equipment.findById(req.params.id);
@@ -20,7 +56,7 @@ router.get("/:id", async (req, res, next) => {
       throw new ApiError(404, "Not equipment found with specified id");
     }
     res.send(equipment);
-  } catch (error) {
+  } catch (e) {
     next(e);
   }
 });

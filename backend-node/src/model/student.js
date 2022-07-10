@@ -70,6 +70,13 @@ const studentSchema = new mongoose.Schema({
   },
 });
 
+studentSchema.methods.toJSON = function () {
+  const student = this;
+  const studentObj = student.toObject();
+  delete studentObj.__v;
+  return studentObj;
+};
+
 const Student = mongoose.model("Student", studentSchema);
 
 module.exports = Student;

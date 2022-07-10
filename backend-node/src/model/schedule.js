@@ -38,6 +38,13 @@ const scheduleSchema = new mongoose.Schema({
   },
 });
 
+scheduleSchema.methods.toJSON = function () {
+  const schedule = this;
+  const scheduleObj = schedule.toObject();
+  delete scheduleObj.__v;
+  return scheduleObj;
+};
+
 const Schedule = mongoose.model("Schedule", scheduleSchema);
 
 module.exports = Schedule;

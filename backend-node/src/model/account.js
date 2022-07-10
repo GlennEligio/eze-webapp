@@ -102,6 +102,8 @@ accountSchema.methods.toJSON = function () {
 
   delete accountObj.password;
   delete accountObj.tokens;
+  delete accountObj.__v;
+  delete accountObj.profile;
   return accountObj;
 };
 

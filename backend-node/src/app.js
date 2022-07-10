@@ -13,8 +13,8 @@ const type = require("./middleware/typeAuth");
 const app = express();
 
 app.use(express.json());
-app.use(auth);
-app.use(type);
+// app.use(auth);
+// app.use(type);
 app.use("/api/accounts", accountRouter);
 app.use("/api/equipments", equipmentRouter);
 app.use("/api/students", studentRouter);

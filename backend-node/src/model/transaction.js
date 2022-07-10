@@ -38,6 +38,13 @@ const transactionSchema = new mongoose.Schema({
   },
 });
 
+transactionSchema.methods.toJSON = function () {
+  const transaction = this;
+  const transactionObj = transaction.toObject();
+  delete transactionObj.__v;
+  return transactionObj;
+};
+
 const Transaction = mongoose.model("Transaction", transactionSchema);
 
 module.exports = Transaction;

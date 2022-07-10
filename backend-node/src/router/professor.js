@@ -1,6 +1,8 @@
 const express = require("express");
 const Professor = require("../model/professor");
 const ApiError = require("../error/ApiError");
+const XLSX = require("xlsx");
+const { uploadExcel } = require("../middleware/file");
 
 const router = express.Router();
 
@@ -8,6 +10,40 @@ router.get("/", async (req, res, next) => {
   try {
     const professors = await Professor.find({});
     res.send(professors);
+  } catch (e) {
+    next(e);
+  }
+});
+
+router.get("/download", async (req, res, next) => {
+  try {
+    const professors = await Professor.find({});
+    const professorsJSON = JSON.stringify(professors);
+    const professorsObj = JSON.parse(professorsJSON);
+
+    const worksheet = XLSX.utils.json_to_sheet(professorsObj);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Professors");
+
+    const buffer = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" });
+    res.set("Content-Disposition", "attachment; filename=professors.xlsx");
+    res.set("Content-Type", "application/octet-stream");
+    res.send(buffer);
+  } catch (e) {
+    next(e);
+  }
+});
+
+router.post("/upload", uploadExcel.single("excel"), async (req, res, next) => {
+  try {
+    const excelBuffer = req.file.buffer;
+    const workbook = XLSX.read(excelBuffer, { type: "buffer" });
+    const professorsJson = XLSX.utils.sheet_to_json(workbook.Sheets.Professors);
+    for (const professorJson of professorsJson) {
+      const professor = new Professor(professorJson);
+      await professor.save();
+    }
+    res.send();
   } catch (e) {
     next(e);
   }

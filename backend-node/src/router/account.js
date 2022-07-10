@@ -1,8 +1,114 @@
 const express = require("express");
+const XLSX = require("xlsx");
+const sharp = require("sharp");
 const Account = require("../model/account");
 const ApiError = require("../error/ApiError");
+const { uploadExcel, uploadImage } = require("../middleware/file");
 
 const router = express.Router();
+
+router.get("/download", async (req, res, next) => {
+  try {
+    const accounts = await Account.find({});
+    const sanitizedAccountsJSON = JSON.stringify(accounts);
+    const sanitizedAccounts = JSON.parse(sanitizedAccountsJSON);
+
+    const worksheet = XLSX.utils.json_to_sheet(sanitizedAccounts);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Accounts");
+
+    const buffer = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" });
+    res.set("Content-Disposition", "attachment; filename=accounts.xlsx");
+    res.set("Content-Type", "application/octet-stream");
+    res.send(buffer);
+  } catch (e) {
+    next(e);
+  }
+});
+
+// NOTE: Account excel must have fullname, username, email, password, and type column
+router.post(
+  "/upload/excel",
+  uploadExcel.single("excel"),
+  async (req, res, next) => {
+    try {
+      const excelBuffer = req.file.buffer;
+      const workbook = XLSX.read(excelBuffer, { type: "buffer" });
+      const accountsJson = XLSX.utils.sheet_to_json(workbook.Sheets.Accounts);
+      for (const accountJson of accountsJson) {
+        const account = new Account(accountJson);
+        await account.save();
+      }
+      res.send();
+    } catch (e) {
+      next(e);
+    }
+  }
+);
+
+router.post(
+  "/me/avatar",
+  uploadImage.single("avatar"),
+  async (req, res, next) => {
+    try {
+      const avatarBuffer = await sharp(req.file.buffer).png().toBuffer();
+      const account = req.account;
+      if (!account) {
+        throw new ApiError(404, "No account with same id was found");
+      }
+      account.profile = avatarBuffer;
+      await account.save();
+      res.send();
+    } catch (e) {
+      next(e);
+    }
+  }
+);
+
+router.post(
+  "/:id/avatar",
+  uploadImage.single("avatar"),
+  async (req, res, next) => {
+    try {
+      const avatarBuffer = await sharp(req.file.buffer).png().toBuffer();
+      const account = await Account.findById(req.params.id);
+      if (!account) {
+        throw new ApiError(404, "No account with same id was found");
+      }
+      account.profile(avatarBuffer);
+      await account.save();
+      res.send();
+    } catch (e) {
+      next(e);
+    }
+  }
+);
+
+router.get("/me/avatar", async (req, res, next) => {
+  try {
+    const account = req.account;
+    if (!account) {
+      throw new ApiError(404, "No account with same id was found");
+    }
+    res.set("Content-Type", "image/png");
+    res.send(account.profile);
+  } catch (e) {
+    next(e);
+  }
+});
+
+router.get("/:id/avatar", async (req, res, next) => {
+  try {
+    const account = await Account.findById(req.params.id);
+    if (!account) {
+      throw new ApiError(404, "No account with same id was found");
+    }
+    res.set("Content-Type", "image/png");
+    res.send(account.profile);
+  } catch (e) {
+    next(e);
+  }
+});
 
 router.get("/", async (req, res, next) => {
   try {
@@ -31,6 +137,36 @@ router.post("/", async (req, res, next) => {
     const user = new Account(req.body);
     await user.save();
     return res.status(201).send(user);
+  } catch (e) {
+    next(e);
+  }
+});
+
+router.patch("/me", async (req, res, next) => {
+  try {
+    const updates = Object.keys(req.body);
+    const allowedUpdates = [
+      "fullname",
+      "username",
+      "email",
+      "password",
+      "type",
+    ];
+    let isValidUpdate = updates.every((update) =>
+      allowedUpdates.includes(update)
+    );
+
+    if (!isValidUpdate) {
+      throw new ApiError(
+        400,
+        "Update object includes properties that is not allowed"
+      );
+    }
+
+    const accountToUpdate = req.account;
+    updates.forEach((update) => (accountToUpdate[update] = req.body[update]));
+    await accountToUpdate.save();
+    res.send();
   } catch (e) {
     next(e);
   }

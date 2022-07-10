@@ -53,8 +53,8 @@ const accountTypeConfig = new AccountTypeConfig();
 accountTypeConfig.addTypeRule(
   "*",
   "POST",
-  "/accounts/register",
-  "/accounts/login"
+  "/api/accounts/register",
+  "/api/accounts/login"
 );
 accountTypeConfig.addTypeRule(
   "USER",

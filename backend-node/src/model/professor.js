@@ -27,6 +27,13 @@ professorSchema.virtual("transactions", {
   foreignField: "professor",
 });
 
+professorSchema.methods.toJSON = function () {
+  const professor = this;
+  const professorObj = professor.toObject();
+  delete professorObj.__v;
+  return professorObj;
+};
+
 const Professor = mongoose.model("Professor", professorSchema);
 
 module.exports = Professor;
