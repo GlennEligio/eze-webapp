@@ -1,8 +1,9 @@
 const express = require("express");
 const XLSX = require("xlsx");
+const sharp = require("sharp");
 const Student = require("../model/student");
 const ApiError = require("../error/ApiError");
-const { uploadExcel } = require("../middleware/file");
+const { uploadExcel, uploadImage } = require("../middleware/file");
 
 const router = express.Router();
 
@@ -115,6 +116,38 @@ router.delete("/:id", async (req, res, next) => {
       throw new ApiError(404, "Student with same id was not found");
     }
     res.send(student);
+  } catch (e) {
+    next(e);
+  }
+});
+
+router.post(
+  "/:id/avatar",
+  uploadImage.single("avatar"),
+  async (req, res, next) => {
+    try {
+      const imageBuffer = await sharp(req.file.buffer).png().toBuffer();
+      const student = await Student.findById(req.params.id);
+      if (!student) {
+        throw new ApiError(404, "No student with same id was found");
+      }
+      student.image = imageBuffer;
+      await student.save();
+      res.send();
+    } catch (e) {
+      next(e);
+    }
+  }
+);
+
+router.get("/:id/avatar", async (req, res, next) => {
+  try {
+    const student = await Student.findById(req.params.id);
+    if (!student) {
+      throw new ApiError(404, "No student with same id was found");
+    }
+    res.set("Content-Type", "image/png");
+    res.send(student.image);
   } catch (e) {
     next(e);
   }
