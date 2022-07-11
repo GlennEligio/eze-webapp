@@ -23,7 +23,10 @@ const jwtAuthMiddleware = async (req, res, next) => {
     }
 
     const payload = jwt.verify(parts[1], process.env.JWT_SECRET_KEY);
-    const account = await Account.findById(payload._id);
+    const account = await Account.findOne({
+      _id: payload._id,
+      "tokens.token": parts[1],
+    });
     if (!account) {
       throw new ApiError(401, "Invalid authentication");
     }
