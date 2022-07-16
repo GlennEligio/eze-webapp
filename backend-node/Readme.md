@@ -18,4 +18,4 @@
 1. Checkout the master branch
 2. Go inside the root directory
 3. In production server, the environment present in _./config/dev.env_ except PORT must be present
-4. Execute _npm run start_
+4. Execute _npm run start_ in the production server where backend is deployed
