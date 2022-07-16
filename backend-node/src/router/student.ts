@@ -1,13 +1,14 @@
-const express = require("express");
-const XLSX = require("xlsx");
-const sharp = require("sharp");
-const Student = require("../model/student");
-const ApiError = require("../error/ApiError");
-const { uploadExcel, uploadImage } = require("../middleware/file");
+import express from "express";
+import XLSX from "xlsx";
+import sharp from "sharp";
+import Student, { IStudent } from "../model/student";
+import ApiError from "../error/ApiError";
+import { uploadExcel, uploadImage } from "../middleware/file";
+import { CustomRequest } from "../types/CustomRequest";
 
 const router = express.Router();
 
-router.get("/", async (req, res, next) => {
+router.get("/", async (_req, res, next) => {
   try {
     const students = await Student.find({});
     res.send(students);
@@ -16,7 +17,7 @@ router.get("/", async (req, res, next) => {
   }
 });
 
-router.get("/download", async (req, res, next) => {
+router.get("/download", async (_req, res, next) => {
   try {
     const students = await Student.find({});
     const studentsJSON = JSON.stringify(students);
@@ -35,20 +36,24 @@ router.get("/download", async (req, res, next) => {
   }
 });
 
-router.post("/upload", uploadExcel.single("excel"), async (req, res, next) => {
-  try {
-    const excelBuffer = req.file.buffer;
-    const workbook = XLSX.read(excelBuffer, { type: "buffer" });
-    const studentsJson = XLSX.utils.sheet_to_json(workbook.Sheets.Students);
-    for (const studentJson of studentsJson) {
-      const student = new Student(studentJson);
-      await student.save();
+router.post(
+  "/upload",
+  uploadExcel.single("excel"),
+  async (req: CustomRequest, res, next) => {
+    try {
+      const excelBuffer = req.file!.buffer;
+      const workbook = XLSX.read(excelBuffer, { type: "buffer" });
+      const studentsJson = XLSX.utils.sheet_to_json(workbook.Sheets.Students);
+      for (const studentJson of studentsJson) {
+        const student = new Student(studentJson);
+        await student.save();
+      }
+      res.send();
+    } catch (e) {
+      next(e);
     }
-    res.send();
-  } catch (e) {
-    next(e);
   }
-});
+);
 
 router.get("/:id", async (req, res, next) => {
   try {
@@ -124,9 +129,9 @@ router.delete("/:id", async (req, res, next) => {
 router.post(
   "/:id/avatar",
   uploadImage.single("avatar"),
-  async (req, res, next) => {
+  async (req: CustomRequest, res, next) => {
     try {
-      const imageBuffer = await sharp(req.file.buffer).png().toBuffer();
+      const imageBuffer = await sharp(req.file!.buffer).png().toBuffer();
       const student = await Student.findById(req.params.id);
       if (!student) {
         throw new ApiError(404, "No student with same id was found");
@@ -153,4 +158,4 @@ router.get("/:id/avatar", async (req, res, next) => {
   }
 });
 
-module.exports = router;
+export default router;

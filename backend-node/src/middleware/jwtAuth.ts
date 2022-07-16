@@ -1,14 +1,24 @@
-const jwt = require("jsonwebtoken");
-const Account = require("../model/account");
-const ApiError = require("../error/ApiError");
+import jwt from "jsonwebtoken";
+import Account from "../model/account";
+import ApiError from "../error/ApiError";
+import express from "express";
+import { CustomRequest } from "../types/CustomRequest";
 
-const jwtAuthMiddleware = async (req, res, next) => {
+const jwtAuthMiddleware: express.RequestHandler = async (
+  req: CustomRequest,
+  _res,
+  next
+) => {
   try {
     const path = req.originalUrl;
-    if (path === "/accounts/register" || path === "/accounts/login") {
-      req.account = {
+    if (path === "/api/accounts/register" || path === "/api/accounts/login") {
+      req.account = new Account({
+        fullname: "*",
+        username: "*",
+        password: "*",
+        email: "anonymous@gmail.com",
         type: "*",
-      };
+      });
       next();
       return;
     }
@@ -22,7 +32,9 @@ const jwtAuthMiddleware = async (req, res, next) => {
       throw new ApiError(401, "Invalid Authentication scheme");
     }
 
-    const payload = jwt.verify(parts[1], process.env.JWT_SECRET_KEY);
+    const payload = jwt.verify(parts[1], process.env.JWT_SECRET_KEY!) as {
+      _id: string;
+    };
     const account = await Account.findOne({
       _id: payload._id,
       "tokens.token": parts[1],
@@ -38,4 +50,4 @@ const jwtAuthMiddleware = async (req, res, next) => {
   }
 };
 
-module.exports = jwtAuthMiddleware;
+export default jwtAuthMiddleware;

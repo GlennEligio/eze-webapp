@@ -1,6 +1,21 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
+import { IIndexable } from "../types/IIndexable";
 
-const transactionSchema = new mongoose.Schema({
+export interface Equipment {
+  equipment: mongoose.Types.ObjectId;
+  amount: number;
+}
+
+export interface ITransaction extends IIndexable {
+  equipments: mongoose.Types.DocumentArray<Equipment>;
+  borrower: mongoose.Types.ObjectId;
+  professor: mongoose.Types.ObjectId;
+  borrowedAt: Date;
+  returnedAt?: Date;
+  status: string;
+}
+
+const transactionSchema = new mongoose.Schema<ITransaction>({
   equipments: [
     {
       equipment: {
@@ -26,6 +41,7 @@ const transactionSchema = new mongoose.Schema({
     ref: "Professor",
   },
   borrowedAt: {
+    required: true,
     type: Date,
   },
   returnedAt: {
@@ -45,6 +61,9 @@ transactionSchema.methods.toJSON = function () {
   return transactionObj;
 };
 
-const Transaction = mongoose.model("Transaction", transactionSchema);
+const Transaction = mongoose.model<ITransaction>(
+  "Transaction",
+  transactionSchema
+);
 
-module.exports = Transaction;
+export default Transaction;

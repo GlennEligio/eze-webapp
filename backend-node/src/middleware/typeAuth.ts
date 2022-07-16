@@ -1,36 +1,57 @@
-const AntPathMatcher = require("ant-path-matcher");
-const ApiError = require("../error/ApiError");
+import AntPathMatcher from "ant-path-matcher";
+import ApiError from "../error/ApiError";
+import express from "express";
+import { CustomRequest } from "../types/CustomRequest";
 const matcher = new AntPathMatcher();
 
+class Rule {
+  constructor(public method: string, public patterns: string[]) {
+    this.method = method;
+    this.patterns = patterns;
+  }
+}
+
+class TypeRule {
+  constructor(public type: string, public rules: Rule[]) {
+    this.type = type;
+    this.rules = rules;
+  }
+}
+
 class AccountTypeConfig {
-  constructor() {
+  private typeRules: TypeRule[];
+  private static instance: AccountTypeConfig;
+
+  private constructor() {
     this.typeRules = [];
   }
 
-  addTypeRule(type, method, ...patterns) {
+  public static getInstance() {
+    if (this.instance) {
+      return this.instance;
+    } else {
+      this.instance = new AccountTypeConfig();
+      return this.instance;
+    }
+  }
+
+  addTypeRule(type: string, method: string, ...patterns: string[]) {
     const typeIndex = this.typeRules.findIndex(
       (typeRule) => typeRule.type === type
     );
     if (typeIndex < 0) {
-      this.typeRules.push({
-        type,
-        rules: [
-          {
-            method,
-            patterns,
-          },
-        ],
-      });
+      this.typeRules.push(new TypeRule(type, [new Rule(method, patterns)]));
     } else {
       const typeRule = this.typeRules[typeIndex];
-      this.typeRules[typeIndex] = {
-        type,
-        rules: [...typeRule.rules, { method, patterns }],
-      };
+      this.typeRules[typeIndex].type = type;
+      this.typeRules[typeIndex].rules = [
+        ...typeRule.rules,
+        new Rule(method, patterns),
+      ];
     }
   }
 
-  validate(type, method, url) {
+  validate(type: string, method: string, url: string) {
     let isValid = false;
     this.typeRules.forEach((typeRule) => {
       if (matcher.match(typeRule.type, type)) {
@@ -49,7 +70,7 @@ class AccountTypeConfig {
   }
 }
 
-const accountTypeConfig = new AccountTypeConfig();
+const accountTypeConfig = AccountTypeConfig.getInstance();
 accountTypeConfig.addTypeRule(
   "*",
   "POST",
@@ -71,10 +92,14 @@ accountTypeConfig.addTypeRule("ADMIN", "POST", "/**");
 accountTypeConfig.addTypeRule("ADMIN", "PATCH", "/**");
 accountTypeConfig.addTypeRule("ADMIN", "DELETE", "/**");
 
-const typeMiddleware = async (req, res, next) => {
+const typeMiddleware: express.RequestHandler = async (
+  req: CustomRequest,
+  _res,
+  next
+) => {
   try {
     const path = req.originalUrl;
-    const type = req.account.type;
+    const type = req.account!.type!;
 
     const isValid = accountTypeConfig.validate(type, req.method, path);
     if (!isValid) {
@@ -86,4 +111,4 @@ const typeMiddleware = async (req, res, next) => {
   }
 };
 
-module.exports = typeMiddleware;
+export default typeMiddleware;

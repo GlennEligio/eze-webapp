@@ -1,6 +1,18 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
+import { IIndexable } from "../types/IIndexable";
 
-const scheduleSchema = new mongoose.Schema({
+export interface ISchedule extends IIndexable {
+  subjectCode: String;
+  subjectName: String;
+  day: String;
+  time: String;
+  room: String;
+  yearLevel: String;
+  yearAndSection: String;
+  professor: mongoose.Types.ObjectId;
+}
+
+const scheduleSchema = new mongoose.Schema<ISchedule>({
   subjectCode: {
     type: String,
     trim: true,
@@ -45,6 +57,6 @@ scheduleSchema.methods.toJSON = function () {
   return scheduleObj;
 };
 
-const Schedule = mongoose.model("Schedule", scheduleSchema);
+const Schedule = mongoose.model<ISchedule>("Schedule", scheduleSchema);
 
-module.exports = Schedule;
+export default Schedule;

@@ -1,6 +1,12 @@
-const mongoose = require("mongoose");
+import mongoose from "mongoose";
+import { IIndexable } from "../types/IIndexable";
 
-const professorSchema = new mongoose.Schema({
+export interface IProfessor extends IIndexable {
+  name: string;
+  contactNumber: string;
+}
+
+const professorSchema = new mongoose.Schema<IProfessor>({
   name: {
     type: String,
     required: true,
@@ -12,7 +18,7 @@ const professorSchema = new mongoose.Schema({
     required: true,
     trim: true,
     unique: true,
-    validate(value) {
+    validate(value: string) {
       if (!value.match(/^(09|\+639)\d{9}$/)) {
         throw new Error("Please enter a valid phone number");
       }
@@ -34,6 +40,6 @@ professorSchema.methods.toJSON = function () {
   return professorObj;
 };
 
-const Professor = mongoose.model("Professor", professorSchema);
+const Professor = mongoose.model<IProfessor>("Professor", professorSchema);
 
-module.exports = Professor;
+export default Professor;

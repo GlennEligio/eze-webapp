@@ -1,6 +1,14 @@
-const mongoose = require("mongoose");
+import mongoose, { HydratedDocument } from "mongoose";
+import { IIndexable } from "../types/IIndexable";
 
-const equipmentSchema = new mongoose.Schema({
+export interface IEquipment extends IIndexable {
+  name: string;
+  barcode: string;
+  status?: string;
+  defectiveSince?: Date;
+}
+
+const equipmentSchema = new mongoose.Schema<IEquipment>({
   name: {
     type: String,
     require: true,
@@ -27,6 +35,6 @@ equipmentSchema.methods.toJSON = function () {
   return equipmentObj;
 };
 
-const Equipment = mongoose.model("Equipment", equipmentSchema);
+const Equipment = mongoose.model<IEquipment>("Equipment", equipmentSchema);
 
-module.exports = Equipment;
+export default Equipment;

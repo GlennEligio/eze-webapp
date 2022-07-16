@@ -1,7 +1,22 @@
-const mongoose = require("mongoose");
-const validator = require("validator");
+import mongoose from "mongoose";
+import validator from "validator";
+import { IIndexable } from "../types/IIndexable";
 
-const studentSchema = new mongoose.Schema({
+export interface IStudent extends IIndexable {
+  studentNumber: string;
+  fullname: string;
+  yearAndSection: string;
+  contactNumber?: string;
+  birthday?: string;
+  address?: string;
+  email?: string;
+  guardian?: string;
+  guardianNumber?: string;
+  yearLevel?: string;
+  image?: Buffer;
+}
+
+const studentSchema = new mongoose.Schema<IStudent>({
   studentNumber: {
     type: String,
     required: true,
@@ -21,7 +36,7 @@ const studentSchema = new mongoose.Schema({
   contactNumber: {
     type: String,
     trim: true,
-    validate(value) {
+    validate(value: string) {
       if (!value.match(/^(09|\+639)\d{9}$/)) {
         throw new Error("Please enter a valid phone number");
       }
@@ -40,7 +55,7 @@ const studentSchema = new mongoose.Schema({
     type: String,
     trim: true,
     lowercase: true,
-    validate(value) {
+    validate(value: string) {
       if (!validator.isEmail(value)) {
         throw new Error("Email is invalid");
       }
@@ -54,7 +69,7 @@ const studentSchema = new mongoose.Schema({
   guardianNumber: {
     type: String,
     trim: true,
-    validate(value) {
+    validate(value: string) {
       if (!value.match(/^(09|\+639)\d{9}$/)) {
         throw new Error("Please enter a valid phone number");
       }
@@ -77,6 +92,6 @@ studentSchema.methods.toJSON = function () {
   return studentObj;
 };
 
-const Student = mongoose.model("Student", studentSchema);
+const Student = mongoose.model<IStudent>("Student", studentSchema);
 
-module.exports = Student;
+export default Student;

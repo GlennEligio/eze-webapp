@@ -1,12 +1,13 @@
-const express = require("express");
-const Professor = require("../model/professor");
-const ApiError = require("../error/ApiError");
-const XLSX = require("xlsx");
-const { uploadExcel } = require("../middleware/file");
+import express from "express";
+import Professor from "../model/professor";
+import ApiError from "../error/ApiError";
+import XLSX from "xlsx";
+import { uploadExcel } from "../middleware/file";
+import { CustomRequest } from "../types/CustomRequest";
 
 const router = express.Router();
 
-router.get("/", async (req, res, next) => {
+router.get("/", async (_req, res, next) => {
   try {
     const professors = await Professor.find({});
     res.send(professors);
@@ -15,7 +16,7 @@ router.get("/", async (req, res, next) => {
   }
 });
 
-router.get("/download", async (req, res, next) => {
+router.get("/download", async (_req, res, next) => {
   try {
     const professors = await Professor.find({});
     const professorsJSON = JSON.stringify(professors);
@@ -34,20 +35,26 @@ router.get("/download", async (req, res, next) => {
   }
 });
 
-router.post("/upload", uploadExcel.single("excel"), async (req, res, next) => {
-  try {
-    const excelBuffer = req.file.buffer;
-    const workbook = XLSX.read(excelBuffer, { type: "buffer" });
-    const professorsJson = XLSX.utils.sheet_to_json(workbook.Sheets.Professors);
-    for (const professorJson of professorsJson) {
-      const professor = new Professor(professorJson);
-      await professor.save();
+router.post(
+  "/upload",
+  uploadExcel.single("excel"),
+  async (req: CustomRequest, res, next) => {
+    try {
+      const excelBuffer = req.file!.buffer;
+      const workbook = XLSX.read(excelBuffer, { type: "buffer" });
+      const professorsJson = XLSX.utils.sheet_to_json(
+        workbook.Sheets.Professors
+      );
+      for (const professorJson of professorsJson) {
+        const professor = new Professor(professorJson);
+        await professor.save();
+      }
+      res.send();
+    } catch (e) {
+      next(e);
     }
-    res.send();
-  } catch (e) {
-    next(e);
   }
-});
+);
 
 router.get("/:id", async (req, res, next) => {
   try {
@@ -110,4 +117,4 @@ router.delete("/:id", async (req, res, next) => {
   }
 });
 
-module.exports = router;
+export default router;

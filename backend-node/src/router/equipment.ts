@@ -1,12 +1,12 @@
-const express = require("express");
-const XLSX = require("xlsx");
-const Equipment = require("../model/equipment");
-const ApiError = require("../error/ApiError");
-const { uploadExcel } = require("../middleware/file");
+import express from "express";
+import XLSX from "xlsx";
+import Equipment, { IEquipment } from "../model/equipment";
+import ApiError from "../error/ApiError";
+import { uploadExcel } from "../middleware/file";
 
 const router = express.Router();
 
-router.get("/", async (req, res, next) => {
+router.get("/", async (_req, res, next) => {
   try {
     const equipments = await Equipment.find({});
     res.send(equipments);
@@ -15,7 +15,7 @@ router.get("/", async (req, res, next) => {
   }
 });
 
-router.get("/download", async (req, res, next) => {
+router.get("/download", async (_req, res, next) => {
   try {
     const equipments = await Equipment.find({});
     const equipmentsJSON = JSON.stringify(equipments);
@@ -36,7 +36,7 @@ router.get("/download", async (req, res, next) => {
 
 router.post("/upload", uploadExcel.single("excel"), async (req, res, next) => {
   try {
-    const excelBuffer = req.file.buffer;
+    const excelBuffer = req.file!.buffer;
     const workbook = XLSX.read(excelBuffer, { type: "buffer" });
     const equipmentsJson = XLSX.utils.sheet_to_json(workbook.Sheets.Equipments);
     for (const equipmentJson of equipmentsJson) {
@@ -74,6 +74,7 @@ router.post("/", async (req, res, next) => {
 
 router.patch("/:id", async (req, res, next) => {
   try {
+    const updatesObject = req.body as Partial<IEquipment>;
     const updates = Object.keys(req.body);
     const allowedUpdates = ["name", "barcode", "status", "defectiveSince"];
     const isValidUpdate = updates.every((update) =>
@@ -111,4 +112,4 @@ router.delete("/:id", async (req, res, next) => {
   }
 });
 
-module.exports = router;
+export default router;

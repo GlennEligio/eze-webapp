@@ -1,10 +1,11 @@
-const multer = require("multer");
+import multer from "multer";
+import ApiError from "../error/ApiError";
 
-const uploadExcel = multer({
+export const uploadExcel = multer({
   limits: {
     fileSize: 15000000,
   },
-  fileFilter(req, file, cb) {
+  fileFilter(_req, file, cb) {
     if (!file.originalname.match(/\.(xlsx)$/)) {
       cb(new ApiError(400, "Can only use .xlsx file for excel uploads"));
       return;
@@ -14,7 +15,7 @@ const uploadExcel = multer({
   },
 });
 
-const uploadImage = multer({
+export const uploadImage = multer({
   limits: {
     fileSize: 1000000,
   },
@@ -31,5 +32,3 @@ const uploadImage = multer({
     cb(null, true);
   },
 });
-
-module.exports = { uploadExcel, uploadImage };

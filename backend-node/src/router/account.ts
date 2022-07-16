@@ -1,13 +1,14 @@
-const express = require("express");
-const XLSX = require("xlsx");
-const sharp = require("sharp");
-const Account = require("../model/account");
-const ApiError = require("../error/ApiError");
-const { uploadExcel, uploadImage } = require("../middleware/file");
+import express from "express";
+import XLSX from "xlsx";
+import sharp from "sharp";
+import Account, { IAccount } from "../model/account";
+import ApiError from "../error/ApiError";
+import { uploadExcel, uploadImage } from "../middleware/file";
+import { CustomRequest } from "../types/CustomRequest";
 
 const router = express.Router();
 
-router.get("/download", async (req, res, next) => {
+router.get("/download", async (_req, res, next) => {
   try {
     const accounts = await Account.find({});
     const sanitizedAccountsJSON = JSON.stringify(accounts);
@@ -30,9 +31,9 @@ router.get("/download", async (req, res, next) => {
 router.post(
   "/upload/excel",
   uploadExcel.single("excel"),
-  async (req, res, next) => {
+  async (req: CustomRequest, res, next) => {
     try {
-      const excelBuffer = req.file.buffer;
+      const excelBuffer = req.file!.buffer;
       const workbook = XLSX.read(excelBuffer, { type: "buffer" });
       const accountsJson = XLSX.utils.sheet_to_json(workbook.Sheets.Accounts);
       for (const accountJson of accountsJson) {
@@ -49,9 +50,9 @@ router.post(
 router.post(
   "/me/avatar",
   uploadImage.single("avatar"),
-  async (req, res, next) => {
+  async (req: CustomRequest, res, next) => {
     try {
-      const avatarBuffer = await sharp(req.file.buffer).png().toBuffer();
+      const avatarBuffer = await sharp(req.file!.buffer).png().toBuffer();
       const account = req.account;
       if (!account) {
         throw new ApiError(404, "No account with same id was found");
@@ -68,14 +69,14 @@ router.post(
 router.post(
   "/:id/avatar",
   uploadImage.single("avatar"),
-  async (req, res, next) => {
+  async (req: CustomRequest, res, next) => {
     try {
-      const avatarBuffer = await sharp(req.file.buffer).png().toBuffer();
+      const avatarBuffer = await sharp(req.file!.buffer).png().toBuffer();
       const account = await Account.findById(req.params.id);
       if (!account) {
         throw new ApiError(404, "No account with same id was found");
       }
-      account.profile(avatarBuffer);
+      account.profile = avatarBuffer;
       await account.save();
       res.send();
     } catch (e) {
@@ -84,7 +85,7 @@ router.post(
   }
 );
 
-router.get("/me/avatar", async (req, res, next) => {
+router.get("/me/avatar", async (req: CustomRequest, res, next) => {
   try {
     const account = req.account;
     if (!account) {
@@ -142,9 +143,10 @@ router.post("/", async (req, res, next) => {
   }
 });
 
-router.patch("/me", async (req, res, next) => {
+router.patch("/me", async (req: CustomRequest, res, next) => {
   try {
-    const updates = Object.keys(req.body);
+    const updatedAccount = req.body as { [prop in keyof IAccount]: any };
+    const updates = Object.keys(updatedAccount);
     const allowedUpdates = [
       "fullname",
       "username",
@@ -163,8 +165,10 @@ router.patch("/me", async (req, res, next) => {
       );
     }
 
-    const accountToUpdate = req.account;
-    updates.forEach((update) => (accountToUpdate[update] = req.body[update]));
+    const accountToUpdate = req.account!;
+    updates.forEach(
+      (update) => (accountToUpdate[update] = updatedAccount[update])
+    );
     await accountToUpdate.save();
     res.send();
   } catch (e) {
@@ -174,7 +178,8 @@ router.patch("/me", async (req, res, next) => {
 
 router.patch("/:id", async (req, res, next) => {
   try {
-    const updates = Object.keys(req.body);
+    const updatedAccount = req.body as { [prop in keyof IAccount]: any };
+    const updates = Object.keys(updatedAccount);
     const allowedUpdates = [
       "fullname",
       "username",
@@ -198,7 +203,9 @@ router.patch("/:id", async (req, res, next) => {
       throw new ApiError(404, "No account found with specified id");
     }
 
-    updates.forEach((update) => (accountToUpdate[update] = req.body[update]));
+    updates.forEach((update) => {
+      accountToUpdate[update] = updatedAccount[update];
+    });
     await accountToUpdate.save();
     res.send();
   } catch (e) {
@@ -250,11 +257,11 @@ router.post("/login", async (req, res, next) => {
   }
 });
 
-router.post("/logout", async (req, res, next) => {
+router.post("/logout", async (req: CustomRequest, res, next) => {
   try {
-    const account = req.account;
-    const accountToken = req.token;
-    account.tokens = account.tokens.filter(
+    const account = req.account!;
+    const accountToken = req.token!;
+    account.tokens = account.tokens!.filter(
       (token) => token.token !== accountToken
     );
     await account.save();
@@ -264,9 +271,9 @@ router.post("/logout", async (req, res, next) => {
   }
 });
 
-router.post("/logoutAll", async (req, res, next) => {
+router.post("/logoutAll", async (req: CustomRequest, res, next) => {
   try {
-    const account = req.account;
+    const account = req.account!;
     account.tokens = [];
     await account.save();
     res.send();
@@ -275,4 +282,4 @@ router.post("/logoutAll", async (req, res, next) => {
   }
 });
 
-module.exports = router;
+export default router;

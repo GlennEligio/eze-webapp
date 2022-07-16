@@ -1,10 +1,45 @@
-const mongoose = require("mongoose");
-const validator = require("validator");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const ApiError = require("../error/ApiError");
+import mongoose from "mongoose";
+import validator from "validator";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import ApiError from "../error/ApiError";
+import { IIndexable } from "../types/IIndexable";
 
-const accountSchema = new mongoose.Schema(
+interface Token {
+  _id: mongoose.Types.ObjectId;
+  token: string;
+}
+
+export interface IAccount extends IIndexable {
+  fullname: string;
+  username: string;
+  email: string;
+  password: string;
+  type?: string;
+  profile?: Buffer;
+  tokens?: Token[];
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+interface IAccountMethods {
+  generateToken(): Promise<string>;
+  toJSON(): string;
+}
+
+export interface AccountModel
+  extends mongoose.Model<IAccount, {}, IAccountMethods> {
+  findCredentials: (
+    username: string,
+    password: string
+  ) => Promise<mongoose.Document<unknown, any, IAccount> & IAccount>;
+}
+
+const accountSchema = new mongoose.Schema<
+  IAccount,
+  AccountModel,
+  IAccountMethods
+>(
   {
     fullname: {
       type: String,
@@ -21,7 +56,7 @@ const accountSchema = new mongoose.Schema(
       required: true,
       trim: true,
       unique: true,
-      validate(value) {
+      validate(value: string) {
         if (!validator.isEmail(value)) {
           throw new Error("Email is invalid");
         }
@@ -84,7 +119,7 @@ accountSchema.methods.generateToken = async function () {
 
   const token = jwt.sign(
     { _id: account._id.toString() },
-    process.env.JWT_SECRET_KEY,
+    process.env.JWT_SECRET_KEY!,
     {
       expiresIn: "2 day",
     }
@@ -107,6 +142,9 @@ accountSchema.methods.toJSON = function () {
   return accountObj;
 };
 
-const Account = mongoose.model("Account", accountSchema);
+const Account = mongoose.model<IAccount, AccountModel>(
+  "Account",
+  accountSchema
+);
 
-module.exports = Account;
+export default Account;

@@ -1,6 +1,7 @@
-const ApiError = require("./ApiError");
+import ApiError from "../error/ApiError";
+import express from "express";
 
-const errorHandler = (error, req, res, next) => {
+const errorHandler: express.ErrorRequestHandler = (error, req, res, _next) => {
   if (error instanceof ApiError) {
     res.status(error.httpCode).send({
       code: error.httpCode,
@@ -16,4 +17,4 @@ const errorHandler = (error, req, res, next) => {
   });
 };
 
-module.exports = errorHandler;
+export default errorHandler;

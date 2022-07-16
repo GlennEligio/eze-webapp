@@ -1,12 +1,13 @@
-const express = require("express");
-const XLSX = require("xlsx");
-const Schedule = require("../model/schedule");
-const ApiError = require("../error/ApiError");
-const { uploadExcel } = require("../middleware/file");
+import express from "express";
+import XLSX from "xlsx";
+import Schedule from "../model/schedule";
+import ApiError from "../error/ApiError";
+import { uploadExcel } from "../middleware/file";
+import { CustomRequest } from "../types/CustomRequest";
 
 const router = express.Router();
 
-router.get("/", async (req, res, next) => {
+router.get("/", async (_req, res, next) => {
   try {
     const schedules = await Schedule.find({}).populate({
       path: "professor",
@@ -18,7 +19,7 @@ router.get("/", async (req, res, next) => {
   }
 });
 
-router.get("/download", async (req, res, next) => {
+router.get("/download", async (_req, res, next) => {
   try {
     const schedules = await Schedule.find({});
     const schedulesJSON = JSON.stringify(schedules);
@@ -37,20 +38,24 @@ router.get("/download", async (req, res, next) => {
   }
 });
 
-router.post("/upload", uploadExcel.single("excel"), async (req, res, next) => {
-  try {
-    const excelBuffer = req.file.buffer;
-    const workbook = XLSX.read(excelBuffer, { type: "buffer" });
-    const schedulesJson = XLSX.utils.sheet_to_json(workbook.Sheets.Schedules);
-    for (const scheduleJson of schedulesJson) {
-      const schedule = new Schedule(scheduleJson);
-      await schedule.save();
+router.post(
+  "/upload",
+  uploadExcel.single("excel"),
+  async (req: CustomRequest, res, next) => {
+    try {
+      const excelBuffer = req.file!.buffer;
+      const workbook = XLSX.read(excelBuffer, { type: "buffer" });
+      const schedulesJson = XLSX.utils.sheet_to_json(workbook.Sheets.Schedules);
+      for (const scheduleJson of schedulesJson) {
+        const schedule = new Schedule(scheduleJson);
+        await schedule.save();
+      }
+      res.send();
+    } catch (e) {
+      next(e);
     }
-    res.send();
-  } catch (e) {
-    next(e);
   }
-});
+);
 
 router.get("/:id", async (req, res, next) => {
   try {
@@ -127,4 +132,4 @@ router.delete("/:id", async (req, res, next) => {
   }
 });
 
-module.exports = router;
+export default router;

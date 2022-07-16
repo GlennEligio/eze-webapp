@@ -1,30 +1,34 @@
-const express = require("express");
-const XLSX = require("xlsx");
-const Transaction = require("../model/transaction");
-const ApiError = require("../error/ApiError");
-const { uploadExcel } = require("../middleware/file");
+import express from "express";
+import XLSX from "xlsx";
+import mongoose from "mongoose";
+import Transaction, { ITransaction } from "../model/transaction";
+import ApiError from "../error/ApiError";
+import { ISort } from "../types/ISort";
+import { uploadExcel } from "../middleware/file";
+import { ITransformedTransaction } from "../types/ITransformedTransaction";
+import { CustomRequest } from "../types/CustomRequest";
 
 const router = express.Router();
 
 router.get("/", async (req, res, next) => {
   try {
     const match = { ...req.query };
-    const sort = {};
     delete match.limit;
     delete match.skip;
     delete match.sortBy;
+    const sort: ISort = {
+      sortBy: req.query.sortBy as string,
+      limit: parseInt(req.query.limit as string),
+      skip: parseInt(req.query.skip as string),
+    };
 
-    if (req.query.sortBy) {
-      const sortOption = req.query.sortBy.split(":");
+    if (sort.sortBy) {
+      const sortOption = sort.sortBy.split(":");
       sort[sortOption[0]] = sortOption[1] === "desc" ? -1 : 1;
     }
 
     const transactions = await Transaction.find(match)
-      .setOptions({
-        sort,
-        limit: req.query.limit,
-        skip: req.query.skip,
-      })
+      .setOptions(sort)
       .populate({ path: "equipments.equipment", select: "name" })
       .populate({ path: "professor", select: "name" })
       .populate({ path: "borrower", select: "fullname" });
@@ -34,18 +38,24 @@ router.get("/", async (req, res, next) => {
   }
 });
 
-router.get("/download", async (req, res, next) => {
+router.get("/download", async (_req, res, next) => {
   try {
     const transactions = await Transaction.find({});
     const transactionsJSON = JSON.stringify(transactions);
-    const transactionsObj = JSON.parse(transactionsJSON);
-    const transformedTransactions = transactionsObj.map((transaction) => {
-      for (const equipment of transaction.equipments) {
-        transaction[equipment.equipment] = equipment.amount;
-      }
-      delete transaction.equipments;
-      return transaction;
-    });
+    const transactionsObj: ITransaction[] = JSON.parse(transactionsJSON);
+    const transformedTransactions: ITransformedTransaction[] =
+      transactionsObj.map((transaction) => {
+        let newTransaction: ITransformedTransaction = {};
+        newTransaction.borrowedAt = transaction.borrowedAt;
+        newTransaction.borrower = transaction.borrower.toHexString();
+        newTransaction.professor = transaction.professor.toHexString();
+        newTransaction.returnedAt = transaction.returnedAt;
+        newTransaction.status = transaction.status;
+        for (const equipment of transaction.equipments!) {
+          newTransaction[equipment.equipment.toHexString()] = equipment.amount;
+        }
+        return newTransaction;
+      });
 
     const worksheet = XLSX.utils.json_to_sheet(transformedTransactions);
     const workbook = XLSX.utils.book_new();
@@ -60,47 +70,49 @@ router.get("/download", async (req, res, next) => {
   }
 });
 
-router.post("/upload", uploadExcel.single("excel"), async (req, res, next) => {
-  try {
-    const excelBuffer = req.file.buffer;
-    const workbook = XLSX.read(excelBuffer, { type: "buffer" });
-    const transactionsJson = XLSX.utils.sheet_to_json(
-      workbook.Sheets.Transactions
-    );
-    const transformedTransactions = transactionsJson.map((transaction) => {
-      let newTransaction = {
-        borrower: transaction.borrower,
-        professor: transaction.professor,
-        borrowedAt: transaction.borrowedAt,
-        returnedAt: transaction.returnedAt,
-        status: transaction.status,
-        equipments: [],
-      };
-      delete transaction.borrower;
-      delete transaction.professor;
-      delete transaction.borrowedAt;
-      delete transaction.returnedAt;
-      delete transaction.status;
-      delete transaction._id;
+router.post(
+  "/upload",
+  uploadExcel.single("excel"),
+  async (req: CustomRequest, res, next) => {
+    try {
+      const excelBuffer = req.file!.buffer;
+      const workbook = XLSX.read(excelBuffer, { type: "buffer" });
+      const transactionsJson: ITransformedTransaction[] =
+        XLSX.utils.sheet_to_json(workbook.Sheets.Transactions);
+      const transformedTransactions = transactionsJson.map((transaction) => {
+        let newTransaction: Partial<ITransaction> = {
+          borrower: new mongoose.Types.ObjectId(transaction.borrower),
+          professor: new mongoose.Types.ObjectId(transaction.professor),
+          borrowedAt: transaction.borrowedAt,
+          returnedAt: transaction.returnedAt,
+          status: transaction.status,
+        };
+        delete transaction.borrower;
+        delete transaction.professor;
+        delete transaction.borrowedAt;
+        delete transaction.returnedAt;
+        delete transaction.status;
+        delete transaction._id;
 
-      const equipmentsId = Object.keys(transaction);
-      for (const id of equipmentsId) {
-        newTransaction.equipments.push({
-          equipment: id,
-          amount: transaction[id],
-        });
+        const equipmentsId = Object.keys(transaction);
+        for (const id of equipmentsId) {
+          newTransaction.equipments!.push({
+            equipment: id,
+            amount: transaction[id],
+          });
+        }
+        return newTransaction;
+      });
+      for (const transaction of transformedTransactions) {
+        const transactionToSave = new Transaction(transaction);
+        await transactionToSave.save();
       }
-      return newTransaction;
-    });
-    for (const transaction of transformedTransactions) {
-      const transactionToSave = new Transaction(transaction);
-      await transactionToSave.save();
+      res.send();
+    } catch (e) {
+      next(e);
     }
-    res.send();
-  } catch (e) {
-    next(e);
   }
-});
+);
 
 router.get("/:id", async (req, res, next) => {
   try {
@@ -171,9 +183,9 @@ router.delete("/:id", async (req, res, next) => {
       throw new ApiError(404, "No transaction with same id was found");
     }
     res.send(transaction);
-  } catch (error) {
+  } catch (e) {
     next(e);
   }
 });
 
-module.exports = router;
+export default router;
