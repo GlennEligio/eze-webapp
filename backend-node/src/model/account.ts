@@ -72,6 +72,7 @@ const accountSchema = new mongoose.Schema<
     type: {
       type: String,
       required: true,
+      default: "USER",
     },
     profile: {
       type: Buffer,

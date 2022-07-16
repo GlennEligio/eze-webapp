@@ -1,0 +1,40 @@
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedHeaders: "*"
+            allowedMethods: "*"
+            exposedHeaders: "*"
+      routes:
+        - id: service-user-id
+          uri: lb://user-service
+          predicates:
+            Path=/api/v1/users/**
+        - id: service-transactions-id
+          uri: lb://transaction-service
+          predicates:
+            Path=/api/v1/transactions/**
+          filters:
+            - AuthFilter
+        - id: service-item-id
+          uri: lb://item-service
+          predicates:
+            Path=/api/v1/items/**
+          filters:
+            - AuthFilter
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka
+
+server:
+  port: 8080
+
+user-service:
+  url: lb://user-service/api/v1/users
