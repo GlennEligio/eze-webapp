@@ -19,7 +19,7 @@ export const uploadImage = multer({
   limits: {
     fileSize: 1000000,
   },
-  fileFilter(_req, file, cb) {
+  fileFilter(req, file, cb) {
     if (!file.originalname.match(/\.(png|jpg|jpeg)$/)) {
       cb(
         new ApiError(
