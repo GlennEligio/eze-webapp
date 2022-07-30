@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import Account from "../model/account";
 import ApiError from "../error/ApiError";
-import express, { response } from "express";
+import express from "express";
 import { CustomRequest } from "../types/CustomRequest";
 
 const jwtAuthMiddleware: express.RequestHandler = async (
@@ -35,10 +35,12 @@ const jwtAuthMiddleware: express.RequestHandler = async (
     const payload = jwt.verify(parts[1], process.env.JWT_SECRET_KEY!) as {
       _id: string;
     };
+
     const account = await Account.findOne({
       _id: payload._id,
       "tokens.token": parts[1],
     });
+
     if (!account) {
       throw new ApiError(401, "Invalid authentication");
     }
