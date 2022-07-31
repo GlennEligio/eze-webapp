@@ -18,6 +18,7 @@ const equipmentSchema = new mongoose.Schema<IEquipment>({
     type: String,
     trim: true,
     unique: true,
+    require: true,
   },
   status: {
     type: String,

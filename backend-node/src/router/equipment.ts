@@ -6,6 +6,23 @@ import { uploadExcel } from "../middleware/file";
 
 const router = express.Router();
 
+/**
+ * @openapi
+ * '/api/equipments':
+ *  get:
+ *     tags:
+ *     - Equipment
+ *     summary: Get all equipments
+ *     responses:
+ *       200:
+ *         description: Successfully fetch all equipments
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Equipment'
+ */
 router.get("/", async (_req, res, next) => {
   try {
     const equipments = await Equipment.find({});
@@ -15,6 +32,22 @@ router.get("/", async (_req, res, next) => {
   }
 });
 
+/**
+ * @openapi
+ * '/api/equipments/download':
+ *  get:
+ *    tags:
+ *    - Equipment
+ *    summary: Download equipments in excel file
+ *    responses:
+ *      200:
+ *        description: Succesfully downloaded the equipment.xlsx file
+ *        content:
+ *          application/octet-stream:
+ *            schema:
+ *              type: string
+ *              format: binary
+ */
 router.get("/download", async (_req, res, next) => {
   try {
     const equipments = await Equipment.find({});
@@ -34,6 +67,31 @@ router.get("/download", async (_req, res, next) => {
   }
 });
 
+/**
+ * @openapi
+ * '/api/equipments/upload':
+ *  post:
+ *    tags:
+ *    - Equipment
+ *    summary: Upload excel file
+ *    requestBody:
+ *      content:
+ *        multipart/form-data:
+ *          schema:
+ *            type: object
+ *            properties:
+ *              excel:
+ *                type: string
+ *                format: base64
+ *          encoding:
+ *            excel:
+ *              contentType: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+ *    responses:
+ *      200:
+ *        description: Succesfully uploaded the equipment.xlsx file
+ *      400:
+ *        description: Bad request
+ */
 router.post("/upload", uploadExcel.single("excel"), async (req, res, next) => {
   try {
     const excelBuffer = req.file!.buffer;
@@ -49,6 +107,30 @@ router.post("/upload", uploadExcel.single("excel"), async (req, res, next) => {
   }
 });
 
+/**
+ * @openapi
+ * '/api/equipments/{id}':
+ *   get:
+ *     tags:
+ *       - Equipment
+ *     summary: Fetch a single Equipment using an id
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: Id of the equipment
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: An Equipment object
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Equipment'
+ *       404:
+ *         description: No Equipment found
+ */
 router.get("/:id", async (req, res, next) => {
   try {
     const equipment = await Equipment.findById(req.params.id);
@@ -61,6 +143,30 @@ router.get("/:id", async (req, res, next) => {
   }
 });
 
+/**
+ * @openapi
+ * '/api/equipments':
+ *   post:
+ *     tags:
+ *       - Equipment
+ *     summary: Create an Equipment
+ *     requestBody:
+ *       description: Equipment to create
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/CreateEquipmentInput'
+ *     responses:
+ *       201:
+ *         description: Successfully created an Equipment
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Equipment'
+ *       400:
+ *         description: Bad request
+ */
 router.post("/", async (req, res, next) => {
   try {
     const equipment = new Equipment(req.body);
@@ -72,6 +178,35 @@ router.post("/", async (req, res, next) => {
   }
 });
 
+/**
+ * @openapi
+ * '/api/equipments/{id}':
+ *   patch:
+ *     tags:
+ *       - Equipment
+ *     summary: Update an equipment information
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: Id of the equipment
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       description: Object for updating equipment
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/UpdateEquipmentInput'
+ *     responses:
+ *       200:
+ *         description: Successfully updated an Equipment
+ *       400:
+ *         description: Bad request
+ *       404:
+ *         description: Equipment not found
+ */
 router.patch("/:id", async (req, res, next) => {
   try {
     const updatesObject = req.body as Partial<IEquipment>;
@@ -100,6 +235,30 @@ router.patch("/:id", async (req, res, next) => {
   }
 });
 
+/**
+ * @openapi
+ * '/api/equipments/{id}':
+ *   delete:
+ *     tags:
+ *       - Equipment
+ *     summary: Delete an Equipment using id
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: Id of the equipment
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Successfully deleted an equipment
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Equipment'
+ *       404:
+ *         description: Equipment not found
+ */
 router.delete("/:id", async (req, res, next) => {
   try {
     const equipment = await Equipment.findByIdAndDelete(req.params.id);

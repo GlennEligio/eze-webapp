@@ -2,6 +2,7 @@ import AntPathMatcher from "ant-path-matcher";
 import ApiError from "../error/ApiError";
 import express from "express";
 import { CustomRequest } from "../types/CustomRequest";
+
 const matcher = new AntPathMatcher();
 
 class Rule {
@@ -77,6 +78,7 @@ accountTypeConfig.addTypeRule(
   "/api/accounts/register",
   "/api/accounts/login"
 );
+accountTypeConfig.addTypeRule("*", "GET", "/api/docs/**");
 accountTypeConfig.addTypeRule(
   "USER",
   "GET",

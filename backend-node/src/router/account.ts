@@ -8,6 +8,22 @@ import { CustomRequest } from "../types/CustomRequest";
 
 const router = express.Router();
 
+/**
+ * @openapi
+ * '/api/accounts/download':
+ *  get:
+ *    tags:
+ *    - Account
+ *    summary: Download Accounts in excel file
+ *    responses:
+ *      200:
+ *        description: Succesfully downloaded the account.xlsx file
+ *        content:
+ *          application/octet-stream:
+ *            schema:
+ *              type: string
+ *              format: binary
+ */
 router.get("/download", async (_req, res, next) => {
   try {
     const accounts = await Account.find({});
@@ -27,7 +43,31 @@ router.get("/download", async (_req, res, next) => {
   }
 });
 
-// NOTE: Account excel must have fullname, username, email, password, and type column
+/**
+ * @openapi
+ * '/api/accounts/upload':
+ *  post:
+ *    tags:
+ *    - Account
+ *    summary: Upload excel file
+ *    requestBody:
+ *      content:
+ *        multipart/form-data:
+ *          schema:
+ *            type: object
+ *            properties:
+ *              excel:
+ *                type: string
+ *                format: base64
+ *          encoding:
+ *            excel:
+ *              contentType: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+ *    responses:
+ *      200:
+ *        description: Succesfully uploaded the account.xlsx file
+ *      400:
+ *        description: Bad request
+ */
 router.post(
   "/upload/excel",
   uploadExcel.single("excel"),
@@ -47,6 +87,31 @@ router.post(
   }
 );
 
+/**
+ * @openapi
+ * '/api/accounts/me/avatar':
+ *  post:
+ *    tags:
+ *    - Account
+ *    summary: Upload own avatar file
+ *    requestBody:
+ *      content:
+ *        multipart/form-data:
+ *          schema:
+ *            type: object
+ *            properties:
+ *              avatar:
+ *                type: string
+ *                format: base64
+ *          encoding:
+ *            avatar:
+ *              contentType: image/png, image/jpg, image/jpeg
+ *    responses:
+ *      200:
+ *        description: Succesfully uploaded the student avatar image file
+ *      400:
+ *        description: Bad request
+ */
 router.post(
   "/me/avatar",
   uploadImage.single("avatar"),
@@ -66,6 +131,38 @@ router.post(
   }
 );
 
+/**
+ * @openapi
+ * '/api/accounts/{id}/avatar':
+ *  post:
+ *    tags:
+ *    - Account
+ *    summary: Upload account avatar file
+ *    parameters:
+ *      - name: id
+ *        in: path
+ *        required: true
+ *        description: Id of account
+ *        schema:
+ *          type: string
+ *    requestBody:
+ *      content:
+ *        multipart/form-data:
+ *          schema:
+ *            type: object
+ *            properties:
+ *              avatar:
+ *                type: string
+ *                format: base64
+ *          encoding:
+ *            avatar:
+ *              contentType: image/png, image/jpg, image/jpeg
+ *    responses:
+ *      200:
+ *        description: Succesfully uploaded the account avatar image file
+ *      400:
+ *        description: Bad request
+ */
 router.post(
   "/:id/avatar",
   uploadImage.single("avatar"),
@@ -85,6 +182,24 @@ router.post(
   }
 );
 
+/**
+ * @openapi
+ * '/api/accounts/me/avatar':
+ *  get:
+ *    tags:
+ *    - Account
+ *    summary: Download own Accounts avatar image file
+ *    responses:
+ *      200:
+ *        description: Succesfully downloaded own Account avatar file
+ *        content:
+ *          image/png:
+ *            schema:
+ *              type: string
+ *              format: base64
+ *      400:
+ *        description: Bad request
+ */
 router.get("/me/avatar", async (req: CustomRequest, res, next) => {
   try {
     const account = req.account;
@@ -98,6 +213,31 @@ router.get("/me/avatar", async (req: CustomRequest, res, next) => {
   }
 });
 
+/**
+ * @openapi
+ * '/api/accounts/{id}/avatar':
+ *  get:
+ *    tags:
+ *    - Account
+ *    summary: Download own Accounts avatar image file
+ *    parameters:
+ *      - name: id
+ *        description: Account id
+ *        required: true
+ *        in: path
+ *        schema:
+ *          type: string
+ *    responses:
+ *      200:
+ *        description: Succesfully downloaded own Account avatar file
+ *        content:
+ *          image/png:
+ *            schema:
+ *              type: string
+ *              format: base64
+ *      400:
+ *        description: Bad request
+ */
 router.get("/:id/avatar", async (req, res, next) => {
   try {
     const account = await Account.findById(req.params.id);
@@ -111,6 +251,23 @@ router.get("/:id/avatar", async (req, res, next) => {
   }
 });
 
+/**
+ * @openapi
+ * '/api/accounts':
+ *  get:
+ *     tags:
+ *     - Account
+ *     summary: Get all Accounts
+ *     responses:
+ *       200:
+ *         description: Successfully fetch all Accounts
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Account'
+ */
 router.get("/", async (req, res, next) => {
   try {
     const users = await Account.find({});
@@ -120,6 +277,30 @@ router.get("/", async (req, res, next) => {
   }
 });
 
+/**
+ * @openapi
+ * '/api/accounts/{id}':
+ *   get:
+ *     tags:
+ *       - Account
+ *     summary: Fetch a single Account using an id
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: Id of the Account
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: An Account object
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Account'
+ *       404:
+ *         description: Student not found
+ */
 router.get("/:id", async (req, res, next) => {
   try {
     const user = await Account.findById(req.params.id);
@@ -133,6 +314,30 @@ router.get("/:id", async (req, res, next) => {
   }
 });
 
+/**
+ * @openapi
+ * '/api/accounts':
+ *   post:
+ *     tags:
+ *       - Account
+ *     summary: Create an Account object
+ *     requestBody:
+ *       description: Account to create
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/CreateAccountInput'
+ *     responses:
+ *       201:
+ *         description: Successfully created an Account
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Account'
+ *       400:
+ *         description: Bad request
+ */
 router.post("/", async (req, res, next) => {
   try {
     const user = new Account(req.body);
@@ -143,6 +348,28 @@ router.post("/", async (req, res, next) => {
   }
 });
 
+/**
+ * @openapi
+ * '/api/accounts/me':
+ *   patch:
+ *     tags:
+ *       - Account
+ *     summary: Update own Account information
+ *     requestBody:
+ *       description: Object for updating Account
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/UpdateAccountInput'
+ *     responses:
+ *       200:
+ *         description: Successfully updated own Account
+ *       400:
+ *         description: Bad request
+ *       404:
+ *         description: Account not found
+ */
 router.patch("/me", async (req: CustomRequest, res, next) => {
   try {
     const updatedAccount = req.body as { [prop in keyof IAccount]: any };
@@ -176,6 +403,35 @@ router.patch("/me", async (req: CustomRequest, res, next) => {
   }
 });
 
+/**
+ * @openapi
+ * '/api/accounts/{id}':
+ *   patch:
+ *     tags:
+ *       - Account
+ *     summary: Update an Account information
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: Id of the Account
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       description: Object for updating Account
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/UpdateAccountInput'
+ *     responses:
+ *       200:
+ *         description: Successfully updated an Account
+ *       400:
+ *         description: Bad request
+ *       404:
+ *         description: Account not found
+ */
 router.patch("/:id", async (req, res, next) => {
   try {
     const updatedAccount = req.body as { [prop in keyof IAccount]: any };
@@ -213,6 +469,30 @@ router.patch("/:id", async (req, res, next) => {
   }
 });
 
+/**
+ * @openapi
+ * '/api/accounts/{id}':
+ *   delete:
+ *     tags:
+ *       - Account
+ *     summary: Delete an Account using id
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: Id of the Account
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Successfully deleted an Account
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Account'
+ *       404:
+ *         description: Account not found
+ */
 router.delete("/:id", async (req, res, next) => {
   try {
     const account = await Account.findByIdAndDelete(req.params.id);
@@ -225,6 +505,30 @@ router.delete("/:id", async (req, res, next) => {
   }
 });
 
+/**
+ * @openapi
+ * '/api/accounts/register':
+ *   post:
+ *     tags:
+ *       - Account
+ *     summary: Register an Account object
+ *     requestBody:
+ *       description: Account to register
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/RegisterAccountInput'
+ *     responses:
+ *       201:
+ *         description: Successfully registered an Account
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Account'
+ *       400:
+ *         description: Bad request
+ */
 router.post("/register", async (req, res, next) => {
   try {
     const account = new Account(req.body);
@@ -235,6 +539,30 @@ router.post("/register", async (req, res, next) => {
   }
 });
 
+/**
+ * @openapi
+ * '/api/accounts/login':
+ *   post:
+ *     tags:
+ *       - Account
+ *     summary: Login an Account object
+ *     requestBody:
+ *       description: Account to login
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/LoginAccountInput'
+ *     responses:
+ *       200:
+ *         description: Successfully logged in an Account
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Account'
+ *       400:
+ *         description: Bad request
+ */
 router.post("/login", async (req, res, next) => {
   try {
     const JWT_SECRET = process.env.JWT_SECRET;
@@ -257,6 +585,23 @@ router.post("/login", async (req, res, next) => {
   }
 });
 
+/**
+ * @openapi
+ * '/api/accounts/logout':
+ *   post:
+ *     tags:
+ *       - Account
+ *     summary: Logout an Account by removing a single token
+ *     responses:
+ *       200:
+ *         description: Successfully logged out an Account
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Account'
+ *       400:
+ *         description: Bad request
+ */
 router.post("/logout", async (req: CustomRequest, res, next) => {
   try {
     const account = req.account!;
@@ -271,6 +616,23 @@ router.post("/logout", async (req: CustomRequest, res, next) => {
   }
 });
 
+/**
+ * @openapi
+ * '/api/accounts/logoutAll':
+ *   post:
+ *     tags:
+ *       - Account
+ *     summary: Logout an Account by removing ALL tokens
+ *     responses:
+ *       200:
+ *         description: Successfully logged out all accounts
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Account'
+ *       400:
+ *         description: Bad request
+ */
 router.post("/logoutAll", async (req: CustomRequest, res, next) => {
   try {
     const account = req.account!;

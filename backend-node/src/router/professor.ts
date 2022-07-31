@@ -7,6 +7,23 @@ import { CustomRequest } from "../types/CustomRequest";
 
 const router = express.Router();
 
+/**
+ * @openapi
+ * '/api/professors':
+ *   get:
+ *     tags:
+ *       - Professor
+ *     summary: Get All Professor
+ *     responses:
+ *       200:
+ *         description: Successfully fetch all Professors
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Professor'
+ */
 router.get("/", async (_req, res, next) => {
   try {
     const professors = await Professor.find({});
@@ -16,6 +33,22 @@ router.get("/", async (_req, res, next) => {
   }
 });
 
+/**
+ * @openapi
+ * '/api/professors/download':
+ *  get:
+ *    tags:
+ *    - Professor
+ *    summary: Download professors in excel file
+ *    responses:
+ *      200:
+ *        description: Succesfully downloaded the professor.xlsx file
+ *        content:
+ *          application/octet-stream:
+ *            schema:
+ *              type: string
+ *              format: binary
+ */
 router.get("/download", async (_req, res, next) => {
   try {
     const professors = await Professor.find({});
@@ -35,6 +68,31 @@ router.get("/download", async (_req, res, next) => {
   }
 });
 
+/**
+ * @openapi
+ * '/api/professors/upload':
+ *  post:
+ *    tags:
+ *    - Professor
+ *    summary: Upload excel file
+ *    requestBody:
+ *      content:
+ *        multipart/form-data:
+ *          schema:
+ *            type: object
+ *            properties:
+ *              excel:
+ *                type: string
+ *                format: base64
+ *          encoding:
+ *            excel:
+ *              contentType: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+ *    responses:
+ *      200:
+ *        description: Succesfully uploaded the professor.xlsx file
+ *      400:
+ *        description: Bad request
+ */
 router.post(
   "/upload",
   uploadExcel.single("excel"),
@@ -56,6 +114,30 @@ router.post(
   }
 );
 
+/**
+ * @openapi
+ * '/api/professors/{id}':
+ *   get:
+ *     tags:
+ *       - Professor
+ *     summary: Fetch a single Professor using an id
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: Id of the professor
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: An Professor object
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Professor'
+ *       404:
+ *         description: Professor not found
+ */
 router.get("/:id", async (req, res, next) => {
   try {
     const professor = await Professor.findById(req.params.id);
@@ -68,6 +150,30 @@ router.get("/:id", async (req, res, next) => {
   }
 });
 
+/**
+ * @openapi
+ * '/api/professors':
+ *   post:
+ *     tags:
+ *       - Professor
+ *     summary: Create an Professor object
+ *     requestBody:
+ *       description: Professor to create
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/CreateProfessorInput'
+ *     responses:
+ *       201:
+ *         description: Successfully created an Professor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Professor'
+ *       400:
+ *         description: Bad request
+ */
 router.post("/", async (req, res, next) => {
   try {
     const professor = new Professor(req.body);
@@ -78,6 +184,35 @@ router.post("/", async (req, res, next) => {
   }
 });
 
+/**
+ * @openapi
+ * '/api/professors/{id}':
+ *   patch:
+ *     tags:
+ *       - Professor
+ *     summary: Update an professor information
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: Id of the professor
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       description: Object for updating professor
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/UpdateProfessorInput'
+ *     responses:
+ *       200:
+ *         description: Successfully updated an Professor
+ *       400:
+ *         description: Bad request
+ *       404:
+ *         description: Professor not found
+ */
 router.patch("/:id", async (req, res, next) => {
   try {
     const updates = Object.keys(req.body);
@@ -105,6 +240,30 @@ router.patch("/:id", async (req, res, next) => {
   }
 });
 
+/**
+ * @openapi
+ * '/api/professors/{id}':
+ *   delete:
+ *     tags:
+ *       - Professor
+ *     summary: Delete an Professor using id
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: Id of the professor
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Successfully deleted an professor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Professor'
+ *       404:
+ *         description: Professor not found
+ */
 router.delete("/:id", async (req, res, next) => {
   try {
     const professor = await Professor.findByIdAndDelete(req.params.id);

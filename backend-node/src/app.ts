@@ -6,13 +6,19 @@ import studentRouter from "./router/student";
 import professorRouter from "./router/professor";
 import transactionRouter from "./router/transaction";
 import scheduleRouter from "./router/schedule";
+import checksRouter from "./router/checks";
 import errorHandler from "./middleware/errorHandler";
 import authMiddleware from "./middleware/jwtAuth";
 import typeMiddleware from "./middleware/typeAuth";
+import swaggerDocs from "./utils/swagger";
 
+const port = parseInt(process.env.PORT as string);
 const app = express();
 
 app.use(express.json());
+app.use(checksRouter);
+// serves Swagger UI page
+swaggerDocs(app, port as number);
 app.use(authMiddleware);
 app.use(typeMiddleware);
 app.use("/api/accounts", accountRouter);

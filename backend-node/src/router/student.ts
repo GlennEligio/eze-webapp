@@ -8,6 +8,23 @@ import { CustomRequest } from "../types/CustomRequest";
 
 const router = express.Router();
 
+/**
+ * @openapi
+ * '/api/students':
+ *   get:
+ *     tags:
+ *       - Student
+ *     summary: Get All Students
+ *     responses:
+ *       200:
+ *         description: Successfully fetch all Students
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Student'
+ */
 router.get("/", async (_req, res, next) => {
   try {
     const students = await Student.find({});
@@ -17,6 +34,22 @@ router.get("/", async (_req, res, next) => {
   }
 });
 
+/**
+ * @openapi
+ * '/api/students/download':
+ *  get:
+ *    tags:
+ *    - Student
+ *    summary: Download Students in excel file
+ *    responses:
+ *      200:
+ *        description: Succesfully downloaded the student.xlsx file
+ *        content:
+ *          application/octet-stream:
+ *            schema:
+ *              type: string
+ *              format: binary
+ */
 router.get("/download", async (_req, res, next) => {
   try {
     const students = await Student.find({});
@@ -36,6 +69,31 @@ router.get("/download", async (_req, res, next) => {
   }
 });
 
+/**
+ * @openapi
+ * '/api/students/upload':
+ *  post:
+ *    tags:
+ *    - Student
+ *    summary: Upload excel file
+ *    requestBody:
+ *      content:
+ *        multipart/form-data:
+ *          schema:
+ *            type: object
+ *            properties:
+ *              excel:
+ *                type: string
+ *                format: base64
+ *          encoding:
+ *            excel:
+ *              contentType: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+ *    responses:
+ *      200:
+ *        description: Succesfully uploaded the student.xlsx file
+ *      400:
+ *        description: Bad request
+ */
 router.post(
   "/upload",
   uploadExcel.single("excel"),
@@ -55,6 +113,30 @@ router.post(
   }
 );
 
+/**
+ * @openapi
+ * '/api/students/{id}':
+ *   get:
+ *     tags:
+ *       - Student
+ *     summary: Fetch a single Student using an id
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: Id of the Student
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: An Student object
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Student'
+ *       404:
+ *         description: Student not found
+ */
 router.get("/:id", async (req, res, next) => {
   try {
     const student = await Student.findById(req.params.id);
@@ -67,6 +149,30 @@ router.get("/:id", async (req, res, next) => {
   }
 });
 
+/**
+ * @openapi
+ * '/api/students':
+ *   post:
+ *     tags:
+ *       - Student
+ *     summary: Create an Student object
+ *     requestBody:
+ *       description: Student to create
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/CreateStudentInput'
+ *     responses:
+ *       201:
+ *         description: Successfully created an Student
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Student'
+ *       400:
+ *         description: Bad request
+ */
 router.post("/", async (req, res, next) => {
   try {
     const student = new Student(req.body);
@@ -77,6 +183,35 @@ router.post("/", async (req, res, next) => {
   }
 });
 
+/**
+ * @openapi
+ * '/api/students/{id}':
+ *   patch:
+ *     tags:
+ *       - Student
+ *     summary: Update an Student information
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: Id of the Student
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       description: Object for updating Student
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/UpdateStudentInput'
+ *     responses:
+ *       200:
+ *         description: Successfully updated an Student
+ *       400:
+ *         description: Bad request
+ *       404:
+ *         description: Student not found
+ */
 router.patch("/:id", async (req, res, next) => {
   try {
     const updates = Object.keys(req.body);
@@ -114,6 +249,30 @@ router.patch("/:id", async (req, res, next) => {
   }
 });
 
+/**
+ * @openapi
+ * '/api/students/{id}':
+ *   delete:
+ *     tags:
+ *       - Student
+ *     summary: Delete an Student using id
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: Id of the Student
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Successfully deleted an Student
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Student'
+ *       404:
+ *         description: Student not found
+ */
 router.delete("/:id", async (req, res, next) => {
   try {
     const student = await Student.findByIdAndDelete(req.params.id);
@@ -126,6 +285,38 @@ router.delete("/:id", async (req, res, next) => {
   }
 });
 
+/**
+ * @openapi
+ * '/api/students/{id}/avatar':
+ *  post:
+ *    tags:
+ *    - Student
+ *    summary: Upload avatar file
+ *    parameters:
+ *      - name: id
+ *        in: path
+ *        required: true
+ *        description: Id of student
+ *        schema:
+ *          type: string
+ *    requestBody:
+ *      content:
+ *        multipart/form-data:
+ *          schema:
+ *            type: object
+ *            properties:
+ *              avatar:
+ *                type: string
+ *                format: base64
+ *          encoding:
+ *            avatar:
+ *              contentType: image/png, image/jpg, image/jpeg
+ *    responses:
+ *      200:
+ *        description: Succesfully uploaded the student avatar image file
+ *      400:
+ *        description: Bad request
+ */
 router.post(
   "/:id/avatar",
   uploadImage.single("avatar"),
@@ -145,6 +336,31 @@ router.post(
   }
 );
 
+/**
+ * @openapi
+ * '/api/students/{id}/avatar':
+ *  get:
+ *    tags:
+ *    - Student
+ *    summary: Download Students avatar image file
+ *    parameters:
+ *      - name: id
+ *        description: Student id
+ *        required: true
+ *        in: path
+ *        schema:
+ *          type: string
+ *    responses:
+ *      200:
+ *        description: Succesfully downloaded the student avatar file
+ *        content:
+ *          image/png:
+ *            schema:
+ *              type: string
+ *              format: base64
+ *      400:
+ *        description: Bad request
+ */
 router.get("/:id/avatar", async (req, res, next) => {
   try {
     const student = await Student.findById(req.params.id);

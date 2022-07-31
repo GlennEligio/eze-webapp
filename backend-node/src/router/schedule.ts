@@ -7,6 +7,23 @@ import { CustomRequest } from "../types/CustomRequest";
 
 const router = express.Router();
 
+/**
+ * @openapi
+ * '/api/schedules':
+ *   get:
+ *     tags:
+ *       - Schedule
+ *     summary: Get All Schedule
+ *     responses:
+ *       200:
+ *         description: Successfully fetch all Schedules
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Schedule'
+ */
 router.get("/", async (_req, res, next) => {
   try {
     const schedules = await Schedule.find({}).populate({
@@ -19,6 +36,22 @@ router.get("/", async (_req, res, next) => {
   }
 });
 
+/**
+ * @openapi
+ * '/api/schedules/download':
+ *  get:
+ *    tags:
+ *    - Schedule
+ *    summary: Download Schedules in excel file
+ *    responses:
+ *      200:
+ *        description: Succesfully downloaded the schedule.xlsx file
+ *        content:
+ *          application/octet-stream:
+ *            schema:
+ *              type: string
+ *              format: binary
+ */
 router.get("/download", async (_req, res, next) => {
   try {
     const schedules = await Schedule.find({});
@@ -38,6 +71,31 @@ router.get("/download", async (_req, res, next) => {
   }
 });
 
+/**
+ * @openapi
+ * '/api/schedules/upload':
+ *  post:
+ *    tags:
+ *    - Schedule
+ *    summary: Upload excel file
+ *    requestBody:
+ *      content:
+ *        multipart/form-data:
+ *          schema:
+ *            type: object
+ *            properties:
+ *              excel:
+ *                type: string
+ *                format: base64
+ *          encoding:
+ *            excel:
+ *              contentType: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+ *    responses:
+ *      200:
+ *        description: Succesfully uploaded the schedule.xlsx file
+ *      400:
+ *        description: Bad request
+ */
 router.post(
   "/upload",
   uploadExcel.single("excel"),
@@ -57,6 +115,30 @@ router.post(
   }
 );
 
+/**
+ * @openapi
+ * '/api/schedules/{id}':
+ *   get:
+ *     tags:
+ *       - Schedule
+ *     summary: Fetch a single Schedule using an id
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: Id of the Schedule
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: An Schedule object
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Schedule'
+ *       404:
+ *         description: Schedule not found
+ */
 router.get("/:id", async (req, res, next) => {
   try {
     const schedule = await Schedule.findById(req.params.id).populate({
@@ -72,6 +154,30 @@ router.get("/:id", async (req, res, next) => {
   }
 });
 
+/**
+ * @openapi
+ * '/api/schedules':
+ *   post:
+ *     tags:
+ *       - Schedule
+ *     summary: Create an Schedule object
+ *     requestBody:
+ *       description: Schedule to create
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/CreateScheduleInput'
+ *     responses:
+ *       201:
+ *         description: Successfully created an Schedule
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Schedule'
+ *       400:
+ *         description: Bad request
+ */
 router.post("/", async (req, res, next) => {
   try {
     const schedule = new Schedule(req.body);
@@ -82,6 +188,35 @@ router.post("/", async (req, res, next) => {
   }
 });
 
+/**
+ * @openapi
+ * '/api/schedules/{id}':
+ *   patch:
+ *     tags:
+ *       - Schedule
+ *     summary: Update an Schedule information
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: Id of the Schedule
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       description: Object for updating Schedule
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/UpdateScheduleInput'
+ *     responses:
+ *       200:
+ *         description: Successfully updated an Schedule
+ *       400:
+ *         description: Bad request
+ *       404:
+ *         description: Schedule not found
+ */
 router.patch("/:id", async (req, res, next) => {
   try {
     const updates = Object.keys(req.body);
@@ -120,6 +255,30 @@ router.patch("/:id", async (req, res, next) => {
   }
 });
 
+/**
+ * @openapi
+ * '/api/schedules/{id}':
+ *   delete:
+ *     tags:
+ *       - Schedule
+ *     summary: Delete an Schedule using id
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: Id of the Schedule
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Successfully deleted an Schedule
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Schedule'
+ *       404:
+ *         description: Schedule not found
+ */
 router.delete("/:id", async (req, res, next) => {
   try {
     const schedule = await Schedule.findByIdAndDelete(req.params.id);

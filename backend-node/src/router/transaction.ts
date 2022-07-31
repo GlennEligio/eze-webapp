@@ -10,6 +10,23 @@ import { CustomRequest } from "../types/CustomRequest";
 
 const router = express.Router();
 
+/**
+ * @openapi
+ * '/api/transactions':
+ *   get:
+ *     tags:
+ *       - Transaction
+ *     summary: Get All Transactions
+ *     responses:
+ *       200:
+ *         description: Successfully fetch all Transactions
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Transaction'
+ */
 router.get("/", async (req, res, next) => {
   try {
     const match = { ...req.query };
@@ -38,6 +55,22 @@ router.get("/", async (req, res, next) => {
   }
 });
 
+/**
+ * @openapi
+ * '/api/transactions/download':
+ *  get:
+ *    tags:
+ *    - Transaction
+ *    summary: Download Transactions in excel file
+ *    responses:
+ *      200:
+ *        description: Succesfully downloaded the transaction.xlsx file
+ *        content:
+ *          application/octet-stream:
+ *            schema:
+ *              type: string
+ *              format: binary
+ */
 router.get("/download", async (_req, res, next) => {
   try {
     const transactions = await Transaction.find({});
@@ -70,6 +103,31 @@ router.get("/download", async (_req, res, next) => {
   }
 });
 
+/**
+ * @openapi
+ * '/api/transactions/upload':
+ *  post:
+ *    tags:
+ *    - Transaction
+ *    summary: Upload excel file
+ *    requestBody:
+ *      content:
+ *        multipart/form-data:
+ *          schema:
+ *            type: object
+ *            properties:
+ *              excel:
+ *                type: string
+ *                format: base64
+ *          encoding:
+ *            excel:
+ *              contentType: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+ *    responses:
+ *      200:
+ *        description: Succesfully uploaded the transaction.xlsx file
+ *      400:
+ *        description: Bad request
+ */
 router.post(
   "/upload",
   uploadExcel.single("excel"),
@@ -114,6 +172,30 @@ router.post(
   }
 );
 
+/**
+ * @openapi
+ * '/api/transactions/{id}':
+ *   get:
+ *     tags:
+ *       - Transaction
+ *     summary: Fetch a single Transaction using an id
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: Id of the Transaction
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: An Transaction object
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Transaction'
+ *       404:
+ *         description: Transaction not found
+ */
 router.get("/:id", async (req, res, next) => {
   try {
     const transaction = await Transaction.findById(req.params.id)
@@ -129,6 +211,30 @@ router.get("/:id", async (req, res, next) => {
   }
 });
 
+/**
+ * @openapi
+ * '/api/transactions':
+ *   post:
+ *     tags:
+ *       - Transaction
+ *     summary: Create an Transaction object
+ *     requestBody:
+ *       description: Transaction to create
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/CreateTransactionInput'
+ *     responses:
+ *       201:
+ *         description: Successfully created an Transaction
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Transaction'
+ *       400:
+ *         description: Bad request
+ */
 router.post("/", async (req, res, next) => {
   try {
     const transaction = new Transaction(req.body);
@@ -141,6 +247,35 @@ router.post("/", async (req, res, next) => {
   }
 });
 
+/**
+ * @openapi
+ * '/api/transactions/{id}':
+ *   patch:
+ *     tags:
+ *       - Transaction
+ *     summary: Update an Transaction information
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: Id of the Transaction
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       description: Object for updating Transaction
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/UpdateTransactionInput'
+ *     responses:
+ *       200:
+ *         description: Successfully updated an Transaction
+ *       400:
+ *         description: Bad request
+ *       404:
+ *         description: Transaction not found
+ */
 router.patch("/:id", async (req, res, next) => {
   try {
     const updates = Object.keys(req.body);
@@ -176,6 +311,30 @@ router.patch("/:id", async (req, res, next) => {
   }
 });
 
+/**
+ * @openapi
+ * '/api/transcations/{id}':
+ *   delete:
+ *     tags:
+ *       - Transaction
+ *     summary: Delete an Transaction using id
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         description: Id of the Transaction
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Successfully deleted an Transaction
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Transaction'
+ *       404:
+ *         description: Transaction not found
+ */
 router.delete("/:id", async (req, res, next) => {
   try {
     const transaction = await Transaction.findByIdAndDelete(req.params.id);
