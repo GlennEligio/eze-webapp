@@ -1,9 +1,10 @@
 import express from "express";
 import XLSX from "xlsx";
 import mongoose from "mongoose";
+import validator from "validator";
 import Transaction, { ITransaction } from "../model/transaction";
 import ApiError from "../error/ApiError";
-import { ISort } from "../types/ISort";
+import { QueryOptions } from "../types/QueryOptions";
 import { uploadExcel } from "../middleware/file";
 import { ITransformedTransaction } from "../types/ITransformedTransaction";
 import { CustomRequest } from "../types/CustomRequest";
@@ -33,19 +34,31 @@ router.get("/", async (req, res, next) => {
     delete match.limit;
     delete match.skip;
     delete match.sortBy;
-    const sort: ISort = {
-      sortBy: req.query.sortBy as string,
-      limit: parseInt(req.query.limit as string),
-      skip: parseInt(req.query.skip as string),
-    };
+    delete match.order;
+    const query: QueryOptions = {};
 
-    if (sort.sortBy) {
-      const sortOption = sort.sortBy.split(":");
-      sort[sortOption[0]] = sortOption[1] === "desc" ? -1 : 1;
+    if (req.query.limit) {
+      if (validator.isInt(req.query.limit as string)) {
+        query.limit = parseInt(req.query.limit as string);
+      }
     }
 
+    if (req.query.skip) {
+      if (validator.isInt(req.query.skip as string)) {
+        query.skip = parseInt(req.query.skip as string);
+      }
+    }
+
+    if (req.query.sortBy || req.query.order) {
+      query.sort = {};
+      query.sort[req.query.sortBy as string] =
+        req.query.order?.toString().toLowerCase() === "desc" ? -1 : 1;
+    }
+
+    console.log(query);
+
     const transactions = await Transaction.find(match)
-      .setOptions(sort)
+      .setOptions(query)
       .populate({ path: "equipments.equipment", select: "name" })
       .populate({ path: "professor", select: "name" })
       .populate({ path: "borrower", select: "fullname" });
