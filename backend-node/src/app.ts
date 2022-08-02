@@ -11,10 +11,12 @@ import errorHandler from "./middleware/errorHandler";
 import authMiddleware from "./middleware/jwtAuth";
 import typeMiddleware from "./middleware/typeAuth";
 import swaggerDocs from "./utils/swagger";
+import cors from "cors";
 
 const port = parseInt(process.env.PORT as string);
 const app = express();
 
+app.use(cors());
 app.use(express.json());
 app.use(checksRouter);
 // serves Swagger UI page

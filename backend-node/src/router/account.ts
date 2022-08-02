@@ -565,7 +565,6 @@ router.post("/register", async (req, res, next) => {
  */
 router.post("/login", async (req, res, next) => {
   try {
-    const JWT_SECRET = process.env.JWT_SECRET;
     const creds = req.body;
     if (!creds.username || !creds.password) {
       throw new ApiError(401, "Username or password is missing");
