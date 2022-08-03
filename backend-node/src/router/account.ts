@@ -559,7 +559,7 @@ router.post("/register", async (req, res, next) => {
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Account'
+ *               $ref: '#/components/schemas/LoginRegisterAccountOutput'
  *       400:
  *         description: Bad request
  */

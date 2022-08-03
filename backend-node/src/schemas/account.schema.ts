@@ -138,4 +138,37 @@
  *          type: string
  *          required: true
  *          example: johndoe
+ *    LoginRegisterAccountOutput:
+ *      type: object
+ *      properties:
+ *        _id:
+ *          type: string
+ *          example: somerandomobjectidstring
+ *        fullname:
+ *          type: string
+ *          required: true
+ *          example: John Doe
+ *        username:
+ *          type: string
+ *          required: true
+ *          example: johndoe
+ *        email:
+ *          type: string
+ *          format: email
+ *          required: true
+ *          example: johndoe@gmail.com
+ *        type:
+ *          type: string
+ *          required: true
+ *          example: USER
+ *        createdAt:
+ *          type: string
+ *          format: date-time
+ *          example: 2017-07-21T17:32:28Z
+ *        updatedAt:
+ *          type: string
+ *          format: date-time
+ *          example: 2017-07-21T17:32:28Z
+ *        token:
+ *          $ref: '#/components/schemas/AccountToken'
  */

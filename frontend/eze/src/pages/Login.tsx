@@ -1,9 +1,22 @@
-import { FormEvent } from "react";
+import { FormEvent, useEffect } from "react";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import useHttp from "../hooks/useHttp";
 import useInput from "../hooks/useInput";
+import { authActions } from "../store/authSlice";
 interface LoginData {
   username: string;
   password: string;
+}
+
+interface AuthResponse {
+  account: {
+    username: string;
+    type: string;
+  };
+  token: {
+    token: string;
+  };
 }
 
 const Login = () => {
@@ -20,7 +33,6 @@ const Login = () => {
     ).then((response) => response.json());
     return responseObj;
   };
-
   const validateUserPass = (input: string) => {
     let errorMessage = "";
     let valueIsValid = true;
@@ -35,7 +47,6 @@ const Login = () => {
       errorMessage,
     };
   };
-
   const { sendRequest, data, error, status } = useHttp(loginRequest, true);
   const {
     value: enteredUname,
@@ -53,6 +64,24 @@ const Login = () => {
     inputBlurHandler: passBlurHandler,
     reset: resetPassInput,
   } = useInput(validateUserPass);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (status === "completed") {
+      if (data && !error) {
+        const authResp = data as AuthResponse;
+        dispatch(
+          authActions.saveAuth({
+            accessToken: authResp.token,
+            username: authResp.account.username,
+            type: authResp.account.type,
+          })
+        );
+        navigate(authResp.account.type === "/USER" ? "/sa" : "/admin");
+      }
+    }
+  }, [status, data, error, dispatch, navigate]);
 
   const submitHandler = (event: FormEvent) => {
     event.preventDefault();
@@ -110,7 +139,7 @@ const Login = () => {
                       <div className={`mb-3 ${passInputClasses}`}>
                         <input
                           className="bg-dark text-white border border-secondary border-1 form-control form-control-lg"
-                          type="text"
+                          type="password"
                           name="password"
                           id="password"
                           placeholder="Password"
