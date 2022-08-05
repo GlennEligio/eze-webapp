@@ -122,7 +122,7 @@ accountSchema.methods.generateToken = async function () {
     { _id: account._id.toString() },
     process.env.JWT_SECRET_KEY!,
     {
-      expiresIn: "2 day",
+      expiresIn: "2 days",
     }
   );
 

@@ -30,7 +30,12 @@ const Login = () => {
           "Content-Type": "application/json",
         },
       }
-    ).then((response) => response.json());
+    ).then((response) => {
+      if (response.ok) {
+        return response.json();
+      }
+      throw new Error("Invalid username/password");
+    });
     return responseObj;
   };
   const validateUserPass = (input: string) => {

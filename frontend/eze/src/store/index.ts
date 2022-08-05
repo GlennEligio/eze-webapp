@@ -1,5 +1,9 @@
 import { configureStore } from "@reduxjs/toolkit";
-import authReducer from "./authSlice";
+import authReducer, { AuthState } from "./authSlice";
+
+export interface IRootState {
+  auth: AuthState;
+}
 
 const store = configureStore({
   reducer: {
