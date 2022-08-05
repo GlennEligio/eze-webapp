@@ -1,6 +1,6 @@
 import { useSelector } from "react-redux";
-import { Routes, Route } from "react-router-dom";
-import Admin from "./pages/AdminMenu";
+import { Routes, Route, Navigate } from "react-router-dom";
+import AdminMenu from "./pages/AdminMenu";
 import BorrowForm from "./pages/BorrowForm";
 import ReturnForm from "./pages/ReturnForm";
 import NotFound from "./pages/NotFound";
@@ -12,6 +12,7 @@ import Students from "./pages/Students";
 import Users from "./pages/Users";
 import "./App.css";
 import { IRootState } from "./store";
+import Unauthorized from "./pages/Unauthorized";
 
 const App = () => {
   const auth = useSelector((state: IRootState) => state.auth);
@@ -23,16 +24,34 @@ const App = () => {
         <Route path="/login" element={<Login />} />
         {!!auth.accessToken && (
           <>
-            <Route path="/admin" element={<Admin />} />
+            <Route
+              path="/admin"
+              element={
+                auth.type === "ADMIN" ? (
+                  <AdminMenu />
+                ) : (
+                  <Navigate to="/unauthorized" />
+                )
+              }
+            />
+            <Route
+              path="/users"
+              element={
+                auth.type === "ADMIN" ? (
+                  <Users />
+                ) : (
+                  <Navigate to="/unauthorized" />
+                )
+              }
+            />
             <Route path="/sa" element={<StudentMenu />} />
             <Route path="/borrow" element={<BorrowForm />} />
             <Route path="/return" element={<ReturnForm />} />
             <Route path="/equipments" element={<Equipments />} />
             <Route path="/students" element={<Students />} />
-            <Route path="/users" element={<Users />} />
           </>
         )}
-
+        <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </div>

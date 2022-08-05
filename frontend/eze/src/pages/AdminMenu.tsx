@@ -1,4 +1,17 @@
+import { useEffect } from "react";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { IRootState } from "../store";
+
 function AdminMenu() {
+  const auth = useSelector((state: IRootState) => state.auth);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!!auth.accessToken && auth.type === "ADMIN") return;
+    navigate("/unauthorized");
+  }, [auth.accessToken, auth.type, navigate]);
+
   return (
     <div className="container-md d-flex flex-column h-100">
       <div className="row">

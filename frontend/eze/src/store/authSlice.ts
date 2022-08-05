@@ -16,17 +16,19 @@ interface JwtPayload {
 const checkJwtValidity = (jwt: string) => {
   let isValid = false;
   const parts = jwt.split(".");
-  const payload = JSON.parse(
-    Buffer.from(parts[1], "base64").toString()
-  ) as JwtPayload;
+  if (!!parts[1]) {
+    const payload = JSON.parse(
+      Buffer.from(parts[1], "base64").toString()
+    ) as JwtPayload;
 
-  const expDate = new Date(payload.exp * 1000);
-  const curDate = new Date();
+    const expDate = new Date(payload.exp * 1000);
+    const curDate = new Date();
 
-  if (expDate > curDate) {
-    isValid = true;
+    if (expDate > curDate) {
+      isValid = true;
+    }
+    return isValid;
   }
-  return isValid;
 };
 
 const createIntialState = () => {
