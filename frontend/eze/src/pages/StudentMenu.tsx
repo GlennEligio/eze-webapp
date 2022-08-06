@@ -1,28 +1,16 @@
 import MenuButton from "../components/UI/MenuButton";
+import MenuHeader from "../components/Layout/MenuHeader";
+import { useSelector } from "react-redux";
+import { IRootState } from "../store";
 
 const StudentMenu = () => {
+  const auth = useSelector((state: IRootState) => state.auth);
+
   return (
     <div className="container-md d-flex flex-column h-100">
       {/* <!-- Header --> */}
       <div className="row">
-        <header>
-          <div className="border-bottom border-3 border-secondary pt-5 pb-2 gx-0">
-            <div className="d-flex justify-content-between">
-              <div className="my-auto">
-                <span className="fs-2">Student Assistant Menu</span>
-              </div>
-              <div className="d-flex justify-content-end">
-                <div className="d-flex flex-column justify-content-center">
-                  <span>John Glenn Eligio</span>
-                  <span>Student Assistant</span>
-                </div>
-                <div className="d-flex align-items-center ms-3">
-                  <i className="bi bi-person-circle fs-1"></i>
-                </div>
-              </div>
-            </div>
-          </div>
-        </header>
+        <MenuHeader name={auth.name} type={auth.type} key={auth.accessToken} />
       </div>
       {/* <!-- Main --> */}
       <div className="row flex-grow-1">

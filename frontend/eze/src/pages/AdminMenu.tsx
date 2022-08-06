@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { IRootState } from "../store";
 import MenuButton from "../components/UI/MenuButton";
+import MenuHeader from "../components/Layout/MenuHeader";
 
 function AdminMenu() {
   const auth = useSelector((state: IRootState) => state.auth);
@@ -16,24 +17,7 @@ function AdminMenu() {
   return (
     <div className="container-md d-flex flex-column h-100">
       <div className="row">
-        <header>
-          <div className="border-bottom border-3 border-secondary pt-5 pb-2 gx-0">
-            <div className="d-flex justify-content-between">
-              <div className="my-auto">
-                <span className="fs-2">Administrator Menu</span>
-              </div>
-              <div className="d-flex justify-content-end">
-                <div className="d-flex flex-column justify-content-center">
-                  <span>John Glenn Eligio</span>
-                  <span>Administrator</span>
-                </div>
-                <div className="d-flex align-items-center ms-3">
-                  <i className="bi bi-person-circle fs-1"></i>
-                </div>
-              </div>
-            </div>
-          </div>
-        </header>
+        <MenuHeader name={auth.name} type={auth.type} key={auth.accessToken} />
       </div>
       <div className="row flex-grow-1">
         <main className="col-12">

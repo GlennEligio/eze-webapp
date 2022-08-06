@@ -13,6 +13,7 @@ interface AuthResponse {
   account: {
     username: string;
     type: string;
+    fullname: string;
   };
   token: {
     token: string;
@@ -81,6 +82,7 @@ const Login = () => {
             accessToken: authResp.token,
             username: authResp.account.username,
             type: authResp.account.type,
+            name: authResp.account.fullname,
           })
         );
         navigate(authResp.account.type === "/USER" ? "/sa" : "/admin");
