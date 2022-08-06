@@ -1,4 +1,4 @@
-const Users = () => {
+const Accounts = () => {
   return (
     <div className="container-md d-flex flex-column h-100">
       {/* <!-- Header --> */}
@@ -86,4 +86,4 @@ const Users = () => {
   );
 };
 
-export default Users;
+export default Accounts;

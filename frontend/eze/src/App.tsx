@@ -9,7 +9,7 @@ import LoginLoading from "./pages/LoginLoading";
 import Login from "./pages/Login";
 import StudentMenu from "./pages/StudentMenu";
 import Students from "./pages/Students";
-import Users from "./pages/Users";
+import Accounts from "./pages/Accounts";
 import "./App.css";
 import { IRootState } from "./store";
 import Unauthorized from "./pages/Unauthorized";
@@ -20,8 +20,6 @@ const App = () => {
   return (
     <div className="vh-100 d-flex flex-column border-top border-info border-5">
       <Routes>
-        <Route path="/loading" element={<LoginLoading />} />
-        <Route path="/login" element={<Login />} />
         {!!auth.accessToken && (
           <>
             <Route
@@ -35,10 +33,10 @@ const App = () => {
               }
             />
             <Route
-              path="/users"
+              path="/accounts"
               element={
                 auth.type === "ADMIN" ? (
-                  <Users />
+                  <Accounts />
                 ) : (
                   <Navigate to="/unauthorized" />
                 )
@@ -51,6 +49,8 @@ const App = () => {
             <Route path="/students" element={<Students />} />
           </>
         )}
+        <Route path="/loading" element={<LoginLoading />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="*" element={<NotFound />} />
       </Routes>

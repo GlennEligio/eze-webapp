@@ -1,3 +1,5 @@
+import MenuButton from "../components/UI/MenuButton";
+
 const StudentMenu = () => {
   return (
     <div className="container-md d-flex flex-column h-100">
@@ -31,98 +33,66 @@ const StudentMenu = () => {
               <div className="col-3 d-flex flex-column">
                 {/* <!--Faculty--> */}
                 <div className="row gx-0 flex-grow-1">
-                  <div
-                    className="col d-flex flex-column align-items-center"
-                    style={{ backgroundColor: "#41d696" }}
-                  >
-                    <img
-                      style={{ height: "10rem", width: "10rem" }}
-                      src="/img/resized_add.jpg"
-                      alt="Faculty"
-                    />
-                    <span className="fs-4 text-white">Faculty</span>
-                  </div>
+                  <MenuButton
+                    backgroundColor="#41d696"
+                    destPage="/borrow"
+                    imageLoc="/img/resized_add.jpg"
+                    title="Add Transaction"
+                    key={"Add Transaction"}
+                  />
                 </div>
                 {/* <!-- Inventory --> */}
                 <div className="row gx-0 gy-1 flex-grow-1 mt-1">
-                  <div
-                    className="col d-flex flex-column align-items-center"
-                    style={{ backgroundColor: "#f2a114" }}
-                  >
-                    <img
-                      style={{ height: "10rem", width: "10rem" }}
-                      src="/img/resized_inventory.jpg"
-                      alt="Resize inventory"
-                    />
-                    <span className="fs-4 text-white text-center">
-                      Inventory
-                    </span>
-                  </div>
+                  <MenuButton
+                    backgroundColor="#f2a114"
+                    destPage="/borrow"
+                    imageLoc="/img/resized_inventory.jpg"
+                    title="Inventory"
+                    key={"Inventory"}
+                  />
                 </div>
                 {/* <!-- Schedule --> */}
                 <div className="row gx-0 gy-1 flex-grow-1 mt-1">
-                  <div
-                    className="col d-flex flex-column align-items-center"
-                    style={{ backgroundColor: "#662d91" }}
-                  >
-                    <img
-                      style={{ height: "10rem", width: "10rem" }}
-                      src="./img/Calendar.png"
-                      alt="Schedule"
-                    />
-                    <span className="fs-4 text-white text-center">
-                      Calendar
-                    </span>
-                  </div>
+                  <MenuButton
+                    backgroundColor="#662d91"
+                    destPage="/borrow"
+                    imageLoc="./img/Calendar.png"
+                    title="Schedule"
+                    key={"Schedule"}
+                  />
                 </div>
               </div>
               {/* <!-- Second column SA-Menu--> */}
               <div className="col-3 d-flex flex-column">
                 {/* <!--Transactions--> */}
                 <div className="row gx-0 flex-grow-1">
-                  <div
-                    className="col d-flex flex-column align-items-center"
-                    style={{ backgroundColor: "#48ac3f" }}
-                  >
-                    <img
-                      style={{ height: "10rem", width: "10rem" }}
-                      src="/img/Sync Center.png"
-                      alt="Transactions"
-                    />
-                    <span className="fs-4 text-white">Transactions</span>
-                  </div>
+                  <MenuButton
+                    backgroundColor="#48ac3f"
+                    destPage="/borrow"
+                    imageLoc="/img/Sync Center.png"
+                    title="Transactions"
+                    key={"Transactions"}
+                  />
                 </div>
                 {/* <!-- Student Database --> */}
                 <div className="row gx-0 gy-1 flex-grow-1 mt-1">
-                  <div
-                    className="col d-flex flex-column align-items-center"
-                    style={{ backgroundColor: "#00aeef" }}
-                  >
-                    <img
-                      style={{ height: "10rem", width: "10rem" }}
-                      src="/img/Documents Library.png"
-                      alt="Student Database"
-                    />
-                    <span className="fs-4 text-white text-center">
-                      Student Database
-                    </span>
-                  </div>
+                  <MenuButton
+                    backgroundColor="#00aeef"
+                    destPage="/borrow"
+                    imageLoc="/img/Documents Library.png"
+                    title="Student Database"
+                    key={"Student Database"}
+                  />
                 </div>
                 {/* <!-- Camera --> */}
                 <div className="row gx-0 gy-1 flex-grow-1 mt-1">
-                  <div
-                    className="col d-flex flex-column align-items-center"
-                    style={{ backgroundColor: "#d24826" }}
-                  >
-                    <img
-                      style={{ height: "10rem", width: "10rem" }}
-                      src="/img/camera2.png"
-                      alt="Schedule"
-                    />
-                    <span className="fs-4 text-white text-center">
-                      Calendar
-                    </span>
-                  </div>
+                  <MenuButton
+                    backgroundColor="#d24826"
+                    destPage="/borrow"
+                    imageLoc="/img/camera2.png"
+                    title="Calendar"
+                    key={"Calendar"}
+                  />
                 </div>
               </div>
               <div className="col-6 d-flex flex-column">

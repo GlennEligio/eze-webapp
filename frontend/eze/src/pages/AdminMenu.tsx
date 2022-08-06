@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { IRootState } from "../store";
+import MenuButton from "../components/UI/MenuButton";
 
 function AdminMenu() {
   const auth = useSelector((state: IRootState) => state.auth);
@@ -40,101 +41,71 @@ function AdminMenu() {
             <div className="row flex-grow-1 gx-2">
               <div className="col-6 d-flex flex-column">
                 <div className="row gx-0 flex-grow-1">
-                  <div
-                    className="col d-flex flex-column align-items-center"
-                    style={{ backgroundColor: "#a43ae3" }}
-                  >
-                    <img
-                      style={{ maxHeight: "10rem", maxWidth: "10rem" }}
-                      src="/img/Contacts.png"
-                      alt="Faculty"
-                    />
-                    <span className="fs-4 text-white">Faculty</span>
-                  </div>
+                  <MenuButton
+                    backgroundColor="#a43ae3"
+                    imageLoc="/img/Contacts.png"
+                    title="Faculty"
+                    key={"Faculty"}
+                    destPage="/faculty"
+                  />
                 </div>
                 <div className="row gx-0 gy-1 flex-grow-1 mt-1">
-                  <div
-                    className="col d-flex flex-column align-items-center me-md-2"
-                    style={{ backgroundColor: "#f2a114" }}
-                  >
-                    <img
-                      style={{ maxHeight: "10rem", maxWidth: "10rem" }}
-                      src="/img/resized_inventory.jpg"
-                      alt="Resize inventory"
-                    />
-                    <span className="fs-4 text-white text-center">
-                      Inventory
-                    </span>
-                  </div>
-                  <div
-                    className="col d-flex flex-column align-items-center"
-                    style={{ backgroundColor: "#d68a3a" }}
-                  >
-                    <img
-                      style={{ maxHeight: "10rem", maxWidth: "10rem" }}
-                      src="/img/User Accounts.png"
-                      alt="User Accounts"
-                    />
-                    <span className="fs-4 text-white text-center">Account</span>
-                  </div>
+                  <MenuButton
+                    backgroundColor="#f2a114"
+                    imageLoc="/img/resized_inventory.jpg"
+                    title="Resize inventory"
+                    key={"Resize inventory"}
+                    destPage="/equipments"
+                    leftSpacer={true}
+                  />
+                  <MenuButton
+                    backgroundColor="#d68a3a"
+                    imageLoc="/img/User Accounts.png"
+                    title="Accounts"
+                    key="User Accounts"
+                    destPage="/accounts"
+                  />
                 </div>
                 <div className="row gx-0 gy-1 flex-grow-1 mt-1">
-                  <div
-                    className="col d-flex flex-column align-items-center me-md-2"
-                    style={{ backgroundColor: "#662d91" }}
-                  >
-                    <img
-                      style={{ maxHeight: "10rem", maxWidth: "10rem" }}
-                      src="/img/Calendar.png"
-                      alt="Schedule"
-                    />
-                    <span className="fs-4 text-white text-center">
-                      Calendar
-                    </span>
-                  </div>
-                  <div
-                    className="col d-flex flex-column align-items-center"
-                    style={{ backgroundColor: "#d24826" }}
-                  >
-                    <img
-                      style={{ maxHeight: "10rem", maxWidth: "10rem" }}
-                      src="/img/camera2.png"
-                      alt="Camera"
-                    />
-                    <span className="fs-4 text-white text-center">Camera</span>
-                  </div>
+                  <MenuButton
+                    backgroundColor="#662d91"
+                    imageLoc="/img/Calendar.png"
+                    title="Schedule"
+                    key="Schedule"
+                    destPage="/schedules"
+                    leftSpacer={true}
+                  />
+                  <MenuButton
+                    backgroundColor="#d24826"
+                    imageLoc="/img/camera2.png"
+                    title="Camera"
+                    key="Camera"
+                    destPage="/camera"
+                  />
                 </div>
               </div>
               <div className="col-3 d-flex flex-column">
                 <div className="row gx-0 flex-grow-1">
-                  <div
-                    className="col d-flex flex-column align-items-center justify-content-between"
-                    style={{ backgroundColor: "#00aeef" }}
-                  >
-                    <img
-                      style={{ maxHeight: "100%", maxWidth: "100%" }}
-                      src="/img/Documents Library.png"
-                      alt="Student Database"
-                    />
-                    <span className="fs-4 text-white text-center">
-                      Student Database
-                    </span>
-                  </div>
+                  <MenuButton
+                    backgroundColor="#00aeef"
+                    imageLoc="/img/Documents Library.png"
+                    title="Student Database"
+                    key="Student Database"
+                    imgMaxHeight="100%"
+                    imgMaxWidth="100%"
+                    destPage="/students"
+                  />
                 </div>
                 <div className="row gx-0 flex-grow-1 mt-2">
-                  <div
-                    className="col d-flex flex-column align-items-center justify-content-between"
-                    style={{ backgroundColor: "#48ac3f" }}
-                  >
-                    <img
-                      style={{ maxHeight: "100%", maxWidth: "100%" }}
-                      src="/img/Sync Center.png"
-                      alt="Transactions"
-                    />
-                    <span className="fs-4 text-white text-center">
-                      Transactions
-                    </span>
-                  </div>
+                  <MenuButton
+                    backgroundColor="#48ac3f"
+                    imageLoc="/img/Sync Center.png"
+                    title="Transactions"
+                    key="Transactions"
+                    imgMaxHeight="100%"
+                    imgMaxWidth="100%"
+                    destPage="/transactions"
+                  />
                 </div>
               </div>
               <div className="col-3 d-flex flex-column">
