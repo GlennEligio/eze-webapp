@@ -33,7 +33,7 @@ const StudentMenu = () => {
                 <div className="row gx-0 gy-1 flex-grow-1 mt-1">
                   <MenuButton
                     backgroundColor="#f2a114"
-                    destPage="/borrow"
+                    destPage="/equipments"
                     imageLoc="/img/resized_inventory.jpg"
                     title="Inventory"
                     key={"Inventory"}
@@ -43,7 +43,7 @@ const StudentMenu = () => {
                 <div className="row gx-0 gy-1 flex-grow-1 mt-1">
                   <MenuButton
                     backgroundColor="#662d91"
-                    destPage="/borrow"
+                    destPage="/schedules"
                     imageLoc="./img/Calendar.png"
                     title="Schedule"
                     key={"Schedule"}
@@ -56,7 +56,7 @@ const StudentMenu = () => {
                 <div className="row gx-0 flex-grow-1">
                   <MenuButton
                     backgroundColor="#48ac3f"
-                    destPage="/borrow"
+                    destPage="/transactions"
                     imageLoc="/img/Sync Center.png"
                     title="Transactions"
                     key={"Transactions"}
@@ -66,7 +66,7 @@ const StudentMenu = () => {
                 <div className="row gx-0 gy-1 flex-grow-1 mt-1">
                   <MenuButton
                     backgroundColor="#00aeef"
-                    destPage="/borrow"
+                    destPage="/students"
                     imageLoc="/img/Documents Library.png"
                     title="Student Database"
                     key={"Student Database"}
@@ -78,8 +78,8 @@ const StudentMenu = () => {
                     backgroundColor="#d24826"
                     destPage="/borrow"
                     imageLoc="/img/camera2.png"
-                    title="Calendar"
-                    key={"Calendar"}
+                    title="Camera"
+                    key={"Camera"}
                   />
                 </div>
               </div>
