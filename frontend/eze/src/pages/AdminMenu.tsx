@@ -1,12 +1,16 @@
-import { useEffect } from "react";
+import { MouseEventHandler, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import { IRootState } from "../store";
+import { authActions } from "../store/authSlice";
 import MenuButton from "../components/UI/MenuButton";
 import MenuHeader from "../components/Layout/MenuHeader";
+import MenuFooter from "../components/Layout/MenuFooter";
 
 function AdminMenu() {
   const auth = useSelector((state: IRootState) => state.auth);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -14,12 +18,17 @@ function AdminMenu() {
     navigate("/unauthorized");
   }, [auth.accessToken, auth.type, navigate]);
 
+  const logout: MouseEventHandler = (event) => {
+    dispatch(authActions.removeAuth());
+    navigate("/login");
+  };
+
   return (
     <div className="container-md d-flex flex-column h-100">
       <div className="row">
         <MenuHeader name={auth.name} type={auth.type} key={auth.accessToken} />
       </div>
-      <div className="row flex-grow-1">
+      <div className="row">
         <main className="col-12">
           <div className="mt-2 d-flex flex-column gx-0">
             <div className="row flex-grow-1 gx-2">
@@ -116,6 +125,10 @@ function AdminMenu() {
             </div>
           </div>
         </main>
+      </div>
+      {/* Footer */}
+      <div className="row">
+        <MenuFooter onClick={logout} />
       </div>
     </div>
   );
