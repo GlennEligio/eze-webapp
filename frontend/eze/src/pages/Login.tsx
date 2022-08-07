@@ -85,7 +85,7 @@ const Login = () => {
             name: authResp.account.fullname,
           })
         );
-        navigate(authResp.account.type === "/USER" ? "/sa" : "/admin");
+        navigate("/");
       }
     }
   }, [status, data, error, dispatch, navigate]);
