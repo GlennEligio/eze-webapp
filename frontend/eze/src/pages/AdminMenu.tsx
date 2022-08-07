@@ -7,6 +7,7 @@ import { authActions } from "../store/authSlice";
 import MenuButton from "../components/UI/MenuButton";
 import MenuHeader from "../components/Layout/MenuHeader";
 import MenuFooter from "../components/Layout/MenuFooter";
+import MenuClock from "../components/Menu/MenuClock";
 
 function AdminMenu() {
   const auth = useSelector((state: IRootState) => state.auth);
@@ -46,8 +47,8 @@ function AdminMenu() {
                   <MenuButton
                     backgroundColor="#f2a114"
                     imageLoc="/img/resized_inventory.jpg"
-                    title="Resize inventory"
-                    key={"Resize inventory"}
+                    title="Inventory"
+                    key={"Inventory"}
                     destPage="/equipments"
                     leftSpacer={true}
                   />
@@ -111,16 +112,7 @@ function AdminMenu() {
                     />
                   </div>
                 </div>
-                <div className="row gx-0 flex-grow-1 border border-dark border-1 mt-2">
-                  <div className="col d-flex flex-column align-items-center justify-content-center">
-                    <p className="fs-4">SATURDAY</p>
-                    <p className="text-danger" style={{ fontSize: "10rem" }}>
-                      12
-                    </p>
-                    <p className="fs-4">October, 2019</p>
-                    <h1 className="text-danger fs-4">1:19:24 AM</h1>
-                  </div>
-                </div>
+                <MenuClock />
               </div>
             </div>
           </div>

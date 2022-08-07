@@ -1,4 +1,12 @@
+import { MouseEventHandler } from "react";
+import { useNavigate } from "react-router-dom";
+
 function Equipments() {
+  const navigate = useNavigate();
+  const backBtnHandler: MouseEventHandler = () => {
+    navigate("/");
+  };
+
   return (
     <div className="container-md d-flex flex-column h-100">
       <div className="row">
@@ -6,14 +14,19 @@ function Equipments() {
           <div className="pt-5 pb-2">
             <div className="d-flex justify-content-between">
               <div className="my-auto">
-                <i className="bi bi-arrow-left-circle fs-1 me-4"></i>
+                <span>
+                  <i
+                    className={`bi bi-arrow-left-circle fs-1 me-4 back-button`}
+                    onClick={backBtnHandler}
+                  ></i>
+                </span>
                 <i className="bi bi-gear fs-1"></i>
               </div>
               <div className="d-flex justify-content-end">
                 <div className="d-flex align-items-center">
                   <i className="bi bi-tools fs-1"></i>
                 </div>
-                <div className="d-flex flex-column justify-content-center ms-3">
+                <div className="d-flex flex-column justify-content-center ms-3 flex-grow-1">
                   <span className="fs-3">Equipment List</span>
                 </div>
               </div>
