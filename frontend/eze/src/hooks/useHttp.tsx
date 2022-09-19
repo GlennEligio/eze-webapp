@@ -9,7 +9,7 @@ enum RequestActionKind {
 interface RequestState {
   data: object | null;
   error: string | null;
-  status: string | null;
+  status: "pending" | "completed" | null;
 }
 
 interface RequestAction {
@@ -54,7 +54,7 @@ function useHttp(requestFunction: Function, startWithPending = false) {
   });
 
   const sendRequest = useCallback(
-    async function (requestData: any) {
+    async function (requestData?: any) {
       dispatch({ type: RequestActionKind.SEND });
       try {
         const responseData = await requestFunction(requestData);

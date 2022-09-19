@@ -20,25 +20,23 @@ interface AuthResponse {
   };
 }
 
+const loginRequest = async (loginData: LoginData) => {
+  const responseObj = await fetch("http://localhost:3200/api/accounts/login", {
+    method: "POST",
+    body: JSON.stringify(loginData),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  }).then((response) => {
+    if (response.ok) {
+      return response.json();
+    }
+    throw new Error("Invalid username/password");
+  });
+  return responseObj;
+};
+
 const Login = () => {
-  const loginRequest = async (loginData: LoginData) => {
-    const responseObj = await fetch(
-      "http://localhost:3200/api/accounts/login",
-      {
-        method: "POST",
-        body: JSON.stringify(loginData),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    ).then((response) => {
-      if (response.ok) {
-        return response.json();
-      }
-      throw new Error("Invalid username/password");
-    });
-    return responseObj;
-  };
   const validateUserPass = (input: string) => {
     let errorMessage = "";
     let valueIsValid = true;
@@ -53,7 +51,7 @@ const Login = () => {
       errorMessage,
     };
   };
-  const { sendRequest, data, error, status } = useHttp(loginRequest, true);
+  const { sendRequest, data, error, status } = useHttp(loginRequest, false);
   const {
     value: enteredUname,
     hasError: unameInputHasError,
@@ -75,17 +73,20 @@ const Login = () => {
 
   useEffect(() => {
     if (status === "completed") {
-      if (data && !error) {
-        const authResp = data as AuthResponse;
-        dispatch(
-          authActions.saveAuth({
-            accessToken: authResp.token,
-            username: authResp.account.username,
-            type: authResp.account.type,
-            name: authResp.account.fullname,
-          })
-        );
-        navigate("/");
+      if (data) {
+        if (error === null) {
+          const authResp = data as AuthResponse;
+          dispatch(
+            authActions.saveAuth({
+              accessToken: authResp.token,
+              username: authResp.account.username,
+              type: authResp.account.type,
+              name: authResp.account.fullname,
+            })
+          );
+          navigate("/");
+          return;
+        }
       }
     }
   }, [status, data, error, dispatch, navigate]);
@@ -94,7 +95,6 @@ const Login = () => {
     event.preventDefault();
 
     if (!enteredUnameIsValid || !enteredPassIsValid) {
-      console.log("Invalid input");
       return;
     }
 
@@ -117,6 +117,22 @@ const Login = () => {
             </div>
             <div className="bg-dark h-50 row gx-0 w-100">
               <div className="col-4 d-flex flex-column justify-content-center w-100">
+                {status === "pending" && (
+                  <div className="d-flex justify-content-center mb-3">
+                    <div
+                      className="spinner-border text-light me-3"
+                      role="status"
+                    >
+                      <span className="visually-hidden">Loading...</span>
+                    </div>
+                    <span className="text-light fs-5">Logging in....</span>
+                  </div>
+                )}
+                {error && (
+                  <div className="d-flex justify-content-center mb-3">
+                    <span className="text-light fs-5">{error}</span>
+                  </div>
+                )}
                 <form onSubmit={submitHandler}>
                   <div className="row gx-0">
                     <div className="col d-flex justify-content-end">

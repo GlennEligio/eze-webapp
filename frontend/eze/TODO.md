@@ -6,3 +6,5 @@
    - /camera
    - /schedule
    - /transactions
+4. Add pagination to the resource tables like equipments, students, transactions, etc
+5. Make useHttp hook generic, where we can pass the "data" type
