@@ -7,6 +7,7 @@ import org.bson.types.ObjectId;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,30 +26,42 @@ public class EquipmentService implements IService<Equipment>{
     }
 
     @Override
-    public Equipment get(String code) {
-        return repository.findByEquipmentCode(code).orElseThrow(() -> new ApiException("No equipment with code supplied was found", HttpStatus.NOT_FOUND));
+    public Equipment get(Serializable code) {
+        return repository.findByEquipmentCode(code.toString()).orElseThrow(() -> new ApiException(notFound(code), HttpStatus.NOT_FOUND));
     }
 
     @Override
     public Equipment create(Equipment equipment) {
-        Optional<Equipment> optionalEquipment = repository.findByEquipmentCode(equipment.getEquipmentCode());
-        if(optionalEquipment.isPresent()) {
-            throw new ApiException("Equipment with same code already exist", HttpStatus.BAD_REQUEST);
+        if(equipment.getId() != null) {
+            Optional<Equipment> optionalEquipment = repository.findByEquipmentCode(equipment.getEquipmentCode());
+            if(optionalEquipment.isPresent()) {
+                throw new ApiException(alreadyExist(equipment.getEquipmentCode()), HttpStatus.BAD_REQUEST);
+            }
         }
         equipment.setEquipmentCode(new ObjectId().toHexString());
         return repository.save(equipment);
     }
 
     @Override
-    public Equipment update(Equipment equipment, String code) {
-        Equipment oldEquipment = repository.findByEquipmentCode(code).orElseThrow(() -> new ApiException("No transaction with id suppied was found", HttpStatus.NOT_FOUND));
+    public Equipment update(Equipment equipment, Serializable code) {
+        Equipment oldEquipment = repository.findByEquipmentCode(code.toString()).orElseThrow(() -> new ApiException(notFound(code), HttpStatus.NOT_FOUND));
         oldEquipment.update(equipment);
         return repository.save(oldEquipment);
     }
 
     @Override
-    public void delete(String code) {
-        Equipment equipment = repository.findByEquipmentCode(code).orElseThrow(() -> new ApiException("No transaction with id suppied was found", HttpStatus.NOT_FOUND));
+    public void delete(Serializable code) {
+        Equipment equipment = repository.findByEquipmentCode(code.toString()).orElseThrow(() -> new ApiException(notFound(code), HttpStatus.NOT_FOUND));
         repository.delete(equipment);
+    }
+
+    @Override
+    public String notFound(Serializable code) {
+        return "No equipment with code " + code + " was found";
+    }
+
+    @Override
+    public String alreadyExist(Serializable code) {
+        return "Equipment with code " + code + " exist";
     }
 }

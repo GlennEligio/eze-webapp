@@ -1,5 +1,6 @@
 package com.eze.backend.restapi.model;
 
+import com.eze.backend.restapi.enums.EqStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,13 +18,14 @@ public class Equipment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(unique = true)
+    @Column(nullable = false, unique = true)
     private String equipmentCode;
     private String name;
     @Column(unique = true)
     private String barcode;
     // will be EquipmentStatus enum later on
-    private String status;
+    @Enumerated(EnumType.ORDINAL)
+    private EqStatus status;
     private LocalDateTime defectiveSince;
 
     public void update(Equipment newEquipment) {

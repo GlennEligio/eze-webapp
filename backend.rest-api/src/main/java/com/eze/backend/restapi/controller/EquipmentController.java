@@ -32,7 +32,7 @@ public class EquipmentController {
     @PostMapping("/equipments")
     public ResponseEntity<Equipment> createEquipment(@RequestBody Equipment equipment) {
         Equipment newEq = equipmentService.create(equipment);
-        return ResponseEntity.created(URI.create("/equipments/" + newEq.getEquipmentCode())).body(newEq);
+        return ResponseEntity.created(URI.create("/equipments/" + newEq.getId())).body(newEq);
     }
 
     @PutMapping("/equipments/{code}")
