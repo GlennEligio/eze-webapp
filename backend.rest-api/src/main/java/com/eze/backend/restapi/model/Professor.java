@@ -15,6 +15,7 @@ import javax.persistence.*;
 public class Professor {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "professor_id")
     private Long id;
     @Column(unique = true, nullable = false)
     private String name;
