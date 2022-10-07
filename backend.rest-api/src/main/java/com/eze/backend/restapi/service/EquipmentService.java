@@ -3,6 +3,7 @@ package com.eze.backend.restapi.service;
 import com.eze.backend.restapi.exception.ApiException;
 import com.eze.backend.restapi.model.Equipment;
 import com.eze.backend.restapi.repository.EquipmentRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Slf4j
 public class EquipmentService implements IService<Equipment>{
 
     private final EquipmentRepository repository;
@@ -32,7 +34,8 @@ public class EquipmentService implements IService<Equipment>{
 
     @Override
     public Equipment create(Equipment equipment) {
-        if(equipment.getId() != null) {
+        log.info("Creating equipment");
+        if(equipment.getEquipmentCode() != null) {
             Optional<Equipment> optionalEquipment = repository.findByEquipmentCode(equipment.getEquipmentCode());
             if(optionalEquipment.isPresent()) {
                 throw new ApiException(alreadyExist(equipment.getEquipmentCode()), HttpStatus.BAD_REQUEST);

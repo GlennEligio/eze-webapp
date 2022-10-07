@@ -1,5 +1,6 @@
 package com.eze.backend.restapi.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -7,17 +8,20 @@ import lombok.NoArgsConstructor;
 import org.springframework.lang.NonNull;
 
 import javax.persistence.*;
+import java.io.Serializable;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 @Entity
-public class Student {
+public class Student implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "student_id")
     private Long id;
-    @Column(unique = true, nullable = false)
+    @Column(unique = true, nullable = false, name = "student_number")
     private String studentNumber;
     private String fullName;
     private String yearAndSection;
@@ -29,6 +33,10 @@ public class Student {
     private String guardianNumber;
     private String yearLevel;
     private byte[] image;
+    @OneToMany(mappedBy = "borrower")
+    // TODO: Temp fix for stackoverflow error, create DTO for this class that doesnt include this field
+    @JsonIgnore
+    private List<Transaction> transactions;
 
     public void update(@NonNull Student newStudent) {
         if(newStudent.getAddress() != null) {
