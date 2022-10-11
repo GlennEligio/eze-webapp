@@ -37,6 +37,8 @@ public class Student implements Serializable {
     // TODO: Temp fix for stackoverflow error, create DTO for this class that doesnt include this field
     @JsonIgnore
     private List<Transaction> transactions;
+    @OneToOne(mappedBy = "student")
+    private StudentFingerprint studentFingerprint;
 
     public void update(@NonNull Student newStudent) {
         if(newStudent.getAddress() != null) {

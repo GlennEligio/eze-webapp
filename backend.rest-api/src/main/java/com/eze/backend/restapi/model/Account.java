@@ -19,7 +19,7 @@ public class Account implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(unique = true, nullable = false)
+    @Column(unique = true, nullable = false, name = "account_code")
     private String accountCode;
     private String fullName;
     private String username;
@@ -29,6 +29,8 @@ public class Account implements Serializable {
     private AccountType type;
     private byte[] profile;
     private LocalDateTime createdAt;
+    @OneToOne(mappedBy = "account")
+    private AccountFingerprint accountFingerprint;
 
     public void update(Account newAccount) {
         if(newAccount.getEmail() != null) {
