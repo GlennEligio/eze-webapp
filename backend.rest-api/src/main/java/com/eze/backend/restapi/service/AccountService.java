@@ -1,11 +1,16 @@
 package com.eze.backend.restapi.service;
 
+import com.eze.backend.restapi.dtos.EzeUserDetails;
 import com.eze.backend.restapi.exception.ApiException;
 import com.eze.backend.restapi.model.Account;
 import com.eze.backend.restapi.repository.AccountRepository;
+import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.io.Serializable;
@@ -14,9 +19,9 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class AccountService implements IService<Account> {
+@RequiredArgsConstructor
+public class AccountService implements IService<Account>, UserDetailsService {
 
-    @Autowired
     private AccountRepository repository;
 
     @Override
@@ -66,5 +71,12 @@ public class AccountService implements IService<Account> {
     @Override
     public String alreadyExist(Serializable code) {
         return "Account with code " + code.toString() + " already exist";
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        Account account = repository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("No user found"));
+        return new EzeUserDetails(account);
     }
 }

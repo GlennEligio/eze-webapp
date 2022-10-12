@@ -2,6 +2,7 @@ package com.eze.backend.restapi.controller;
 
 import com.eze.backend.restapi.model.Student;
 import com.eze.backend.restapi.service.StudentService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,10 +11,10 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/v1")
 public class StudentController {
 
-    @Autowired
     private StudentService service;
 
     @GetMapping("/students")

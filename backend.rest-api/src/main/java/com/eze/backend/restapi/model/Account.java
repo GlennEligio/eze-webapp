@@ -22,6 +22,7 @@ public class Account implements Serializable {
     @Column(unique = true, nullable = false, name = "account_code")
     private String accountCode;
     private String fullName;
+    @Column(unique = true, nullable = false)
     private String username;
     private String email;
     private String password;
@@ -29,6 +30,7 @@ public class Account implements Serializable {
     private AccountType type;
     private byte[] profile;
     private LocalDateTime createdAt;
+    private Boolean active;
     @OneToOne(mappedBy = "account")
     private AccountFingerprint accountFingerprint;
 
@@ -50,6 +52,9 @@ public class Account implements Serializable {
         }
         if(newAccount.getUsername() != null) {
             this.setUsername(newAccount.getUsername());
+        }
+        if(newAccount.getActive() != null) {
+            this.setActive(newAccount.getActive());
         }
     }
 }

@@ -1,25 +1,21 @@
 package com.eze.backend.restapi.service;
 
 import com.eze.backend.restapi.exception.ApiException;
-import com.eze.backend.restapi.model.Account;
-import com.eze.backend.restapi.model.AccountFingerprint;
 import com.eze.backend.restapi.model.Student;
 import com.eze.backend.restapi.model.StudentFingerprint;
 import com.eze.backend.restapi.repository.StudentFingerprintRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.io.Serializable;
 import java.util.List;
-import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class StudentFingerprintService implements IService<StudentFingerprint>{
 
-    @Autowired
     private StudentFingerprintRepository repository;
-    @Autowired
     private StudentService studentService;
 
     @Override

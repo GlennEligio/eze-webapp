@@ -1,7 +1,9 @@
 package com.eze.backend.restapi.controller;
 
+import com.digitalpersona.onetouch._impl.DPFPFeatureSetFactoryImpl;
 import com.eze.backend.restapi.model.AccountFingerprint;
 import com.eze.backend.restapi.service.AccountFingerprintService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,12 +11,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-// TODO: Implement websocket alongside biometric validation (DFPF api) to properly validate fingerprint
+// TODO: Implement biometric authenticatio using DFPF api alongside biometric validation (DFPF api) to properly validate fingerprint
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/v1")
 public class AccountFingerprintController {
 
-    @Autowired
     private AccountFingerprintService service;
 
     @GetMapping("/accountFingerprints")

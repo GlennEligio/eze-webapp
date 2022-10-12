@@ -2,6 +2,7 @@ package com.eze.backend.restapi.controller;
 
 import com.eze.backend.restapi.model.StudentFingerprint;
 import com.eze.backend.restapi.service.StudentFingerprintService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -9,11 +10,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+// TODO: Implement biometric authenticatio using DFPF api alongside biometric validation (DFPF api) to properly validate fingerprint
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/v1")
 public class StudentFingerprintController {
 
-    @Autowired
     private StudentFingerprintService service;
 
     @GetMapping("/studentFingerprints")
