@@ -4,8 +4,8 @@ import { Buffer } from "buffer";
 export interface AuthState {
   accessToken: string;
   username: string;
-  type: string;
-  name: string;
+  accountType: string;
+  fullName: string;
 }
 
 interface JwtPayload {
@@ -43,8 +43,8 @@ const createIntialState = () => {
         ? (storedToken as string)
         : "",
     username: username !== null ? (username as string) : "",
-    type: type !== null ? (type as string) : "",
-    name: name !== null ? (name as string) : "",
+    accountType: type !== null ? (type as string) : "",
+    fullName: name !== null ? (name as string) : "",
   };
 };
 
@@ -58,24 +58,24 @@ const authSlice = createSlice({
       state.accessToken = action.payload.accessToken;
       localStorage.setItem("accessToken", action.payload.accessToken);
 
-      state.type = action.payload.type;
-      localStorage.setItem("type", action.payload.type);
+      state.accountType = action.payload.accountType;
+      localStorage.setItem("accountType", action.payload.accountType);
 
       state.username = action.payload.username;
       localStorage.setItem("username", action.payload.username);
 
-      state.name = action.payload.name;
-      localStorage.setItem("name", action.payload.name);
+      state.fullName = action.payload.fullName;
+      localStorage.setItem("fullName", action.payload.name);
     },
     removeAuth(state) {
       state.accessToken = "";
       localStorage.setItem("accessToken", "");
-      state.type = "";
-      localStorage.setItem("type", "");
+      state.accountType = "";
+      localStorage.setItem("accountType", "");
       state.username = "";
       localStorage.setItem("username", "");
-      state.name = "";
-      localStorage.setItem("name", "");
+      state.fullName = "";
+      localStorage.setItem("fullName", "");
     },
   },
 });

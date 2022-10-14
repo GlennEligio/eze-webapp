@@ -3,6 +3,7 @@ import { FC } from "react";
 interface MenuHeaderProps {
   type: string;
   name: string;
+  key: React.Key;
 }
 
 const MenuHeader: FC<MenuHeaderProps> = (props) => {
@@ -11,7 +12,7 @@ const MenuHeader: FC<MenuHeaderProps> = (props) => {
 
   return (
     <header>
-      <div className="border-bottom border-3 border-secondary pt-5 pb-2 gx-0">
+      <div className="border-bottom border-3 border-secondary pt-2 gx-0">
         <div className="d-flex justify-content-between">
           <div className="my-auto">
             <span className="fs-2">{accountType}</span>

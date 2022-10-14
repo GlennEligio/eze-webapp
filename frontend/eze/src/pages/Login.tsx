@@ -1,40 +1,11 @@
 import { FormEvent, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import AccountService from "../api/AccountService";
 import useHttp from "../hooks/useHttp";
 import useInput from "../hooks/useInput";
 import { authActions } from "../store/authSlice";
-interface LoginData {
-  username: string;
-  password: string;
-}
-
-interface AuthResponse {
-  account: {
-    username: string;
-    type: string;
-    fullname: string;
-  };
-  token: {
-    token: string;
-  };
-}
-
-const loginRequest = async (loginData: LoginData) => {
-  const responseObj = await fetch("http://localhost:3200/api/accounts/login", {
-    method: "POST",
-    body: JSON.stringify(loginData),
-    headers: {
-      "Content-Type": "application/json",
-    },
-  }).then((response) => {
-    if (response.ok) {
-      return response.json();
-    }
-    throw new Error("Invalid username/password");
-  });
-  return responseObj;
-};
+import { LoginResponseDto } from "../api/AccountService";
 
 const Login = () => {
   const validateUserPass = (input: string) => {
@@ -51,7 +22,10 @@ const Login = () => {
       errorMessage,
     };
   };
-  const { sendRequest, data, error, status } = useHttp(loginRequest, false);
+  const { sendRequest, data, error, status } = useHttp(
+    AccountService.login,
+    false
+  );
   const {
     value: enteredUname,
     hasError: unameInputHasError,
@@ -75,13 +49,13 @@ const Login = () => {
     if (status === "completed") {
       if (data) {
         if (error === null) {
-          const authResp = data as AuthResponse;
+          const authResp = data as LoginResponseDto;
           dispatch(
             authActions.saveAuth({
-              accessToken: authResp.token,
-              username: authResp.account.username,
-              type: authResp.account.type,
-              name: authResp.account.fullname,
+              accessToken: authResp.accessToken,
+              username: authResp.username,
+              accountType: authResp.accountType,
+              name: authResp.fullName,
             })
           );
           navigate("/");

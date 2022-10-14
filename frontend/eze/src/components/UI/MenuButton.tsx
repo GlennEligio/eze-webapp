@@ -9,6 +9,7 @@ interface MenuButtonProps {
   leftSpacer?: boolean;
   imgMaxHeight?: string;
   imgMaxWidth?: string;
+  key: React.Key;
 }
 
 const MenuButton: FC<MenuButtonProps> = (props) => {

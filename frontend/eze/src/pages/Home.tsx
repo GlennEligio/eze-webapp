@@ -10,9 +10,12 @@ const Home = () => {
   const [homeDisplay, setHomeDisplay] = useState<JSX.Element>(<></>);
 
   useEffect(() => {
-    if (!!auth.accessToken && auth.type === "ADMIN") {
+    if (
+      !!auth.accessToken &&
+      (auth.accountType === "ADMIN" || auth.accountType === "SADMIN")
+    ) {
       setHomeDisplay(<AdminMenu />);
-    } else if (!!auth.accessToken && auth.type === "USER") {
+    } else if (!!auth.accessToken && auth.accountType === "USER") {
       setHomeDisplay(<StudentMenu />);
     } else {
       setHomeDisplay(<Navigate to="/login" />);

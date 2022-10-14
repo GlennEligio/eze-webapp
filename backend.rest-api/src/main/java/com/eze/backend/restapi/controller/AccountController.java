@@ -45,7 +45,7 @@ public class AccountController {
         final String accessToken = jwtUtil.generateToken(userDetails);
         final String refreshToken = jwtUtil.generateRefreshToken(userDetails);
         log.info("Authentication success with jwt: " + accessToken);
-        return ResponseEntity.ok(new LoginResponseDto(userDetails.getUsername(), accessToken, refreshToken));
+        return ResponseEntity.ok(new LoginResponseDto(userDetails.getUsername(), userDetails.getAuthorities().stream().findFirst().get().toString(), userDetails.getFullName(), accessToken, refreshToken));
     }
 
     @PostMapping("/accounts/register")
@@ -58,7 +58,7 @@ public class AccountController {
         String accessToken = jwtUtil.generateToken(userDetails);
         String refreshToken = jwtUtil.generateRefreshToken(userDetails);
         log.info("Generated access token {}, and refresh token {}", accessToken, refreshToken);
-        return ResponseEntity.ok(new LoginResponseDto(userDetails.getUsername(), accessToken, refreshToken));
+        return ResponseEntity.ok(new LoginResponseDto(userDetails.getUsername(), userDetails.getAuthorities().stream().findFirst().get().toString(), userDetails.getFullName(), accessToken, refreshToken));
     }
 
     @GetMapping("/accounts")

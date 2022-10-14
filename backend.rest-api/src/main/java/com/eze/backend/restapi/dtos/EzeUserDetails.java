@@ -1,6 +1,7 @@
 package com.eze.backend.restapi.dtos;
 
 import com.eze.backend.restapi.model.Account;
+import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -8,12 +9,15 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.List;
 
+@Data
 public class EzeUserDetails implements UserDetails {
 
     private final Account account;
+    private String fullName;
 
     public EzeUserDetails(Account account) {
         this.account = account;
+        this.fullName = account.getFullName();
     }
 
     @Override

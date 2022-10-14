@@ -25,7 +25,8 @@ const App = () => {
             <Route
               path="/accounts"
               element={
-                auth.type === "ADMIN" ? (
+                auth.accountType === "ADMIN" ||
+                auth.accountType === "SADMIN" ? (
                   <Accounts />
                 ) : (
                   <Navigate to="/unauthorized" />

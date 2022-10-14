@@ -1,4 +1,4 @@
-import { MouseEventHandler, useEffect } from "react";
+import { FC, MouseEventHandler, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import AccountItem from "../components/Account/AccountItem";
@@ -6,7 +6,7 @@ import useHttp from "../hooks/useHttp";
 import { Account } from "../models/Account";
 import { IRootState } from "../store";
 
-const Accounts = () => {
+const Accounts: FC = () => {
   const auth = useSelector((state: IRootState) => state.auth);
   const navigate = useNavigate();
 

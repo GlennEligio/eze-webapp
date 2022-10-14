@@ -15,10 +15,13 @@ const StudentMenu = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!!auth.accessToken && (auth.type === "USER" || auth.type === "ADMIN"))
+    if (
+      !!auth.accessToken &&
+      ["SADMIN", "USER", "ADMIN"].includes(auth.accountType)
+    )
       return;
     navigate("/unauthorized");
-  }, [auth.accessToken, auth.type, navigate]);
+  }, [auth.accessToken, auth.accountType, navigate]);
 
   const logout: MouseEventHandler = (event) => {
     dispatch(authActions.removeAuth());
@@ -29,7 +32,11 @@ const StudentMenu = () => {
     <div className="container-md d-flex flex-column h-100">
       {/* <!-- Header --> */}
       <div className="row">
-        <MenuHeader name={auth.name} type={auth.type} key={auth.accessToken} />
+        <MenuHeader
+          name={auth.fullName}
+          type={auth.accountType}
+          key={auth.accessToken}
+        />
       </div>
       {/* <!-- Main --> */}
       <div className="row">
