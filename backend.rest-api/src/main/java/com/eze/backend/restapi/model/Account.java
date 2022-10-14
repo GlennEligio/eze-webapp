@@ -1,6 +1,7 @@
 package com.eze.backend.restapi.model;
 
 import com.eze.backend.restapi.enums.AccountType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,13 +15,10 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Account implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(unique = true, nullable = false, name = "account_code")
-    private String accountCode;
     private String fullName;
     @Column(unique = true, nullable = false)
     private String username;
@@ -31,8 +29,8 @@ public class Account implements Serializable {
     private byte[] profile;
     private LocalDateTime createdAt;
     private Boolean active;
-    @OneToOne(mappedBy = "account")
-    private AccountFingerprint accountFingerprint;
+//    @OneToOne(mappedBy = "account")
+//    private AccountFingerprint accountFingerprint;
 
     public void update(Account newAccount) {
         if(newAccount.getEmail() != null) {

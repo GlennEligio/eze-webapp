@@ -11,11 +11,9 @@ import java.util.List;
 public class EzeUserDetails implements UserDetails {
 
     private final Account account;
-    private final String accountCode;
 
     public EzeUserDetails(Account account) {
         this.account = account;
-        this.accountCode = account.getAccountCode();
     }
 
     @Override
@@ -51,9 +49,5 @@ public class EzeUserDetails implements UserDetails {
     @Override
     public boolean isEnabled() {
         return account.getActive();
-    }
-
-    public String getAccountCode() {
-        return accountCode;
     }
 }

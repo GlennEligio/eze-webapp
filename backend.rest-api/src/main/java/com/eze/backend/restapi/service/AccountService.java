@@ -4,13 +4,14 @@ import com.eze.backend.restapi.dtos.EzeUserDetails;
 import com.eze.backend.restapi.exception.ApiException;
 import com.eze.backend.restapi.model.Account;
 import com.eze.backend.restapi.repository.AccountRepository;
-import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.io.Serializable;
@@ -19,10 +20,16 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-@RequiredArgsConstructor
+@Slf4j
 public class AccountService implements IService<Account>, UserDetailsService {
 
-    private AccountRepository repository;
+    private final AccountRepository repository;
+    private final PasswordEncoder passwordEncoder;
+
+    public AccountService(AccountRepository repository, @Lazy PasswordEncoder passwordEncoder) {
+        this.repository = repository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @Override
     public List<Account> getAll() {
@@ -30,53 +37,56 @@ public class AccountService implements IService<Account>, UserDetailsService {
     }
 
     @Override
-    public Account get(Serializable code) {
-        return repository.findByAccountCode(code.toString())
-                .orElseThrow(() -> new ApiException(notFound(code), HttpStatus.NOT_FOUND));
+    public Account get(Serializable username) {
+        return repository.findByUsername(username.toString())
+                .orElseThrow(() -> new ApiException(notFound(username), HttpStatus.NOT_FOUND));
     }
 
     @Override
     public Account create(Account account) {
-        if (account.getAccountCode() != null) {
-            Optional<Account> accOp = repository.findByAccountCode(account.getAccountCode());
+        if (account.getUsername() != null) {
+            Optional<Account> accOp = repository.findByUsername(account.getUsername());
             if (accOp.isPresent()) {
-                throw new ApiException(alreadyExist(account.getAccountCode()), HttpStatus.BAD_REQUEST);
+                throw new ApiException(alreadyExist(account.getUsername()), HttpStatus.BAD_REQUEST);
             }
+            account.setPassword(passwordEncoder.encode(account.getPassword()));
+            account.setCreatedAt(LocalDateTime.now());
+            account.setActive(true);
+            return repository.save(account);
         }
-        account.setAccountCode(new ObjectId().toHexString());
-        account.setCreatedAt(LocalDateTime.now());
-        return repository.save(account);
+        throw new ApiException("No username found in Account to create", HttpStatus.BAD_REQUEST);
     }
 
     @Override
-    public Account update(Account account, Serializable code) {
-        Account account1 = repository.findByAccountCode(code.toString())
-                .orElseThrow(() -> new ApiException(notFound(code), HttpStatus.NOT_FOUND));
-        account1.update(account);
+    public Account update(Account account, Serializable username) {
+        Account account1 = repository.findByUsername(username.toString())
+                .orElseThrow(() -> new ApiException(notFound(username), HttpStatus.NOT_FOUND));
         return repository.save(account1);
     }
 
     @Override
-    public void delete(Serializable code) {
-        Account account = repository.findByAccountCode(code.toString())
-                .orElseThrow(() -> new ApiException(notFound(code), HttpStatus.NOT_FOUND));
+    public void delete(Serializable username) {
+        Account account = repository.findByUsername(username.toString())
+                .orElseThrow(() -> new ApiException(notFound(username), HttpStatus.NOT_FOUND));
         repository.delete(account);
     }
 
     @Override
-    public String notFound(Serializable code) {
-        return "No account with account code " + code.toString() + " was found";
+    public String notFound(Serializable username) {
+        return "No account with account username " + username.toString() + " was found";
     }
 
     @Override
-    public String alreadyExist(Serializable code) {
-        return "Account with code " + code.toString() + " already exist";
+    public String alreadyExist(Serializable username) {
+        return "Account with username " + username.toString() + " already exist";
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        log.info("Loading account with username {}", username);
         Account account = repository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("No user found"));
+                .orElseThrow(() -> new UsernameNotFoundException("No account found with username " + username));
+        log.info("Account found: {}", account);
         return new EzeUserDetails(account);
     }
 }

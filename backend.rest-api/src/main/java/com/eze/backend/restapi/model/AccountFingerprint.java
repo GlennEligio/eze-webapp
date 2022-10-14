@@ -18,7 +18,7 @@ public class AccountFingerprint implements Serializable {
     private Long id;
     private Byte[] fingerprint;
     @OneToOne
-    @JoinColumn(name = "account_code_ref", referencedColumnName = "account_code")
+    @JoinColumn(name = "account_username", referencedColumnName = "username")
     private Account account;
 
     public void update(AccountFingerprint ufNew) {

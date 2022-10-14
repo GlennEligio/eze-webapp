@@ -10,7 +10,7 @@ public interface AccountFingerprintRepository extends JpaRepository<AccountFinge
 
     @Query("SELECT fp FROM AccountFingerprint fp " +
             "LEFT JOIN fp.account ac " +
-            "WHERE ac.accountCode=?1")
-    Optional<AccountFingerprint> findByAccountCode(String accountCode);
+            "WHERE ac.username=:username")
+    Optional<AccountFingerprint> findByAccountUsername(String username);
 }
 

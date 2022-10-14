@@ -2,16 +2,18 @@ package com.eze.backend.restapi.config;
 
 import com.eze.backend.restapi.filter.JwtAuthFilter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -24,11 +26,16 @@ import java.util.List;
 
 
 @Configuration
-@RequiredArgsConstructor
+@EnableWebSecurity
 public class SecurityConfiguration {
 
-    private JwtAuthFilter jwtAuthFilter;
-    private UserDetailsService userDetailsService;
+    private final UserDetailsService userDetailsService;
+    private final JwtAuthFilter jwtAuthFilter;
+
+    public SecurityConfiguration(UserDetailsService userDetailsService, JwtAuthFilter jwtAuthFilter) {
+        this.userDetailsService = userDetailsService;
+        this.jwtAuthFilter = jwtAuthFilter;
+    }
 
     @Bean
     public PasswordEncoder getPasswordEncoder() {
@@ -37,11 +44,16 @@ public class SecurityConfiguration {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.authorizeRequests().antMatchers("/api/v1/accounts/login").permitAll()
+        http.cors().and().csrf().disable()
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and().authorizeRequests()
+                .antMatchers("/api/v1/accounts/login", "/api/v1/accounts/register").permitAll()
+                // TODO: Configure properly route guarding with other Account Types
+                .antMatchers(HttpMethod.POST, "/**").hasAnyAuthority("SADMIN", "ADMIN", "STUDENT_ASSISTANT")
+                .antMatchers(HttpMethod.PUT, "/**").hasAnyAuthority("SADMIN", "ADMIN", "STUDENT_ASSISTANT")
+                .antMatchers(HttpMethod.DELETE, "/**").hasAnyAuthority("SADMIN", "ADMIN", "STUDENT_ASSISTANT")
                 .anyRequest().authenticated();
-        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-        http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
-        http.cors();
         return http.build();
     }
 
