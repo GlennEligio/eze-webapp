@@ -2,7 +2,7 @@ import { FormEvent, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import AccountService from "../api/AccountService";
-import useHttp from "../hooks/useHttp";
+import useHttp, { RequestConfig } from "../hooks/useHttp";
 import useInput from "../hooks/useInput";
 import { authActions } from "../store/authSlice";
 import { LoginResponseDto } from "../api/AccountService";
@@ -73,10 +73,14 @@ const Login = () => {
     if (!enteredUnameIsValid || !enteredPassIsValid) {
       return;
     }
-    login({
-      requestBody: { username: enteredUname, password: enteredPass },
-      requestConfig: null,
-    });
+
+    const requestConf: RequestConfig = {
+      body: { username: enteredUname, password: enteredPass },
+      headers: {
+        "Content-type": "application/json",
+      },
+    };
+    login(requestConf);
 
     resetPassInput();
     resetUnameInput();

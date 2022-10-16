@@ -1,14 +1,18 @@
-import React, { useRef, useState } from "react";
-import useHttp from "../../hooks/useHttp";
+import React, { useRef, useState, useEffect } from "react";
+import useHttp, { RequestConfig } from "../../hooks/useHttp";
 import { Equipment, CreateEquipmentDto } from "../../api/EquipmentService";
 import * as EquipmentService from "../../api/EquipmentService";
 import { useSelector } from "react-redux";
 import { IRootState } from "../../store";
+import { equipmentActions } from "../../store/equipmentSlice";
+import { useDispatch } from "react-redux";
 
 const AddEquipmentForm = () => {
   const addEquipmentForm = useRef<HTMLFormElement>(null);
   const submitButton = useRef<HTMLButtonElement>(null);
   const auth = useSelector((state: IRootState) => state.auth);
+  const equipment = useSelector((state: IRootState) => state.equipment);
+  const dispatch = useDispatch();
   const [name, setName] = useState("");
   const [status, setStatus] = useState("GOOD");
   const [barcode, setBarcode] = useState("");
@@ -16,10 +20,18 @@ const AddEquipmentForm = () => {
   const [isDuplicable, setIsDuplicable] = useState(true);
   const {
     sendRequest: createEquipment,
-    data: equipment,
+    data,
     error,
     status: requestStatus,
   } = useHttp<Equipment>(EquipmentService.createEquipment, false);
+
+  useEffect(() => {
+    if (requestStatus == "completed") {
+      if (error == null) {
+        dispatch(equipmentActions.addEquipment({ newEquipment: data }));
+      }
+    }
+  }, [data]);
 
   const onAddEquipment = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -30,10 +42,15 @@ const AddEquipmentForm = () => {
       defectiveSince: defectiveSince,
       isDuplicable: isDuplicable,
     };
-    createEquipment({
-      requestConfig: { jwt: auth.accessToken },
-      requestBody: newEquipment,
-    });
+
+    const requestConf: RequestConfig = {
+      body: newEquipment,
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`,
+        "Content-type": "application/json",
+      },
+    };
+    createEquipment(requestConf);
   };
 
   return (

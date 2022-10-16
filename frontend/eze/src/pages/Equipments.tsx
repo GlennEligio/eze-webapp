@@ -4,14 +4,18 @@ import { useSelector } from "react-redux";
 import { IRootState } from "../store";
 import { Equipment } from "../api/EquipmentService";
 import * as EquipmentService from "../api/EquipmentService";
-import useHttp from "../hooks/useHttp";
+import useHttp, { RequestConfig } from "../hooks/useHttp";
 import EquipmentItem from "../components/Equipment/EquipmentItem";
 import EquipmentModal from "../components/Equipment/EquipmentModal";
+import { equipmentActions } from "../store/equipmentSlice";
+import { useDispatch } from "react-redux";
 
 function Equipments() {
+  const equipment = useSelector((state: IRootState) => state.equipment);
+  const dispatch = useDispatch();
   const {
     sendRequest: getEquipments,
-    data: equipments,
+    data,
     error,
     status,
   } = useHttp<Equipment[]>(EquipmentService.getEquipments, false);
@@ -22,6 +26,7 @@ function Equipments() {
   };
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
 
+  // For updating time in footer
   useEffect(() => {
     setTimeout(() => {
       const newTime = new Date();
@@ -29,12 +34,20 @@ function Equipments() {
     }, 1000);
   }, [currentTime]);
 
+  // Fetch Equipments on mount from backend api
   useEffect(() => {
-    getEquipments({
-      requestBody: null,
-      requestConfig: { jwt: auth.accessToken },
-    });
+    const requestConfig: RequestConfig = {
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`,
+      },
+    };
+    getEquipments(requestConfig);
   }, []);
+
+  // For setting the equipmentState based on data from useHttp
+  useEffect(() => {
+    dispatch(equipmentActions.saveEquipments({ equipments: data }));
+  }, [data]);
 
   return (
     <>
@@ -109,8 +122,8 @@ function Equipments() {
                       </tr>
                     </thead>
                     <tbody>
-                      {equipments != null &&
-                        equipments.map((eq) => {
+                      {equipment.equipments != null &&
+                        equipment.equipments.map((eq) => {
                           return (
                             <EquipmentItem
                               key={eq.id}
@@ -126,7 +139,7 @@ function Equipments() {
             <div className="row py-3 mt-auto">
               <div className="col d-flex justify-content-between align-items-center">
                 <div>
-                  <h5>List of Equipments: {equipments?.length}</h5>
+                  <h5>List of Equipments: {equipment.equipments?.length}</h5>
                 </div>
                 <div className="d-flex flex-column justify-content-center align-items-end">
                   <span>1:46 AM</span>

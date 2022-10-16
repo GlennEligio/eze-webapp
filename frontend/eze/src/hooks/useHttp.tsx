@@ -18,11 +18,12 @@ interface RequestAction {
   errorMessage?: any;
 }
 
-interface RequestData {
-  requestBody: { [prop: string]: any } | null;
-  requestConfig: {
-    jwt: string;
-  } | null;
+export interface RequestConfig {
+  body?: { [props: string]: any };
+  headers?: {
+    [header: string]: string;
+  };
+  method?: string;
 }
 
 const createDataFetchReducer =
@@ -92,13 +93,10 @@ function useHttp<T>(requestFunction: Function, startWithPending = false) {
   });
 
   const sendRequest = useCallback(
-    async function (requestData?: RequestData) {
+    async function (requestConfig?: RequestConfig) {
       dispatch({ type: RequestActionKind.SEND });
       try {
-        const responseData = await requestFunction(
-          requestData?.requestConfig?.jwt,
-          requestData?.requestBody
-        );
+        const responseData = await requestFunction(requestConfig);
         dispatch({ type: RequestActionKind.SUCCESS, responseData });
       } catch (error) {
         dispatch({

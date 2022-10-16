@@ -1,3 +1,5 @@
+import { RequestConfig } from "../hooks/useHttp";
+
 export interface Equipment {
   id: number;
   equipmentCode: string;
@@ -19,14 +21,12 @@ export interface CreateEquipmentDto {
 
 const BACKEND_URI = "http://localhost:8080";
 
-const getEquipments = async (jwt: string) => {
+const getEquipments = async (requestConfig: RequestConfig) => {
   const responseObj: Equipment[] = await fetch(
     `${BACKEND_URI}/api/v1/equipments`,
     {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${jwt}`,
-      },
+      method: requestConfig.method || "GET",
+      headers: requestConfig.headers != null ? requestConfig.headers : {},
     }
   ).then((response) => {
     if (response.ok) {
@@ -37,17 +37,14 @@ const getEquipments = async (jwt: string) => {
   return responseObj;
 };
 
-const createEquipment = async (jwt: string, equipment: CreateEquipmentDto) => {
-  console.log(equipment);
+const createEquipment = async (requestConfig: RequestConfig) => {
   const responseObj: Equipment = await fetch(
     `${BACKEND_URI}/api/v1/equipments`,
     {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${jwt}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(equipment),
+      method: requestConfig.method || "POST",
+      body:
+        requestConfig.body != null ? JSON.stringify(requestConfig.body) : null,
+      headers: requestConfig.headers != null ? requestConfig.headers : {},
     }
   ).then((response) => {
     if (response.ok) {

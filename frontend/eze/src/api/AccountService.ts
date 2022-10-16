@@ -1,3 +1,5 @@
+import { RequestConfig } from "../hooks/useHttp";
+
 export interface LoginRequestDto {
   username: string;
   password: string;
@@ -13,15 +15,14 @@ export interface LoginResponseDto {
 
 const BACKEND_URI = "http://localhost:8080";
 
-const login = async (loginData: LoginRequestDto) => {
+const login = async (requestConfig: RequestConfig) => {
   const responseObj: LoginResponseDto = await fetch(
     `${BACKEND_URI}/api/v1/accounts/login`,
     {
-      method: "POST",
-      body: JSON.stringify(loginData),
-      headers: {
-        "Content-Type": "application/json",
-      },
+      method: requestConfig.method || "POST",
+      body:
+        requestConfig.body != null ? JSON.stringify(requestConfig.body) : null,
+      headers: requestConfig.headers != null ? requestConfig.headers : {},
     }
   ).then((response) => {
     if (response.ok) {
