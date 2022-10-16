@@ -18,6 +18,13 @@ interface RequestAction {
   errorMessage?: any;
 }
 
+interface RequestData {
+  requestBody: { [prop: string]: any } | null;
+  requestConfig: {
+    jwt: string;
+  } | null;
+}
+
 const createDataFetchReducer =
   <T,>() =>
   (state: RequestState<T>, action: RequestAction): RequestState<T> => {
@@ -26,12 +33,14 @@ const createDataFetchReducer =
         return {
           ...state,
           isLoading: true,
+          status: "pending",
         } as RequestState<T>;
       case RequestActionKind.SUCCESS: {
         return {
           ...state,
           isLoading: false,
           isError: false,
+          status: "completed",
           data: action.responseData,
         } as RequestState<T>;
       }
@@ -40,6 +49,7 @@ const createDataFetchReducer =
           ...state,
           isLoading: false,
           isError: true,
+          status: "completed",
         } as RequestState<T>;
       default:
         throw new Error("Action not supported");
@@ -82,10 +92,13 @@ function useHttp<T>(requestFunction: Function, startWithPending = false) {
   });
 
   const sendRequest = useCallback(
-    async function (requestData?: any) {
+    async function (requestData?: RequestData) {
       dispatch({ type: RequestActionKind.SEND });
       try {
-        const responseData = await requestFunction(requestData);
+        const responseData = await requestFunction(
+          requestData?.requestConfig?.jwt,
+          requestData?.requestBody
+        );
         dispatch({ type: RequestActionKind.SUCCESS, responseData });
       } catch (error) {
         dispatch({

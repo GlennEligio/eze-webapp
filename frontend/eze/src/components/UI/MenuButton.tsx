@@ -31,7 +31,7 @@ const MenuButton: FC<MenuButtonProps> = (props) => {
         src={props.imageLoc}
         alt={props.title}
       />
-      <span className="fs-4 text-white mt-auto">{props.title}</span>
+      <span className="fs-4 text-white mt-auto text-center">{props.title}</span>
     </div>
   );
 };

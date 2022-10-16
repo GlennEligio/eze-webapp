@@ -22,10 +22,12 @@ const Login = () => {
       errorMessage,
     };
   };
-  const { sendRequest, data, error, status } = useHttp(
-    AccountService.login,
-    false
-  );
+  const {
+    sendRequest: login,
+    data,
+    error,
+    status,
+  } = useHttp<LoginResponseDto>(AccountService.login, false);
   const {
     value: enteredUname,
     hasError: unameInputHasError,
@@ -71,8 +73,10 @@ const Login = () => {
     if (!enteredUnameIsValid || !enteredPassIsValid) {
       return;
     }
-
-    sendRequest({ username: enteredUname, password: enteredPass });
+    login({
+      requestBody: { username: enteredUname, password: enteredPass },
+      requestConfig: null,
+    });
 
     resetPassInput();
     resetUnameInput();
