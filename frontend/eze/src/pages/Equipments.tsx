@@ -1,11 +1,29 @@
-import { MouseEventHandler } from "react";
+import { MouseEventHandler, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { IRootState } from "../store";
+import { Equipment } from "../api/EquipmentService";
+import * as EquipmentService from "../api/EquipmentService";
+import useHttp from "../hooks/useHttp";
+import EquipmentItem from "../components/Equipment/EquipmentItem";
 
 function Equipments() {
+  const [equipments, setEquipments] = useState<Equipment[]>();
+  const {
+    sendRequest: getEquipments,
+    data,
+    error,
+    status,
+  } = useHttp<Equipment[]>(EquipmentService.getEquipments, false);
+  const auth = useSelector((state: IRootState) => state.auth);
   const navigate = useNavigate();
   const backBtnHandler: MouseEventHandler = () => {
     navigate("/");
   };
+
+  useEffect(() => {
+    getEquipments(auth.accessToken);
+  }, []);
 
   return (
     <div className="container-md d-flex flex-column h-100">
@@ -64,29 +82,26 @@ function Equipments() {
                 >
                   <thead className="table-dark">
                     <tr>
-                      <th>Student Number</th>
-                      <th>Full Name</th>
-                      <th>Year and Section</th>
-                      <th>Contact Number</th>
-                      <th>Birthday</th>
-                      <th>Address</th>
-                      <th>Email</th>
-                      <th>Guardian</th>
-                      <th>Guardian Number</th>
+                      <th>Id</th>
+                      <th>Equipment Code</th>
+                      <th>Name</th>
+                      <th>Status</th>
+                      <th>Defective Since</th>
+                      <th>Duplicable?</th>
+                      <th>Borrowed?</th>
+                      <th>Barcode</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr>
-                      <td>2015-00129-MN-0</td>
-                      <td>John Glenn Eligio</td>
-                      <td>BSECE 5-3</td>
-                      <td>09062560574</td>
-                      <td>January 1, 1996</td>
-                      <td>Malabon City</td>
-                      <td>johnglenneligio@yahoo.com</td>
-                      <td>Jaydee Eligio</td>
-                      <td>09560574842</td>
-                    </tr>
+                    {data != null &&
+                      data.map((eq) => {
+                        return (
+                          <EquipmentItem
+                            key={eq.id}
+                            equipment={eq}
+                          ></EquipmentItem>
+                        );
+                      })}
                   </tbody>
                 </table>
               </div>

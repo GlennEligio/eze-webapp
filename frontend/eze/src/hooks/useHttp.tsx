@@ -6,8 +6,8 @@ enum RequestActionKind {
   ERROR = "ERROR",
 }
 
-interface RequestState {
-  data: object | null;
+interface RequestState<T> {
+  data: T | null;
   error: string | null;
   status: "pending" | "completed" | null;
 }
@@ -18,36 +18,64 @@ interface RequestAction {
   errorMessage?: any;
 }
 
-function httpReducer(state: RequestState, action: RequestAction): RequestState {
-  if (action.type === RequestActionKind.SEND) {
-    return {
-      data: null,
-      error: null,
-      status: "pending",
-    };
-  }
+const createDataFetchReducer =
+  <T,>() =>
+  (state: RequestState<T>, action: RequestAction): RequestState<T> => {
+    switch (action.type) {
+      case RequestActionKind.SEND:
+        return {
+          ...state,
+          isLoading: true,
+        } as RequestState<T>;
+      case RequestActionKind.SUCCESS: {
+        return {
+          ...state,
+          isLoading: false,
+          isError: false,
+          data: action.responseData,
+        } as RequestState<T>;
+      }
+      case RequestActionKind.ERROR:
+        return {
+          ...state,
+          isLoading: false,
+          isError: true,
+        } as RequestState<T>;
+      default:
+        throw new Error("Action not supported");
+    }
+  };
 
-  if (action.type === RequestActionKind.SUCCESS) {
-    return {
-      data: action.responseData,
-      error: null,
-      status: "completed",
-    };
-  }
+// function httpReducer(state: RequestState, action: RequestAction): RequestState {
+//   if (action.type === RequestActionKind.SEND) {
+//     return {
+//       data: null,
+//       error: null,
+//       status: "pending",
+//     };
+//   }
 
-  if (action.type === RequestActionKind.ERROR) {
-    return {
-      data: null,
-      error: action.errorMessage,
-      status: "completed",
-    };
-  }
+//   if (action.type === RequestActionKind.SUCCESS) {
+//     return {
+//       data: action.responseData,
+//       error: null,
+//       status: "completed",
+//     };
+//   }
 
-  return state;
-}
+//   if (action.type === RequestActionKind.ERROR) {
+//     return {
+//       data: null,
+//       error: action.errorMessage,
+//       status: "completed",
+//     };
+//   }
 
-function useHttp(requestFunction: Function, startWithPending = false) {
-  const [httpState, dispatch] = useReducer(httpReducer, {
+//   return state;
+// }
+
+function useHttp<T>(requestFunction: Function, startWithPending = false) {
+  const [httpState, dispatch] = useReducer(createDataFetchReducer<T>(), {
     status: startWithPending ? "pending" : null,
     data: null,
     error: null,

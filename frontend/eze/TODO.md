@@ -8,3 +8,5 @@
    - /transactions
 4. Add pagination to the resource tables like equipments, students, transactions, etc
 5. Make useHttp hook generic, where we can pass the "data" type
+6. Add CRUD functionality to resources like Equipment, Transaction, Students. etc
+7. Fix Admin and Student Assistant menu
