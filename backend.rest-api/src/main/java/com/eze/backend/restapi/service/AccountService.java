@@ -33,6 +33,7 @@ public class AccountService implements IService<Account>, UserDetailsService {
 
     @Override
     public List<Account> getAll() {
+        log.info("Fetching all accounts");
         return repository.findAll();
     }
 
@@ -44,6 +45,7 @@ public class AccountService implements IService<Account>, UserDetailsService {
 
     @Override
     public Account create(Account account) {
+        log.info("Adding account: {}", account);
         if (account.getUsername() != null) {
             Optional<Account> accOp = repository.findByUsername(account.getUsername());
             if (accOp.isPresent()) {
@@ -59,6 +61,7 @@ public class AccountService implements IService<Account>, UserDetailsService {
 
     @Override
     public Account update(Account account, Serializable username) {
+        log.info("Updating account: {}", account);
         Account account1 = repository.findByUsername(username.toString())
                 .orElseThrow(() -> new ApiException(notFound(username), HttpStatus.NOT_FOUND));
         return repository.save(account1);
@@ -66,6 +69,7 @@ public class AccountService implements IService<Account>, UserDetailsService {
 
     @Override
     public void delete(Serializable username) {
+        log.info("Deleting account: {}", username);
         Account account = repository.findByUsername(username.toString())
                 .orElseThrow(() -> new ApiException(notFound(username), HttpStatus.NOT_FOUND));
         repository.delete(account);

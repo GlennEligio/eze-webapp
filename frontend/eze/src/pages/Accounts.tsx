@@ -1,39 +1,77 @@
-import { FC, MouseEventHandler, useEffect } from "react";
+import { FC, MouseEventHandler, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import AccountItem from "../components/Account/AccountItem";
-import useHttp from "../hooks/useHttp";
-import { Account } from "../models/Account";
+import useHttp, { RequestConfig } from "../hooks/useHttp";
+import { Account } from "../api/AccountService";
 import { IRootState } from "../store";
+import AccountService from "../api/AccountService";
+import { useDispatch } from "react-redux";
+import { accountActions } from "../store/accountSlice";
+import AddAccountModal from "../components/UI/Modal/AddAccountModal";
+import UpdateAccountModal from "../components/UI/Modal/UpdateAccountModal";
+import DeleteAccountModal from "../components/UI/Modal/DeleteAccountModal";
 
 const Accounts: FC = () => {
   const auth = useSelector((state: IRootState) => state.auth);
+  const account = useSelector((state: IRootState) => state.account);
   const navigate = useNavigate();
-
-  const fetchAccounts = async () => {
-    const responseObj = fetch("http://localhost:3200/api/accounts", {
-      headers: {
-        Authorization: `Bearer ${auth.accessToken}`,
-        "Content-Type": "application/json",
-      },
-    }).then((res) => {
-      if (res.ok) {
-        return res.json();
-      }
-      throw new Error("Cant fetch the account list");
-    });
-    return responseObj;
-  };
-
-  const { data: accounts, error, sendRequest } = useHttp(fetchAccounts, true);
+  const dispatch = useDispatch();
+  const {
+    sendRequest: getAccounts,
+    data,
+    error,
+    status,
+  } = useHttp<Account[]>(AccountService.getAccounts, true);
+  const [currentTime, setCurrentTime] = useState<Date>(new Date());
+  const dateString = `${new Intl.DateTimeFormat("en-US", {
+    day: "2-digit",
+  }).format(currentTime)} ${new Intl.DateTimeFormat("en-US", {
+    month: "short",
+  }).format(currentTime)} ${new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+  }).format(currentTime)}`;
 
   const backBtnHandler: MouseEventHandler = () => {
     navigate("/");
   };
 
+  // Fetch all accounts on start
   useEffect(() => {
-    sendRequest();
-  }, [accounts]);
+    fetchAccounts();
+  }, []);
+
+  // For updating time in footer
+  useEffect(() => {
+    setTimeout(() => {
+      const newTime = new Date();
+      setCurrentTime(newTime);
+    }, 1000);
+  }, [currentTime]);
+
+  // Add all accounts in the Context
+  useEffect(() => {
+    if (data != null) {
+      dispatch(accountActions.addAccounts({ accounts: data }));
+    }
+  }, [data]);
+
+  // onclick handler to update selected account
+  const onUpdateSelectedAccount = (account: Account) => {
+    dispatch(
+      accountActions.updateSelectedAccount({ selectedAccount: account })
+    );
+  };
+
+  // fetches all accounts
+  const fetchAccounts = () => {
+    const requestConf: RequestConfig = {
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`,
+      },
+    };
+    getAccounts(requestConf);
+  };
 
   return (
     <div className="container-md d-flex flex-column h-100">
@@ -64,36 +102,44 @@ const Accounts: FC = () => {
       <div className="row h-80">
         <main className="col-12 d-flex flex-column h-100 pb-4">
           {/* <!-- User info table --> */}
-          {accounts instanceof Array && accounts.length > 0 && (
-            <div className="row gx-0 overflow-auto">
-              <div className="col-12 table-responsive-xxl">
+          <div className="row mt-2 gx-0 overflow-auto">
+            <div className="col">
+              <div className="table-responsive-xxl">
                 <table
                   className="table table-hover"
-                  style={{ minWidth: "1200px" }}
+                  style={{ minWidth: "1300px" }}
                 >
                   <thead className="table-dark">
                     <tr>
+                      <th>Id</th>
                       <th>Full name</th>
                       <th>Username</th>
-                      <th>User type</th>
-                      <th>Date and Time Registered</th>
                       <th>Email</th>
+                      <th>Type</th>
+                      <th>Created at</th>
+                      <th>Active</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {accounts.map((account: Account) => (
-                      <AccountItem account={account} key={account._id} />
-                    ))}
+                    {account.accounts &&
+                      account.accounts.length > 0 &&
+                      account.accounts.map((a) => {
+                        return (
+                          <AccountItem
+                            account={a}
+                            focused={
+                              account.selectedAccount?.username === a.username
+                            }
+                            onRowClick={onUpdateSelectedAccount}
+                            key={a.username}
+                          />
+                        );
+                      })}
                   </tbody>
                 </table>
               </div>
             </div>
-          )}
-          {accounts instanceof Array && accounts.length === 0 && (
-            <div className="d-flex justify-content-center">
-              <span>Empty account list</span>
-            </div>
-          )}
+          </div>
           {error && (
             <div className="d-flex justify-content-center">
               <span className="text-danger">
@@ -107,30 +153,57 @@ const Accounts: FC = () => {
             <div className="col-2"></div>
             <div className="col d-flex justify-content-center align-items-center">
               <div className="px-4">
-                <button className="btn btn-outline-dark">
+                <button
+                  className="btn btn-dark"
+                  data-bs-target="#addAccountModal"
+                  data-bs-toggle="modal"
+                >
                   <i className="bi bi-person-plus-fill fs-5"></i>
                   <span>Add</span>
                 </button>
               </div>
               <div className="px-4">
-                <button className="btn btn-outline-dark">
+                <button
+                  className="btn btn-dark"
+                  data-bs-target="#updateAccountModal"
+                  data-bs-toggle="modal"
+                  disabled={account.selectedAccount === null}
+                >
                   <i className="bi bi-pencil-fill fs-5"></i>
                   <span>Edit</span>
                 </button>
               </div>
               <div className="px-4">
-                <button className="btn btn-outline-dark">
+                <button
+                  className="btn btn-dark"
+                  data-bs-target="#deleteAccountModal"
+                  data-bs-toggle="modal"
+                  disabled={account.selectedAccount === null}
+                >
                   <i className="bi bi-trash-fill fs-5"></i>
                   <span>Delete</span>
                 </button>
               </div>
             </div>
             <div className="col-2 d-flex flex-column align-items-end justify-content-center">
-              <span>1:49 AM</span>
-              <span>12 Oct 2019</span>
+              <div className="d-flex flex-column justify-content-center align-items-end">
+                <span>
+                  {new Intl.DateTimeFormat("en-US", {
+                    hour: "numeric",
+                    minute: "numeric",
+                    hour12: true,
+                  }).format(currentTime)}
+                </span>
+                <span>{dateString}</span>
+              </div>
             </div>
           </div>
         </main>
+      </div>
+      <div>
+        <AddAccountModal />
+        <UpdateAccountModal />
+        <DeleteAccountModal />
       </div>
     </div>
   );

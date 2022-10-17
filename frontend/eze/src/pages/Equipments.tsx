@@ -28,6 +28,13 @@ function Equipments() {
     navigate("/");
   };
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
+  const dateString = `${new Intl.DateTimeFormat("en-US", {
+    day: "2-digit",
+  }).format(currentTime)} ${new Intl.DateTimeFormat("en-US", {
+    month: "short",
+  }).format(currentTime)} ${new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+  }).format(currentTime)}`;
 
   // For updating time in footer
   useEffect(() => {
@@ -39,12 +46,7 @@ function Equipments() {
 
   // Fetch Equipments on mount from backend api
   useEffect(() => {
-    const requestConfig: RequestConfig = {
-      headers: {
-        Authorization: `Bearer ${auth.accessToken}`,
-      },
-    };
-    getEquipments(requestConfig);
+    fetchEquipments();
   }, []);
 
   // For setting the equipmentState based on data from useHttp
@@ -57,6 +59,16 @@ function Equipments() {
     dispatch(
       equipmentActions.updateSelectedEquipment({ selectedEquipment: equipment })
     );
+  };
+
+  // sends request to fetch equipment
+  const fetchEquipments = () => {
+    const requestConfig: RequestConfig = {
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`,
+      },
+    };
+    getEquipments(requestConfig);
   };
 
   return (
@@ -91,11 +103,14 @@ function Equipments() {
           <main className="col-12 d-flex flex-column h-100">
             <div className="row mt-2 gx-1">
               <div className="col d-flex align-items-center justify-content-end">
-                <div className="d-flex align-items-center px-2">
+                <div
+                  className="d-flex align-items-center px-2"
+                  onClick={() => fetchEquipments()}
+                >
                   <i className="bi bi-arrow-repeat fs-4 me-1"></i>
                 </div>
                 <button
-                  className="d-flex align-items-center px-2 ms-2 btn btn-sm btn-outline-dark"
+                  className="d-flex align-items-center px-2 ms-2 btn btn-sm btn-dark"
                   data-bs-toggle="modal"
                   data-bs-target="#addEquipmentModal"
                 >
@@ -103,7 +118,7 @@ function Equipments() {
                   <span>Add</span>
                 </button>
                 <button
-                  className="d-flex align-items-center px-2 ms-2 btn btn-sm btn-outline-dark"
+                  className="d-flex align-items-center px-2 ms-2 btn btn-sm btn-dark"
                   data-bs-toggle="modal"
                   data-bs-target="#updateEquipmentModal"
                   disabled={equipment.selectedEquipment == null}
@@ -112,7 +127,7 @@ function Equipments() {
                   <span>Edit</span>
                 </button>
                 <button
-                  className="d-flex align-items-center px-2 ms-2 btn btn-sm btn-outline-dark"
+                  className="d-flex align-items-center px-2 ms-2 btn btn-sm btn-dark"
                   data-bs-toggle="modal"
                   data-bs-target="#deleteEquipmentModal"
                   disabled={equipment.selectedEquipment == null}
@@ -148,6 +163,10 @@ function Equipments() {
                             <EquipmentItem
                               key={eq.id}
                               equipment={eq}
+                              focused={
+                                eq.equipmentCode ===
+                                equipment.selectedEquipment?.equipmentCode
+                              }
                               onUpdateSelectedEquipment={onEqItemClickHandler}
                             ></EquipmentItem>
                           );
@@ -163,8 +182,14 @@ function Equipments() {
                   <h5>List of Equipments: {equipment.equipments?.length}</h5>
                 </div>
                 <div className="d-flex flex-column justify-content-center align-items-end">
-                  <span>1:46 AM</span>
-                  <span>12 Oct 2019</span>
+                  <span>
+                    {new Intl.DateTimeFormat("en-US", {
+                      hour: "numeric",
+                      minute: "numeric",
+                      hour12: true,
+                    }).format(currentTime)}
+                  </span>
+                  <span>{dateString}</span>
                 </div>
               </div>
             </div>

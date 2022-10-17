@@ -5,11 +5,17 @@ interface EquipmentItemProps {
   equipment: Equipment;
   key: React.Key;
   onUpdateSelectedEquipment: (equipment: Equipment) => void;
+  focused: boolean;
 }
 
 const EquipmentItem: FC<EquipmentItemProps> = (props) => {
+  const focusedStyle = "table-active";
+
   return (
-    <tr onClick={() => props.onUpdateSelectedEquipment(props.equipment)}>
+    <tr
+      onClick={() => props.onUpdateSelectedEquipment(props.equipment)}
+      className={`${props.focused && focusedStyle}`}
+    >
       <td>{props.equipment.id}</td>
       <td>{props.equipment.equipmentCode}</td>
       <td>{props.equipment.name}</td>
