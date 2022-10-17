@@ -11,7 +11,8 @@ export interface Equipment {
   isBorrowed: boolean;
 }
 
-export interface CreateEquipmentDto {
+export interface CreateUpdateEquipmentDto {
+  equipmentCode?: string;
   name: string;
   barcode: string;
   status: string;
@@ -50,9 +51,48 @@ const createEquipment = async (requestConfig: RequestConfig) => {
     if (response.ok) {
       return response.json();
     }
-    throw new Error("Failed to fetch equipments");
+    throw new Error("Failed to create equipment");
   });
   return responseObj;
 };
 
-export { getEquipments, createEquipment };
+const updateEquipment = async (requestConfig: RequestConfig) => {
+  console.log("Updating equipment", requestConfig);
+  const responseObj: Equipment = await fetch(
+    !!requestConfig.relativeUrl
+      ? `${BACKEND_URI}${requestConfig.relativeUrl}`
+      : `${BACKEND_URI}/api/v1/equipments/${requestConfig.body?.equipmentCode}`,
+    {
+      method: requestConfig.method || "PUT",
+      body:
+        requestConfig.body != null ? JSON.stringify(requestConfig.body) : null,
+      headers: requestConfig.headers != null ? requestConfig.headers : {},
+    }
+  ).then((response) => {
+    if (response.ok) {
+      return response.json();
+    }
+    throw new Error("Failed to update equipment");
+  });
+  return responseObj;
+};
+
+const deleteEquipment = async (requestConfig: RequestConfig) => {
+  const responseObj: boolean = await fetch(
+    !!requestConfig.relativeUrl
+      ? `${BACKEND_URI}${requestConfig.relativeUrl}`
+      : `${BACKEND_URI}/api/v1/equipments/${requestConfig.body?.equipmentCode}`,
+    {
+      method: requestConfig.method || "DELETE",
+      headers: requestConfig.headers != null ? requestConfig.headers : {},
+    }
+  ).then((response) => {
+    if (response.ok) {
+      return true;
+    }
+    throw new Error("Failed to update equipment");
+  });
+  return responseObj;
+};
+
+export { getEquipments, createEquipment, updateEquipment, deleteEquipment };

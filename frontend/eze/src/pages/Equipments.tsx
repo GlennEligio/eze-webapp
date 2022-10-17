@@ -6,12 +6,16 @@ import { Equipment } from "../api/EquipmentService";
 import * as EquipmentService from "../api/EquipmentService";
 import useHttp, { RequestConfig } from "../hooks/useHttp";
 import EquipmentItem from "../components/Equipment/EquipmentItem";
-import EquipmentModal from "../components/Equipment/EquipmentModal";
 import { equipmentActions } from "../store/equipmentSlice";
 import { useDispatch } from "react-redux";
+import AddEquipmentForm from "../components/UI/Modal/AddEquipmentModal";
+import UpdateEquipmentForm from "../components/UI/Modal/UpdateEquipmentModal";
+import DeleteEquipmentModal from "../components/UI/Modal/DeleteEquipmentModal";
 
 function Equipments() {
   const equipment = useSelector((state: IRootState) => state.equipment);
+  const [equipments, setEquipments] = useState([]);
+  const auth = useSelector((state: IRootState) => state.auth);
   const dispatch = useDispatch();
   const {
     sendRequest: getEquipments,
@@ -19,7 +23,6 @@ function Equipments() {
     error,
     status,
   } = useHttp<Equipment[]>(EquipmentService.getEquipments, false);
-  const auth = useSelector((state: IRootState) => state.auth);
   const navigate = useNavigate();
   const backBtnHandler: MouseEventHandler = () => {
     navigate("/");
@@ -48,6 +51,13 @@ function Equipments() {
   useEffect(() => {
     dispatch(equipmentActions.saveEquipments({ equipments: data }));
   }, [data]);
+
+  // onClickHandler to update selected Equipment
+  const onEqItemClickHandler = (equipment: Equipment) => {
+    dispatch(
+      equipmentActions.updateSelectedEquipment({ selectedEquipment: equipment })
+    );
+  };
 
   return (
     <>
@@ -87,16 +97,26 @@ function Equipments() {
                 <button
                   className="d-flex align-items-center px-2 ms-2 btn btn-sm btn-outline-dark"
                   data-bs-toggle="modal"
-                  data-bs-target="#equipmentModal"
+                  data-bs-target="#addEquipmentModal"
                 >
                   <i className="bi bi-plus-circle fs-4 me-1"></i>
                   <span>Add</span>
                 </button>
-                <button className="d-flex align-items-center px-2 ms-2 btn btn-sm btn-outline-dark">
+                <button
+                  className="d-flex align-items-center px-2 ms-2 btn btn-sm btn-outline-dark"
+                  data-bs-toggle="modal"
+                  data-bs-target="#updateEquipmentModal"
+                  disabled={equipment.selectedEquipment == null}
+                >
                   <i className="bi bi-pencil fs-4 me-1"></i>
                   <span>Edit</span>
                 </button>
-                <button className="d-flex align-items-center px-2 ms-2 btn btn-sm btn-outline-dark">
+                <button
+                  className="d-flex align-items-center px-2 ms-2 btn btn-sm btn-outline-dark"
+                  data-bs-toggle="modal"
+                  data-bs-target="#deleteEquipmentModal"
+                  disabled={equipment.selectedEquipment == null}
+                >
                   <i className="bi bi-trash fs-4 me-1"></i>
                   <span>Delete</span>
                 </button>
@@ -128,6 +148,7 @@ function Equipments() {
                             <EquipmentItem
                               key={eq.id}
                               equipment={eq}
+                              onUpdateSelectedEquipment={onEqItemClickHandler}
                             ></EquipmentItem>
                           );
                         })}
@@ -150,7 +171,11 @@ function Equipments() {
           </main>
         </div>
       </div>
-      <EquipmentModal action="ADD" />
+      <div>
+        <AddEquipmentForm />
+        <UpdateEquipmentForm />
+        <DeleteEquipmentModal />
+      </div>
     </>
   );
 }

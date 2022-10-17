@@ -4,11 +4,12 @@ import { Equipment } from "../../api/EquipmentService";
 interface EquipmentItemProps {
   equipment: Equipment;
   key: React.Key;
+  onUpdateSelectedEquipment: (equipment: Equipment) => void;
 }
 
 const EquipmentItem: FC<EquipmentItemProps> = (props) => {
   return (
-    <tr>
+    <tr onClick={() => props.onUpdateSelectedEquipment(props.equipment)}>
       <td>{props.equipment.id}</td>
       <td>{props.equipment.equipmentCode}</td>
       <td>{props.equipment.name}</td>

@@ -19,10 +19,18 @@ const equipmentSlice = createSlice({
       state.equipments = action.payload.equipments;
     },
     updateSelectedEquipment(state, action) {
-      state.equipments = action.payload.selectedEquipment;
+      state.selectedEquipment = action.payload.selectedEquipment;
     },
     addEquipment(state, action) {
       state.equipments = [...state.equipments, action.payload.newEquipment];
+    },
+    updateEquipment(state, action) {
+      state.equipments = state.equipments.map((e) => {
+        if (e.equipmentCode === action.payload.equipment.equipmentCode) {
+          return action.payload.equipment;
+        }
+        return e;
+      });
     },
     removeEquipment(state, action) {
       state.equipments = state.equipments.filter(

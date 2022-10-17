@@ -24,6 +24,7 @@ export interface RequestConfig {
     [header: string]: string;
   };
   method?: string;
+  relativeUrl?: string;
 }
 
 const createDataFetchReducer =
@@ -94,6 +95,7 @@ function useHttp<T>(requestFunction: Function, startWithPending = false) {
 
   const sendRequest = useCallback(
     async function (requestConfig?: RequestConfig) {
+      console.log("Send request:", requestConfig);
       dispatch({ type: RequestActionKind.SEND });
       try {
         const responseData = await requestFunction(requestConfig);

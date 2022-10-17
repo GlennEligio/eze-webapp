@@ -45,6 +45,7 @@ public class EquipmentService implements IService<Equipment>{
 
     @Override
     public Equipment update(Equipment equipment, Serializable code) {
+        log.info("Updating equipment with code: {}", code);
         Equipment oldEquipment = repository.findByEquipmentCode(code.toString()).orElseThrow(() -> new ApiException(notFound(code), HttpStatus.NOT_FOUND));
         oldEquipment.update(equipment);
         return repository.save(oldEquipment);
