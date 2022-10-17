@@ -92,16 +92,6 @@ const DeleteAccountModal = () => {
                 <label htmlFor="deleteAccountUsername">Username</label>
               </div>
               <div className="form-floating mb-3">
-                <input
-                  type="text"
-                  className="form-control"
-                  id="deleteAccountPassword"
-                  readOnly={true}
-                  value={password}
-                />
-                <label htmlFor="deleteAccountPassword">Password</label>
-              </div>
-              <div className="form-floating mb-3">
                 <select
                   className="form-select"
                   id="deleteAccountType"

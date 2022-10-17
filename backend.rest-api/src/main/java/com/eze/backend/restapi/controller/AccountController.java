@@ -4,6 +4,7 @@ import com.eze.backend.restapi.dtos.EzeUserDetails;
 import com.eze.backend.restapi.dtos.LoginRequestDto;
 import com.eze.backend.restapi.dtos.LoginResponseDto;
 import com.eze.backend.restapi.dtos.RegisterRequestDto;
+import com.eze.backend.restapi.enums.AccountType;
 import com.eze.backend.restapi.model.Account;
 import com.eze.backend.restapi.service.AccountService;
 import com.eze.backend.restapi.util.JwtUtil;
@@ -63,7 +64,7 @@ public class AccountController {
 
     @GetMapping("/accounts")
     public ResponseEntity<List<Account>> getAccounts() {
-        return ResponseEntity.ok(service.getAll());
+        return ResponseEntity.ok(service.getAll().stream().filter(account -> account.getType() != AccountType.SADMIN).toList());
     }
 
     @GetMapping("/accounts/{username}")
