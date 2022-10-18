@@ -3,6 +3,7 @@ package com.eze.backend.restapi.util;
 import com.eze.backend.restapi.enums.AccountType;
 import com.eze.backend.restapi.model.Account;
 import com.eze.backend.restapi.service.AccountService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -12,6 +13,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Component
+@Slf4j
 public class DataLoader implements ApplicationRunner {
 
     @Autowired
@@ -28,6 +30,7 @@ public class DataLoader implements ApplicationRunner {
         account1.setPassword("password");
         account1.setActive(true);
         account1.setType(AccountType.SADMIN);
+        log.info("Adding an SADMIN type account");
         accountService.create(account1);
     }
 }

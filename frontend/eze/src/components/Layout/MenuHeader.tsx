@@ -4,6 +4,8 @@ interface MenuHeaderProps {
   type: string;
   name: string;
   key: React.Key;
+  "data-bs-target": string;
+  "data-bs-toggle": string;
 }
 
 const MenuHeader: FC<MenuHeaderProps> = (props) => {
@@ -23,7 +25,14 @@ const MenuHeader: FC<MenuHeaderProps> = (props) => {
               <span>{accountType}</span>
             </div>
             <div className="d-flex align-items-center ms-3">
-              <i className="bi bi-person-circle fs-1"></i>
+              <a
+                href={props["data-bs-target"]}
+                data-bs-toggle={props["data-bs-toggle"]}
+                role="button"
+                className="text-dark"
+              >
+                <i className="bi bi-person-circle fs-1"></i>
+              </a>
             </div>
           </div>
         </div>

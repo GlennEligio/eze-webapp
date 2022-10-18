@@ -8,6 +8,7 @@ import MenuButton from "../components/UI/MenuButton";
 import MenuHeader from "../components/Layout/MenuHeader";
 import MenuFooter from "../components/Layout/MenuFooter";
 import MenuClock from "../components/Menu/MenuClock";
+import MenuOffcanvas from "../components/Layout/MenuOffcanvas";
 
 function AdminMenu() {
   const auth = useSelector((state: IRootState) => state.auth);
@@ -20,9 +21,8 @@ function AdminMenu() {
     navigate("/unauthorized");
   }, [auth.accessToken, auth.accountType, navigate]);
 
-  const logout: MouseEventHandler = (event) => {
+  const logout = () => {
     dispatch(authActions.removeAuth());
-    navigate("/login");
   };
 
   return (
@@ -32,6 +32,8 @@ function AdminMenu() {
           name={auth.fullName}
           type={auth.accountType}
           key={auth.accessToken}
+          data-bs-toggle="offcanvas"
+          data-bs-target="#menuOffCanvas"
         />
       </div>
       <div className="row">
@@ -124,8 +126,11 @@ function AdminMenu() {
         </main>
       </div>
       {/* Footer */}
-      <div className="row">
+      {/* <div className="row">
         <MenuFooter onClick={logout} />
+      </div> */}
+      <div>
+        <MenuOffcanvas onLogoutClick={logout} />
       </div>
     </div>
   );

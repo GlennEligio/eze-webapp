@@ -36,6 +36,8 @@ const StudentMenu = () => {
           name={auth.fullName}
           type={auth.accountType}
           key={auth.accessToken}
+          data-bs-target="#menuOffCanvas"
+          data-bs-toggle="offcanvas"
         />
       </div>
       {/* <!-- Main --> */}
@@ -125,9 +127,9 @@ const StudentMenu = () => {
           </div>
         </main>
       </div>
-      <div className="row">
+      {/* <div className="row">
         <MenuFooter onClick={logout} />
-      </div>
+      </div> */}
     </div>
   );
 };

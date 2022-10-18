@@ -31,7 +31,9 @@ public class Student implements Serializable {
     private String email;
     private String guardian;
     private String guardianNumber;
-    private String yearLevel;
+    @ManyToOne
+    @JoinColumn(name = "yearLevel", referencedColumnName = "yearName")
+    private YearLevel yearLevel;
     private byte[] image;
     @OneToMany(mappedBy = "borrower")
     // TODO: Temp fix for stackoverflow error, create DTO for this class that doesnt include this field

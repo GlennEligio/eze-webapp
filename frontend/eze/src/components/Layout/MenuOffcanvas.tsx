@@ -1,9 +1,11 @@
 import React, { FC } from "react";
+import { Link } from "react-router-dom";
 
 interface MenuOffcanvasProps {
-  name: string;
-  accountType: string;
-  image: string;
+  name?: string;
+  accountType?: string;
+  image?: string;
+  onLogoutClick: () => void;
 }
 
 const MenuOffcanvas: FC<MenuOffcanvasProps> = (props) => {
@@ -27,34 +29,17 @@ const MenuOffcanvas: FC<MenuOffcanvasProps> = (props) => {
       </div>
       <div className="offcanvas-body">
         <div>
-          Some text as placeholder. In real life you can have the elements you
-          have chosen. Like, text, images, lists, etc.
-        </div>
-        <div className="dropdown mt-3">
-          <button
-            className="btn btn-secondary dropdown-toggle"
-            type="button"
-            data-bs-toggle="dropdown"
-          >
-            Dropdown button
-          </button>
-          <ul className="dropdown-menu">
-            <li>
-              <a className="dropdown-item" href="#">
-                Action
-              </a>
-            </li>
-            <li>
-              <a className="dropdown-item" href="#">
-                Another action
-              </a>
-            </li>
-            <li>
-              <a className="dropdown-item" href="#">
-                Something else here
-              </a>
-            </li>
-          </ul>
+          <nav className="nav flex-column">
+            <a className="nav-link disabled">Account Settings</a>
+            <a className="nav-link active">Main Menu</a>
+            <Link
+              to={"/login"}
+              className="nav-link"
+              onClick={() => props.onLogoutClick()}
+            >
+              Logout
+            </Link>
+          </nav>
         </div>
       </div>
     </div>

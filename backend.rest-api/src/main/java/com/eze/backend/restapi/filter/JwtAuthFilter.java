@@ -18,6 +18,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Component
 @Slf4j
@@ -33,6 +35,16 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        final String requestUri = request.getRequestURI();
+        log.info(requestUri);
+        Pattern patPackageDescription = Pattern.compile("/api/v.*/accounts/[login|register]");
+        Matcher matPackageDescription = patPackageDescription.matcher(requestUri);
+        if(matPackageDescription.find()) {
+            log.info("Login and register request, will not be processed");
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         final String authorization = request.getHeader("Authorization");
 
         String jwt = null;
