@@ -36,7 +36,7 @@ const Accounts: FC = () => {
 
   // Add all accounts in the Context
   useEffect(() => {
-    if (data != null) {
+    if (status === "completed" && error === null) {
       dispatch(accountActions.addAccounts({ accounts: data }));
     }
   }, [data]);

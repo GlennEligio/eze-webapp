@@ -1,14 +1,48 @@
-import { MouseEventHandler } from "react";
+import { MouseEventHandler, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import StudentItem from "../components/Student/StudentItem";
 import MiniClock from "../components/UI/Other/MiniClock";
+import useHttp, { RequestConfig } from "../hooks/useHttp";
+import StudentService, { Student } from "../api/StudentService";
+import { studentActions } from "../store/studentSlice";
+import { useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
+import { IRootState } from "../store";
+import AddStudentModal from "../components/UI/Modal/AddStudentModal";
 
 const Students = () => {
   const navigate = useNavigate();
+  const auth = useSelector((state: IRootState) => state.auth);
+  const student = useSelector((state: IRootState) => state.student);
+  const dispatch = useDispatch();
+  const {
+    sendRequest: getStudents,
+    data,
+    error,
+    status,
+  } = useHttp<Student[]>(StudentService.getStudents, true);
 
   const backBtnHandler: MouseEventHandler = () => {
     navigate("/");
   };
+
+  // Call backend api to populate data in the useHttp
+  useEffect(() => {
+    const requestConf: RequestConfig = {
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`,
+      },
+      relativeUrl: "/api/v1/students",
+    };
+    getStudents(requestConf);
+  }, [auth.accessToken]);
+
+  // Pass the data in useHttp to the Student Context
+  useEffect(() => {
+    if (status === "completed" && error === null) {
+      dispatch(studentActions.addStudents({ students: data }));
+    }
+  }, [data]);
 
   return (
     <div className="container-md d-flex flex-column h-100">
@@ -66,7 +100,48 @@ const Students = () => {
             <div className="col d-flex align-items-center justify-content-end">
               <i className="bi bi-arrow-repeat fs-3"></i>
             </div>
-            <div className="col-3 d-flex align-items-center justify-content-end">
+            <div className="col d-flex align-items-center">
+              <div className="flex-grow-1 d-flex justify-content-center">
+                <div className="btn-group dropdown-center me-1">
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-primary dropdown-toggle"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                  >
+                    Student
+                  </button>
+                  <ul className="dropdown-menu">
+                    <li>
+                      <a
+                        className="dropdown-item"
+                        href="#addStudentModal"
+                        data-bs-toggle="modal"
+                      >
+                        Add
+                      </a>
+                    </li>
+                    <li>
+                      <a className="dropdown-item" href="#">
+                        Update
+                      </a>
+                    </li>
+                    <li>
+                      <a className="dropdown-item" href="#">
+                        Delete
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+                <button className="btn btn-sm btn-primary me-1">
+                  <i className="bi bi-person-fill"></i> Year Level
+                </button>
+                <button className="btn btn-sm btn-primary">
+                  <i className="bi bi-person-fill"></i> Year Sections
+                </button>
+              </div>
+            </div>
+            <div className="col-4 d-flex align-items-center justify-content-end">
               <form className="w-100">
                 <div className="input-group">
                   <input
@@ -102,7 +177,11 @@ const Students = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  <StudentItem />
+                  {student.students !== null &&
+                    student.students.length > 0 &&
+                    student.students.map((s) => (
+                      <StudentItem student={s} key={s.studentNumber} />
+                    ))}
                 </tbody>
               </table>
             </div>
@@ -111,12 +190,15 @@ const Students = () => {
           <div className="row py-3 mt-auto">
             <div className="col d-flex justify-content-between align-items-center">
               <div>
-                <h5>Overall registered student: 6</h5>
+                <h5>Overall registered student: {student.students.length}</h5>
               </div>
               <MiniClock />
             </div>
           </div>
         </main>
+      </div>
+      <div>
+        <AddStudentModal />
       </div>
     </div>
   );

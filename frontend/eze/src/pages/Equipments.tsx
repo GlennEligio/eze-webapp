@@ -36,7 +36,9 @@ function Equipments() {
 
   // For setting the equipmentState based on data from useHttp
   useEffect(() => {
-    dispatch(equipmentActions.saveEquipments({ equipments: data }));
+    if (status === "completed" && error === null) {
+      dispatch(equipmentActions.saveEquipments({ equipments: data }));
+    }
   }, [data]);
 
   // onClickHandler to update selected Equipment

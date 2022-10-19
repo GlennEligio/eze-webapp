@@ -1,17 +1,22 @@
-import React from "react";
+import React, { FC } from "react";
+import { Student } from "../../api/StudentService";
+interface StudentItemProps {
+  student: Student;
+  key: React.Key;
+}
 
-const StudentItem = () => {
+const StudentItem: FC<StudentItemProps> = (props) => {
   return (
     <tr>
-      <td>2015-00129-MN-0</td>
-      <td>John Glenn Eligio</td>
-      <td>BSECE 5-3</td>
-      <td>09062560574</td>
-      <td>January 1, 1996</td>
-      <td>Malabon City</td>
-      <td>johnglenneligio@yahoo.com</td>
-      <td>Jaydee Eligio</td>
-      <td>09560574842</td>
+      <td>{props.student.studentNumber}</td>
+      <td>{props.student.fullName}</td>
+      <td>{props.student.yearAndSection}</td>
+      <td>{props.student.contactNumber}</td>
+      <td>{props.student.birthday}</td>
+      <td>{props.student.address}</td>
+      <td>{props.student.email}</td>
+      <td>{props.student.guardian}</td>
+      <td>{props.student.guardianNumber}</td>
     </tr>
   );
 };

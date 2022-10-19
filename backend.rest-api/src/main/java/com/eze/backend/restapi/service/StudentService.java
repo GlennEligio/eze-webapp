@@ -6,6 +6,7 @@ import com.eze.backend.restapi.model.YearLevel;
 import com.eze.backend.restapi.model.YearSection;
 import com.eze.backend.restapi.repository.StudentRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Slf4j
 public class StudentService implements IService<Student>{
 
     private final StudentRepository repository;
@@ -29,16 +31,19 @@ public class StudentService implements IService<Student>{
 
     @Override
     public List<Student> getAll() {
+        log.info("Fetching all students");
         return repository.findAll();
     }
 
     @Override
     public Student get(Serializable studentNo) {
+        log.info("Fetching student with student number {}", studentNo);
         return repository.findByStudentNumber(studentNo.toString()).orElseThrow(() -> new ApiException(notFound(studentNo), HttpStatus.NOT_FOUND));
     }
 
     @Override
     public Student create(Student student) {
+        log.info("Creating student {}", student);
         Optional<Student> studentOp = repository.findByStudentNumber(student.getStudentNumber());
         if(studentOp.isPresent()) {
             throw new ApiException(alreadyExist(student.getStudentNumber()), HttpStatus.BAD_REQUEST);
@@ -53,6 +58,7 @@ public class StudentService implements IService<Student>{
 
     @Override
     public Student update(Student student, Serializable studentNo) {
+        log.info("Updating student {} with student number {}", student, studentNo);
         Student student1 = repository.findByStudentNumber(studentNo.toString())
                 .orElseThrow(() -> new ApiException(notFound(studentNo), HttpStatus.NOT_FOUND));
         YearLevel yearLevel = ylService.get(student.getYearLevel().getYearNumber());
@@ -65,6 +71,7 @@ public class StudentService implements IService<Student>{
 
     @Override
     public void delete(Serializable studentNo) {
+        log.info("Deleting student with student number {}", studentNo);
         Student student = repository.findByStudentNumber(studentNo.toString())
                 .orElseThrow(() -> new ApiException(notFound(studentNo), HttpStatus.NOT_FOUND));
         repository.delete(student);

@@ -29,14 +29,14 @@ public class StudentController {
     }
 
     @PostMapping("/students")
-    public ResponseEntity<Student> createStudent(@RequestBody Student student) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(student));
+    public ResponseEntity<StudentDto> createStudent(@RequestBody Student student) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(Student.toStudentDto(service.create(student)));
     }
 
     @PutMapping("/students/{studentNo}")
-    public ResponseEntity<Student> updateStudent(@RequestBody Student student,
+    public ResponseEntity<StudentDto> updateStudent(@RequestBody Student student,
                                                  @PathVariable("studentNo") String studentNo) {
-        return ResponseEntity.ok(service.update(student, studentNo));
+        return ResponseEntity.ok(Student.toStudentDto(service.update(student, studentNo)));
     }
 
     @DeleteMapping("/students/{studentNo}")
