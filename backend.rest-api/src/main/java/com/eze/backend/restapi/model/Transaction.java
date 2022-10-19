@@ -32,7 +32,7 @@ public class Transaction implements Serializable {
     )
     private List<Equipment> equipments;
     @ManyToOne
-    @JoinColumn(name = "student_number", referencedColumnName = "student_number")
+    @JoinColumn(name = "studentNumber", referencedColumnName = "studentNumber")
     private Student borrower;
     @ManyToOne
     @JoinColumn(name = "professor_name", referencedColumnName = "name")

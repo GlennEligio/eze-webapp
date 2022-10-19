@@ -1,5 +1,7 @@
 import { MouseEventHandler } from "react";
 import { useNavigate } from "react-router-dom";
+import StudentItem from "../components/Student/StudentItem";
+import MiniClock from "../components/UI/Other/MiniClock";
 
 const Students = () => {
   const navigate = useNavigate();
@@ -7,6 +9,7 @@ const Students = () => {
   const backBtnHandler: MouseEventHandler = () => {
     navigate("/");
   };
+
   return (
     <div className="container-md d-flex flex-column h-100">
       {/* <!-- Header --> */}
@@ -99,17 +102,7 @@ const Students = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td>2015-00129-MN-0</td>
-                    <td>John Glenn Eligio</td>
-                    <td>BSECE 5-3</td>
-                    <td>09062560574</td>
-                    <td>January 1, 1996</td>
-                    <td>Malabon City</td>
-                    <td>johnglenneligio@yahoo.com</td>
-                    <td>Jaydee Eligio</td>
-                    <td>09560574842</td>
-                  </tr>
+                  <StudentItem />
                 </tbody>
               </table>
             </div>
@@ -120,10 +113,7 @@ const Students = () => {
               <div>
                 <h5>Overall registered student: 6</h5>
               </div>
-              <div className="d-flex flex-column justify-content-center align-items-end">
-                <span>1:46 AM</span>
-                <span>12 Oct 2019</span>
-              </div>
+              <MiniClock />
             </div>
           </div>
         </main>

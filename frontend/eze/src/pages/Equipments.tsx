@@ -11,6 +11,7 @@ import { useDispatch } from "react-redux";
 import AddEquipmentForm from "../components/UI/Modal/AddEquipmentModal";
 import UpdateEquipmentForm from "../components/UI/Modal/UpdateEquipmentModal";
 import DeleteEquipmentModal from "../components/UI/Modal/DeleteEquipmentModal";
+import MiniClock from "../components/UI/Other/MiniClock";
 
 function Equipments() {
   const equipment = useSelector((state: IRootState) => state.equipment);
@@ -27,22 +28,6 @@ function Equipments() {
   const backBtnHandler: MouseEventHandler = () => {
     navigate("/");
   };
-  const [currentTime, setCurrentTime] = useState<Date>(new Date());
-  const dateString = `${new Intl.DateTimeFormat("en-US", {
-    day: "2-digit",
-  }).format(currentTime)} ${new Intl.DateTimeFormat("en-US", {
-    month: "short",
-  }).format(currentTime)} ${new Intl.DateTimeFormat("en-US", {
-    year: "numeric",
-  }).format(currentTime)}`;
-
-  // For updating time in footer
-  useEffect(() => {
-    setTimeout(() => {
-      const newTime = new Date();
-      setCurrentTime(newTime);
-    }, 1000);
-  }, [currentTime]);
 
   // Fetch Equipments on mount from backend api
   useEffect(() => {
@@ -181,16 +166,7 @@ function Equipments() {
                 <div>
                   <h5>List of Equipments: {equipment.equipments?.length}</h5>
                 </div>
-                <div className="d-flex flex-column justify-content-center align-items-end">
-                  <span>
-                    {new Intl.DateTimeFormat("en-US", {
-                      hour: "numeric",
-                      minute: "numeric",
-                      hour12: true,
-                    }).format(currentTime)}
-                  </span>
-                  <span>{dateString}</span>
-                </div>
+                <MiniClock />
               </div>
             </div>
           </main>

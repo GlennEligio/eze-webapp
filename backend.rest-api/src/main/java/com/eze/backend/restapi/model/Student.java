@@ -1,5 +1,6 @@
 package com.eze.backend.restapi.model;
 
+import com.eze.backend.restapi.dtos.StudentDto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,17 +15,18 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @Entity
 public class Student implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "student_id")
     private Long id;
-    @Column(unique = true, nullable = false, name = "student_number")
+    @Column(unique = true, nullable = false)
     private String studentNumber;
     private String fullName;
-    private String yearAndSection;
+    @ManyToOne
+    @JoinColumn(name = "yearAndSection", referencedColumnName = "sectionName")
+    private YearSection yearAndSection;
     private String contactNumber;
     private String birthday;
     private String address;
@@ -39,8 +41,8 @@ public class Student implements Serializable {
     // TODO: Temp fix for stackoverflow error, create DTO for this class that doesnt include this field
     @JsonIgnore
     private List<Transaction> transactions;
-    @OneToOne(mappedBy = "student")
-    private StudentFingerprint studentFingerprint;
+//    @OneToOne(mappedBy = "student")
+//    private StudentFingerprint studentFingerprint;
 
     public void update(@NonNull Student newStudent) {
         if(newStudent.getAddress() != null) {
@@ -73,5 +75,19 @@ public class Student implements Serializable {
         if(newStudent.getYearLevel() != null) {
             this.setYearLevel(newStudent.getYearLevel());
         }
+    }
+
+    public static StudentDto toStudentDto(Student student) {
+        return new StudentDto(student.getId(),
+                student.getStudentNumber(),
+                student.getFullName(),
+                student.getYearAndSection().getSectionName(),
+                student.getContactNumber(),
+                student.getBirthday(),
+                student.getAddress(),
+                student.getEmail(),
+                student.getGuardian(),
+                student.getGuardianNumber(),
+                student.getYearLevel().getYearName());
     }
 }

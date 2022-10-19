@@ -4,11 +4,10 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { IRootState } from "../store";
 import { authActions } from "../store/authSlice";
-import MenuButton from "../components/UI/MenuButton";
-import MenuHeader from "../components/Layout/MenuHeader";
-import MenuFooter from "../components/Layout/MenuFooter";
+import MenuButton from "../components/Menu/MenuButton";
+import MenuHeader from "../components/Menu/MenuHeader";
 import MenuClock from "../components/Menu/MenuClock";
-import MenuOffcanvas from "../components/Layout/MenuOffcanvas";
+import MenuOffcanvas from "../components/Menu/MenuOffcanvas";
 
 function AdminMenu() {
   const auth = useSelector((state: IRootState) => state.auth);

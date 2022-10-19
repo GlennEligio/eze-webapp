@@ -11,6 +11,7 @@ import { accountActions } from "../store/accountSlice";
 import AddAccountModal from "../components/UI/Modal/AddAccountModal";
 import UpdateAccountModal from "../components/UI/Modal/UpdateAccountModal";
 import DeleteAccountModal from "../components/UI/Modal/DeleteAccountModal";
+import MiniClock from "../components/UI/Other/MiniClock";
 
 const Accounts: FC = () => {
   const auth = useSelector((state: IRootState) => state.auth);
@@ -23,14 +24,6 @@ const Accounts: FC = () => {
     error,
     status,
   } = useHttp<Account[]>(AccountService.getAccounts, true);
-  const [currentTime, setCurrentTime] = useState<Date>(new Date());
-  const dateString = `${new Intl.DateTimeFormat("en-US", {
-    day: "2-digit",
-  }).format(currentTime)} ${new Intl.DateTimeFormat("en-US", {
-    month: "short",
-  }).format(currentTime)} ${new Intl.DateTimeFormat("en-US", {
-    year: "numeric",
-  }).format(currentTime)}`;
 
   const backBtnHandler: MouseEventHandler = () => {
     navigate("/");
@@ -40,14 +33,6 @@ const Accounts: FC = () => {
   useEffect(() => {
     fetchAccounts();
   }, []);
-
-  // For updating time in footer
-  useEffect(() => {
-    setTimeout(() => {
-      const newTime = new Date();
-      setCurrentTime(newTime);
-    }, 1000);
-  }, [currentTime]);
 
   // Add all accounts in the Context
   useEffect(() => {
@@ -186,16 +171,7 @@ const Accounts: FC = () => {
               </div>
             </div>
             <div className="col-2 d-flex flex-column align-items-end justify-content-center">
-              <div className="d-flex flex-column justify-content-center align-items-end">
-                <span>
-                  {new Intl.DateTimeFormat("en-US", {
-                    hour: "numeric",
-                    minute: "numeric",
-                    hour12: true,
-                  }).format(currentTime)}
-                </span>
-                <span>{dateString}</span>
-              </div>
+              <MiniClock />
             </div>
           </div>
         </main>

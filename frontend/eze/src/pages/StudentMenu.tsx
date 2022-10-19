@@ -4,9 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { MouseEventHandler, useEffect } from "react";
 import { IRootState } from "../store";
 import { authActions } from "../store/authSlice";
-import MenuButton from "../components/UI/MenuButton";
-import MenuHeader from "../components/Layout/MenuHeader";
-import MenuFooter from "../components/Layout/MenuFooter";
+import MenuButton from "../components/Menu/MenuButton";
+import MenuHeader from "../components/Menu/MenuHeader";
 import MenuClock from "../components/Menu/MenuClock";
 
 const StudentMenu = () => {

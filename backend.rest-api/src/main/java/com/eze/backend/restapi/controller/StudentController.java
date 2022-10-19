@@ -1,5 +1,6 @@
 package com.eze.backend.restapi.controller;
 
+import com.eze.backend.restapi.dtos.StudentDto;
 import com.eze.backend.restapi.model.Student;
 import com.eze.backend.restapi.service.StudentService;
 import lombok.RequiredArgsConstructor;
@@ -11,20 +12,20 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/api/v1")
 public class StudentController {
 
+    @Autowired
     private StudentService service;
 
     @GetMapping("/students")
-    public ResponseEntity<List<Student>> getStudents() {
-        return ResponseEntity.ok(service.getAll());
+    public ResponseEntity<List<StudentDto>> getStudents() {
+        return ResponseEntity.ok(service.getAll().stream().map(Student::toStudentDto).toList());
     }
 
     @GetMapping("/students/{studentNo}")
-    public ResponseEntity<Student> getStudent(@PathVariable("studentNo") String studentNo) {
-        return ResponseEntity.ok(service.get(studentNo));
+    public ResponseEntity<StudentDto> getStudent(@PathVariable("studentNo") String studentNo) {
+        return ResponseEntity.ok(Student.toStudentDto(service.get(studentNo)));
     }
 
     @PostMapping("/students")
