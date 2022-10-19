@@ -26,14 +26,14 @@ const AddStudentModal = () => {
   const dispatch = useDispatch();
   const [studentNumber, setStudentNumber] = useState("");
   const [fullName, setFullName] = useState("");
-  const [yearAndSection, setYearAndSection] = useState("");
+  const [yearAndSection, setYearAndSection] = useState("BSECE 5-1");
   const [contactNumber, setContactNumber] = useState("");
   const [birthday, setBirthday] = useState("");
   const [address, setAddress] = useState("");
   const [email, setEmail] = useState("");
   const [guardian, setGuardian] = useState("");
   const [guardianNumber, setGuardianNumber] = useState("");
-  const [yearNumber, setYearNumber] = useState(1);
+  const [yearNumber, setYearNumber] = useState(5);
 
   const {
     sendRequest: createStudent,

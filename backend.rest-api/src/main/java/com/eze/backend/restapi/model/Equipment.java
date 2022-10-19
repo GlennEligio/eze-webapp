@@ -27,7 +27,6 @@ public class Equipment implements Serializable {
     private String name;
     @Column(unique = true)
     private String barcode;
-    // will be EquipmentStatus enum later on
     @Enumerated(EnumType.ORDINAL)
     private EqStatus status;
     private LocalDateTime defectiveSince;
