@@ -27,7 +27,7 @@ const yearLevelSlice = createSlice({
     addYearLevelSection(state, action) {
       state.yearLevels = state.yearLevels.map((yl) => {
         if (yl.yearNumber === action.payload.yearNumber) {
-          yl.yearSections = [...yl.yearSections, action.payload.sectionName];
+          yl.yearSections = [...yl.yearSections, action.payload.yearSection];
           return yl;
         }
         return yl;

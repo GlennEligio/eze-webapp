@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -44,6 +45,7 @@ public class YearLevelService implements IService<YearLevel>{
         String firstLetter = yearName.substring(0,1).toUpperCase();
         String remainingLetters = yearName.substring(1,yearName.length());
         yearLevel.setYearName(firstLetter + remainingLetters);
+        yearLevel.setYearSections(new ArrayList<>());
         return repository.save(yearLevel);
     }
 

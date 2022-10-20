@@ -47,15 +47,16 @@ const createYearLevel = async (requestConfig: RequestConfig) => {
 };
 
 const deleteYearLevel = async (requestConfig: RequestConfig) => {
-  const responseObj: YearLevel[] = await fetch(
+  const responseObj: true = await fetch(
     `${BACKEND_URI}${requestConfig.relativeUrl}` as string,
     {
       method: requestConfig.method || "DELETE",
       headers: requestConfig.headers != null ? requestConfig.headers : {},
     }
   ).then((response) => {
+    console.log(response);
     if (response.ok) {
-      return response.json();
+      return true;
     }
     throw new Error("Failed to fetch YearLevels");
   });

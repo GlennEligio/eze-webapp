@@ -27,9 +27,11 @@ public class YearLevel implements Serializable {
     private List<YearSection> yearSections;
 
     public static YearLevelDto toYearLevelDto(YearLevel yl) {
-        return new YearLevelDto(yl.getId(),
-                yl.getYearNumber(),
-                yl.getYearName(),
-                yl.getYearSections().stream().map(YearSection::toYearSectionDto).toList());
+        YearLevelDto dto = new YearLevelDto();
+        if(yl.getId() != null) dto.setId(yl.getId());
+        if(yl.getYearName() != null) dto.setYearName(yl.getYearName());
+        if(yl.getYearNumber() != null) dto.setYearNumber(yl.getYearNumber());
+        if(yl.getYearSections() != null) dto.setYearSections(yl.getYearSections().stream().map(YearSection::toYearSectionDto).toList());
+        return dto;
     }
 }

@@ -1,5 +1,17 @@
 package com.eze.backend.restapi.dtos;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.util.List;
 
-public record YearLevelDto (Long id, Integer yearNumber, String yearName, List<YearSectionDto> yearSections){}
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class YearLevelDto {
+    private Long id;
+    private Integer yearNumber;
+    private String yearName;
+    private List<YearSectionDto> yearSections;
+}

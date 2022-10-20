@@ -1,15 +1,20 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, FC } from "react";
 import useHttp, { RequestConfig } from "../../../hooks/useHttp";
-import YearLevelService from "../../../api/YearLevelService";
+import YearLevelService, { YearLevel } from "../../../api/YearLevelService";
 import { useSelector } from "react-redux";
 import { IRootState } from "../../../store";
 import { useDispatch } from "react-redux";
 import { yearLevelAction } from "../../../store/yearLevelSlice";
 
-const DeleteYearLevelModal = () => {
+interface DeleteYearLevelModalProps {
+  yearLevels: YearLevel[];
+}
+
+const DeleteYearLevelModal: FC<DeleteYearLevelModalProps> = (props) => {
   const auth = useSelector((state: IRootState) => state.auth);
   const dispatch = useDispatch();
-  const [yearNumber, setYearNumber] = useState(1);
+  const [yearNumber, setYearNumber] = useState("");
+  const [yearLevels, setYearLevels] = useState<YearLevel[]>([]);
   const {
     sendRequest: deleteYearLevel,
     data,
@@ -17,11 +22,29 @@ const DeleteYearLevelModal = () => {
     status,
   } = useHttp<boolean>(YearLevelService.deleteYearLevel, false);
 
+  // remove yearLevel in Context upon success
   useEffect(() => {
-    if (status == "completed" && error === null) {
-      dispatch(yearLevelAction.removeYearLevel({ yearNumber: yearNumber }));
+    if (status === "completed" && error === null) {
+      dispatch(
+        yearLevelAction.removeYearLevel({
+          yearNumber: Number.parseInt(yearNumber),
+        })
+      );
     }
-  }, [data]);
+  }, [status]);
+
+  // prepopulate yearNumber and yearLevel state
+  useEffect(() => {
+    if (props.yearLevels) {
+      const sortedYearLevel = [...props.yearLevels].sort(
+        (yl1, yl2) => yl1.yearNumber - yl2.yearNumber
+      );
+      setYearLevels(sortedYearLevel);
+      setYearNumber(
+        sortedYearLevel[0] && sortedYearLevel[0].yearNumber.toString()
+      );
+    }
+  }, [props.yearLevels]);
 
   const deleteYearLevelHandler = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -60,19 +83,21 @@ const DeleteYearLevelModal = () => {
           <div className="modal-body">
             <form onSubmit={deleteYearLevelHandler}>
               <div className="form-floating mb-3">
-                <input
-                  type="number"
-                  className="form-control"
+                <select
+                  className="form-select"
                   id="deleteYearLevelNumber"
-                  min={1}
-                  onChange={(e) =>
-                    setYearNumber(
-                      Number.parseInt(e.target.value ? e.target.value : "1")
-                    )
-                  }
+                  onChange={(e) => setYearNumber(e.currentTarget.value)}
                   value={yearNumber}
-                />
-                <label htmlFor="deleteAccountUsername">Year number</label>
+                >
+                  {yearLevels.map((yl) => {
+                    return (
+                      <option key={yl.yearNumber} value={yl.yearNumber}>
+                        {yl.yearNumber}
+                      </option>
+                    );
+                  })}
+                </select>
+                <label htmlFor="deleteYearLevelNumber">Year Level</label>
               </div>
               <div className="modal-footer">
                 <button

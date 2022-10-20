@@ -332,7 +332,7 @@ const Students = () => {
         <UpdateStudentModal />
         <DeleteStudentModal />
         <AddYearLevelModal />
-        <DeleteYearLevelModal />
+        <DeleteYearLevelModal yearLevels={yearLevel.yearLevels} />
         <AddYearSectionModal yearLevels={yearLevel.yearLevels} />
         <DeleteYearSectionModal yearLevels={yearLevel.yearLevels} />
       </div>

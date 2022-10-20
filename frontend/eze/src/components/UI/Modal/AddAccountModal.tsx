@@ -1,14 +1,12 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import useHttp, { RequestConfig } from "../../../hooks/useHttp";
 import AccountService, {
   Account,
   AccountType,
   CreateUpdateAccountDto,
 } from "../../../api/AccountService";
-import * as EquipmentService from "../../../api/EquipmentService";
 import { useSelector } from "react-redux";
 import { IRootState } from "../../../store";
-import { equipmentActions } from "../../../store/equipmentSlice";
 import { useDispatch } from "react-redux";
 import { accountActions } from "../../../store/accountSlice";
 
@@ -29,8 +27,8 @@ const AddAccountModal = () => {
   } = useHttp<Account>(AccountService.createAccount, false);
 
   useEffect(() => {
-    if (requestStatus == "completed") {
-      if (error == null) {
+    if (requestStatus === "completed") {
+      if (error === null) {
         dispatch(accountActions.addAccount({ newAccount: data }));
       }
     }

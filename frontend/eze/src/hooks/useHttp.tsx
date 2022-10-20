@@ -34,14 +34,13 @@ const createDataFetchReducer =
       case RequestActionKind.SEND:
         return {
           ...state,
-          isLoading: true,
           status: "pending",
+          error: null,
         } as RequestState<T>;
       case RequestActionKind.SUCCESS: {
         return {
           ...state,
-          isLoading: false,
-          isError: false,
+          error: null,
           status: "completed",
           data: action.responseData,
         } as RequestState<T>;
@@ -49,8 +48,7 @@ const createDataFetchReducer =
       case RequestActionKind.ERROR:
         return {
           ...state,
-          isLoading: false,
-          isError: true,
+          error: action.errorMessage,
           status: "completed",
         } as RequestState<T>;
       default:

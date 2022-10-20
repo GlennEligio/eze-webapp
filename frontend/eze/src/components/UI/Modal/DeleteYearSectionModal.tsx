@@ -36,7 +36,7 @@ const DeleteYearSectionModal: FC<DeleteYearSectionModalProps> = (props) => {
         })
       );
     }
-  }, [status]);
+  }, [status, error]);
 
   // Update YearSections state when yearNumber updates
   useEffect(() => {
@@ -50,7 +50,7 @@ const DeleteYearSectionModal: FC<DeleteYearSectionModalProps> = (props) => {
         setSectionName(currentYearLevel.yearSections[0].sectionName);
       }
     }
-  }, [yearNumber]);
+  }, [yearNumber, props.yearLevels]);
 
   const deleteYearSectionHandler = (
     event: React.FormEvent<HTMLFormElement>
