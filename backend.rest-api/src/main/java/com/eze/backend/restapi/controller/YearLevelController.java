@@ -1,5 +1,6 @@
 package com.eze.backend.restapi.controller;
 
+import com.eze.backend.restapi.dtos.YearLevelDto;
 import com.eze.backend.restapi.model.YearLevel;
 import com.eze.backend.restapi.service.YearLevelService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,28 +17,28 @@ public class YearLevelController {
     private YearLevelService service;
 
     @GetMapping("/yearLevels")
-    public ResponseEntity<List<YearLevel>> getYearLevels() {
-        return ResponseEntity.ok(service.getAll());
+    public ResponseEntity<List<YearLevelDto>> getYearLevels() {
+        return ResponseEntity.ok(service.getAll().stream().map(YearLevel::toYearLevelDto).toList());
     }
 
     @GetMapping("/yearLevels/{yearNumber}")
-    public ResponseEntity<YearLevel> getYearLevel(@PathVariable("yearNumber") String yearNumber) {
-        return ResponseEntity.ok(service.get(yearNumber));
+    public ResponseEntity<YearLevelDto> getYearLevel(@PathVariable("yearNumber") String yearNumber) {
+        return ResponseEntity.ok(YearLevel.toYearLevelDto(service.get(yearNumber)));
     }
 
     @PostMapping("/yearLevels")
-    public ResponseEntity<YearLevel> createYearLevel(@RequestBody YearLevel yearLevel) {
-        return ResponseEntity.ok(service.create(yearLevel));
+    public ResponseEntity<YearLevelDto> createYearLevel(@RequestBody YearLevel yearLevel) {
+        return ResponseEntity.ok(YearLevel.toYearLevelDto(service.create(yearLevel)));
     }
 
     @PutMapping("/yearLevels/{yearNumber}")
-    public ResponseEntity<YearLevel> updateYearLevel(@RequestBody YearLevel yearLevel,
+    public ResponseEntity<YearLevelDto> updateYearLevel(@RequestBody YearLevel yearLevel,
                                                      @PathVariable("yearNumber") String yearNumber) {
-        return ResponseEntity.ok(service.update(yearLevel, yearNumber));
+        return ResponseEntity.ok(YearLevel.toYearLevelDto(service.update(yearLevel, yearNumber)));
     }
 
     @DeleteMapping("/yearLevels/{yearNumber}")
-    public ResponseEntity<YearLevel> deleteYearLevel(@PathVariable("yearNumber") String yearNumber) {
+    public ResponseEntity<Object> deleteYearLevel(@PathVariable("yearNumber") String yearNumber) {
         service.delete(yearNumber);
         return ResponseEntity.ok().build();
     }

@@ -1,4 +1,4 @@
-import { MouseEventHandler, useEffect } from "react";
+import { MouseEventHandler, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import StudentItem from "../components/Student/StudentItem";
 import MiniClock from "../components/UI/Other/MiniClock";
@@ -11,36 +11,67 @@ import { IRootState } from "../store";
 import AddStudentModal from "../components/UI/Modal/AddStudentModal";
 import UpdateStudentModal from "../components/UI/Modal/UpdateStudentModal";
 import DeleteStudentModal from "../components/UI/Modal/DeleteStudentModal";
+import AddYearLevelModal from "../components/UI/Modal/AddYearLevelModal";
+import YearLevelService, { YearLevel } from "../api/YearLevelService";
+import { yearLevelAction } from "../store/yearLevelSlice";
+import DeleteYearLevelModal from "../components/UI/Modal/DeleteYearLevelModal";
+import AddYearSectionModal from "../components/UI/Modal/AddYearSectionModal";
+import DeleteYearSectionModal from "../components/UI/Modal/DeleteYearSectionModal";
 
 const Students = () => {
   const navigate = useNavigate();
   const auth = useSelector((state: IRootState) => state.auth);
   const student = useSelector((state: IRootState) => state.student);
+  const yearLevel = useSelector((state: IRootState) => state.yearLevel);
+  const [query, setQuery] = useState("");
   const dispatch = useDispatch();
   const {
     sendRequest: getStudents,
-    data,
-    error,
-    status,
+    data: students,
+    error: stdError,
+    status: stdStatus,
   } = useHttp<Student[]>(StudentService.getStudents, true);
+  const {
+    sendRequest: getYearLevels,
+    data: yearLevels,
+    error: ylError,
+    status: ylStatus,
+  } = useHttp<YearLevel[]>(YearLevelService.getYearLevels, true);
 
   // Call backend api to populate data in the useHttp
   useEffect(() => {
-    const requestConf: RequestConfig = {
+    // Student
+    const stdRequestConf: RequestConfig = {
       headers: {
         Authorization: `Bearer ${auth.accessToken}`,
       },
       relativeUrl: "/api/v1/students",
     };
-    getStudents(requestConf);
+    getStudents(stdRequestConf);
+
+    // YearLevel
+    const ylRequestConf: RequestConfig = {
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`,
+      },
+      relativeUrl: "/api/v1/yearLevels",
+    };
+    getYearLevels(ylRequestConf);
   }, [auth.accessToken]);
 
-  // Pass the data in useHttp to the Student Context
+  // Pass the students in useHttp to the Student Context
   useEffect(() => {
-    if (status === "completed" && error === null) {
-      dispatch(studentActions.addStudents({ students: data }));
+    if (stdStatus === "completed" && stdError === null) {
+      dispatch(studentActions.addStudents({ students: students }));
     }
-  }, [data]);
+  }, [students]);
+
+  // Pass the yearLevels in useHttp to the YearLevel Context
+  useEffect(() => {
+    if (ylStatus === "completed" && ylError === null) {
+      dispatch(yearLevelAction.addYearLevels({ yearLevels: yearLevels }));
+    }
+  }, [yearLevels]);
 
   const backBtnHandler: MouseEventHandler = () => {
     navigate("/");
@@ -161,12 +192,68 @@ const Students = () => {
                     </li>
                   </ul>
                 </div>
-                <button className="btn btn-sm btn-primary me-1">
-                  <i className="bi bi-person-fill"></i> Year Level
-                </button>
-                <button className="btn btn-sm btn-primary">
-                  <i className="bi bi-person-fill"></i> Year Sections
-                </button>
+                <div className="btn-group dropdown-center me-1">
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-primary dropdown-toggle"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                  >
+                    Year Level
+                  </button>
+                  <ul className="dropdown-menu">
+                    {/** Buttons for Year Level CRUD Modals */}
+                    <li>
+                      <a
+                        className="dropdown-item"
+                        href="#addYearLevelModal"
+                        data-bs-toggle="modal"
+                      >
+                        Add
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        className="dropdown-item"
+                        href="#deleteYearLevelModal"
+                        data-bs-toggle="modal"
+                      >
+                        Delete
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+                <div className="btn-group dropdown-center me-1">
+                  <button
+                    type="button"
+                    className="btn btn-sm btn-primary dropdown-toggle"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                  >
+                    Year Section
+                  </button>
+                  <ul className="dropdown-menu">
+                    {/** Buttons for Year Section CRUD Modals */}
+                    <li>
+                      <a
+                        className="dropdown-item"
+                        href="#addYearSectionModal"
+                        data-bs-toggle="modal"
+                      >
+                        Add
+                      </a>
+                    </li>
+                    <li>
+                      <a
+                        className="dropdown-item"
+                        href="#deleteYearSectionModal"
+                        data-bs-toggle="modal"
+                      >
+                        Delete
+                      </a>
+                    </li>
+                  </ul>
+                </div>
               </div>
             </div>
             <div className="col-4 d-flex align-items-center justify-content-end">
@@ -176,8 +263,13 @@ const Students = () => {
                     className="form-control"
                     type="text"
                     placeholder="Search Student Number"
+                    onChange={(e) => setQuery(e.target.value)}
                   />
-                  <button className="btn btn-outline-secondary" type="submit">
+                  <button
+                    className="btn btn-secondary"
+                    type="button"
+                    disabled={true}
+                  >
                     <i className="bi bi-search"></i>
                   </button>
                 </div>
@@ -189,7 +281,7 @@ const Students = () => {
             <div className="table-responsive-xxl">
               <table
                 className="table table-hover"
-                style={{ minWidth: "1300px" }}
+                style={{ minWidth: "1500px" }}
               >
                 <thead className="table-dark">
                   <tr>
@@ -207,17 +299,19 @@ const Students = () => {
                 <tbody>
                   {student.students !== null &&
                     student.students.length > 0 &&
-                    student.students.map((s) => (
-                      <StudentItem
-                        student={s}
-                        key={s.studentNumber}
-                        onStudentRowClick={studentRowClickHandler}
-                        focused={
-                          student.selectedStudent?.studentNumber ===
-                          s.studentNumber
-                        }
-                      />
-                    ))}
+                    student.students
+                      .filter((s) => s.studentNumber.includes(query))
+                      .map((s) => (
+                        <StudentItem
+                          student={s}
+                          key={s.studentNumber}
+                          onStudentRowClick={studentRowClickHandler}
+                          focused={
+                            student.selectedStudent?.studentNumber ===
+                            s.studentNumber
+                          }
+                        />
+                      ))}
                 </tbody>
               </table>
             </div>
@@ -237,6 +331,10 @@ const Students = () => {
         <AddStudentModal />
         <UpdateStudentModal />
         <DeleteStudentModal />
+        <AddYearLevelModal />
+        <DeleteYearLevelModal />
+        <AddYearSectionModal yearLevels={yearLevel.yearLevels} />
+        <DeleteYearSectionModal yearLevels={yearLevel.yearLevels} />
       </div>
     </div>
   );

@@ -1,5 +1,7 @@
 package com.eze.backend.restapi.model;
 
+import com.eze.backend.restapi.dtos.YearSectionDto;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,4 +24,8 @@ public class YearSection implements Serializable {
     @ManyToOne(optional = false)
     @JoinColumn(name = "yearLevel", referencedColumnName = "yearNumber")
     private YearLevel yearLevel;
+
+    public static YearSectionDto toYearSectionDto(YearSection ys) {
+        return new YearSectionDto(ys.getId(), ys.getSectionName());
+    }
 }
