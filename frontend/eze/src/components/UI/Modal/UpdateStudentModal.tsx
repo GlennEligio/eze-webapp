@@ -9,20 +9,9 @@ import { IRootState } from "../../../store";
 import { studentActions } from "../../../store/studentSlice";
 import { useDispatch } from "react-redux";
 
-// id: number;
-// studentNumber: string;
-// fullName: string;
-// yearAndSection: string;
-// contactNumber: string;
-// birthday: string;
-// address: string;
-// email: string;
-// guardian: string;
-// guardianNumber: string;
-// yearLevel: string;
-
-const AddStudentModal = () => {
+const UpdateStudentModal = () => {
   const auth = useSelector((state: IRootState) => state.auth);
+  const student = useSelector((state: IRootState) => state.student);
   const dispatch = useDispatch();
   const [studentNumber, setStudentNumber] = useState("");
   const [fullName, setFullName] = useState("");
@@ -36,22 +25,68 @@ const AddStudentModal = () => {
   const [yearNumber, setYearNumber] = useState(5);
 
   const {
-    sendRequest: createStudent,
+    sendRequest: updateStudent,
     data,
     error,
     status,
-  } = useHttp<Student>(StudentService.createStudent, false);
+  } = useHttp<Student>(StudentService.updateStudent, false);
 
+  // Update the Student in the Context API
   useEffect(() => {
     if (status == "completed" && error === null) {
-      dispatch(studentActions.addStudent({ newStudent: data }));
+      dispatch(studentActions.updateStudent({ student: data }));
     }
   }, [data]);
 
-  const onAddStudent = (event: React.FormEvent<HTMLFormElement>) => {
+  // Prepopulate the inputs based on selectedStudent in Context
+  useEffect(() => {
+    if (student.selectedStudent === null) return;
+    setStudentNumber(
+      student.selectedStudent.studentNumber
+        ? student.selectedStudent.studentNumber
+        : ""
+    );
+    setFullName(
+      student.selectedStudent.fullName ? student.selectedStudent.fullName : ""
+    );
+    setYearAndSection(
+      student.selectedStudent.yearAndSection
+        ? student.selectedStudent.yearAndSection
+        : "BSECE 5-1"
+    );
+    setContactNumber(
+      student.selectedStudent.contactNumber
+        ? student.selectedStudent.contactNumber
+        : ""
+    );
+    setBirthday(
+      student.selectedStudent.birthday ? student.selectedStudent.birthday : ""
+    );
+    setAddress(
+      student.selectedStudent.address ? student.selectedStudent.address : ""
+    );
+    setEmail(
+      student.selectedStudent.email ? student.selectedStudent.email : ""
+    );
+    setGuardian(
+      student.selectedStudent.guardian ? student.selectedStudent.guardian : ""
+    );
+    setGuardianNumber(
+      student.selectedStudent.guardianNumber
+        ? student.selectedStudent.guardianNumber
+        : ""
+    );
+    setYearNumber(
+      student.selectedStudent.yearNumber
+        ? student.selectedStudent.yearNumber
+        : 5
+    );
+  }, [student.selectedStudent]);
+
+  const updateStudentHandler = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log("Adding Student");
-    const newStudent: CreateUpdateStudentDto = {
+    console.log("Updating Student");
+    const updatedStudent: CreateUpdateStudentDto = {
       studentNumber,
       contactNumber,
       fullName,
@@ -69,39 +104,29 @@ const AddStudentModal = () => {
     };
 
     const requestConf: RequestConfig = {
-      body: newStudent,
+      body: updatedStudent,
       headers: {
         Authorization: `Bearer ${auth.accessToken}`,
         "Content-type": "application/json",
       },
-      relativeUrl: "/api/v1/students",
+      relativeUrl: `/api/v1/students/${studentNumber}`,
     };
-    createStudent(requestConf);
-    setStudentNumber("");
-    setContactNumber("");
-    setFullName("");
-    setYearAndSection("BSECE 5-1");
-    setYearNumber(5);
-    setAddress("");
-    setBirthday("");
-    setEmail("");
-    setGuardian("");
-    setGuardianNumber("");
+    updateStudent(requestConf);
   };
 
   return (
     <div
       className="modal fade"
-      id="addStudentModal"
+      id="updateStudentModal"
       tabIndex={-1}
-      aria-labelledby="addStudentModalLabel"
+      aria-labelledby="updateStudentModalLabel"
       aria-hidden="true"
     >
       <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div className="modal-content">
           <div className="modal-header">
             <h1 className="modal-title fs-5" id="studentModalLabel">
-              Add Student
+              Update Student
             </h1>
             <button
               type="button"
@@ -111,47 +136,47 @@ const AddStudentModal = () => {
             ></button>
           </div>
           <div className="modal-body">
-            <form onSubmit={onAddStudent}>
+            <form onSubmit={updateStudentHandler}>
               {/** Student Number input */}
               <div className="form-floating mb-3">
                 <input
                   type="text"
                   className="form-control"
-                  id="newStudentSN"
+                  id="updateStudentSN"
                   onChange={(e) => setStudentNumber(e.target.value)}
                   value={studentNumber}
                 />
-                <label htmlFor="newStudentSN">Student Number</label>
+                <label htmlFor="updateStudentSN">Student Number</label>
               </div>
               {/** Full name input */}
               <div className="form-floating mb-3">
                 <input
                   type="text"
                   className="form-control"
-                  id="newStudentFullName"
+                  id="updateStudentFullName"
                   onChange={(e) => setFullName(e.target.value)}
                   value={fullName}
                 />
-                <label htmlFor="newStudentFullName">Full name</label>
+                <label htmlFor="updateStudentFullName">Full name</label>
               </div>
               {/** Year and Section input */}
               <div className="form-floating mb-3">
                 <select
                   className="form-select"
-                  id="newStudentYearSection"
+                  id="updateStudentYearSection"
                   onChange={(e) => setYearAndSection(e.currentTarget.value)}
                   value={yearAndSection}
                 >
                   <option value="BSECE 5-1">BSECE 5-1</option>
                   <option value="BSECE 5-1P">BSECE 5-1P</option>
                 </select>
-                <label htmlFor="newStudentYearSection">Section</label>
+                <label htmlFor="updateStudentYearSection">Section</label>
               </div>
               {/** Year Number */}
               <div className="form-floating mb-3">
                 <select
                   className="form-select"
-                  id="newStudentYearNumber"
+                  id="updateStudentYearNumber"
                   onChange={(e) =>
                     setYearNumber(Number.parseInt(e.currentTarget.value))
                   }
@@ -159,73 +184,75 @@ const AddStudentModal = () => {
                 >
                   <option value="5">5</option>
                 </select>
-                <label htmlFor="newStudentYearNumber">Year Level</label>
+                <label htmlFor="updateStudentYearNumber">Year Level</label>
               </div>
               {/** Email */}
               <div className="form-floating mb-3">
                 <input
                   type="text"
                   className="form-control"
-                  id="newStudentEmail"
+                  id="updateStudentEmail"
                   onChange={(e) => setEmail(e.target.value)}
                   value={email}
                 />
-                <label htmlFor="newStudentFullname">Email</label>
+                <label htmlFor="updateStudentFullname">Email</label>
               </div>
               {/** Contact Number */}
               <div className="form-floating mb-3">
                 <input
                   type="text"
                   className="form-control"
-                  id="newStudentContactNumber"
+                  id="updateStudentContactNumber"
                   onChange={(e) => setContactNumber(e.target.value)}
                   value={contactNumber}
                 />
-                <label htmlFor="newStudentContactNumber">Contact Number</label>
+                <label htmlFor="updateStudentContactNumber">
+                  Contact Number
+                </label>
               </div>
               {/** Birthday */}
               <div className="form-floating mb-3">
                 <input
                   type="datetime-local"
                   className="form-control"
-                  id="newStudentBirthday"
+                  id="updateStudentBirthday"
                   onChange={(e) => setBirthday(e.target.value)}
                   value={birthday}
                 />
-                <label htmlFor="newStudentBirthday">Birthday</label>
+                <label htmlFor="updateStudentBirthday">Birthday</label>
               </div>
               {/** Address */}
               <div className="form-floating mb-3">
                 <input
                   type="text"
                   className="form-control"
-                  id="newStudentAddress"
+                  id="updateStudentAddress"
                   onChange={(e) => setAddress(e.target.value)}
                   value={address}
                 />
-                <label htmlFor="newStudentAddress">Address</label>
+                <label htmlFor="updateStudentAddress">Address</label>
               </div>
               {/** Guardian */}
               <div className="form-floating mb-3">
                 <input
                   type="text"
                   className="form-control"
-                  id="newStudentGuardian"
+                  id="updateStudentGuardian"
                   onChange={(e) => setGuardian(e.target.value)}
                   value={guardian}
                 />
-                <label htmlFor="newStudentGuardian">Guardian</label>
+                <label htmlFor="updateStudentGuardian">Guardian</label>
               </div>
               {/** Guardian Number */}
               <div className="form-floating mb-3">
                 <input
                   type="text"
                   className="form-control"
-                  id="newStudentGuardianNumber"
+                  id="updateStudentGuardianNumber"
                   onChange={(e) => setGuardianNumber(e.target.value)}
                   value={guardianNumber}
                 />
-                <label htmlFor="newStudentGuardianNumber">
+                <label htmlFor="updateStudentGuardianNumber">
                   Guardian Number
                 </label>
               </div>
@@ -238,7 +265,7 @@ const AddStudentModal = () => {
                   Close
                 </button>
                 <button type="submit" className="btn btn-primary">
-                  Add Student
+                  Update Student
                 </button>
               </div>
             </form>
@@ -249,4 +276,4 @@ const AddStudentModal = () => {
   );
 };
 
-export default AddStudentModal;
+export default UpdateStudentModal;

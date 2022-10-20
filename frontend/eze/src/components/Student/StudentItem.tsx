@@ -3,11 +3,16 @@ import { Student } from "../../api/StudentService";
 interface StudentItemProps {
   student: Student;
   key: React.Key;
+  onStudentRowClick: (student: Student) => void;
+  focused: boolean;
 }
 
 const StudentItem: FC<StudentItemProps> = (props) => {
   return (
-    <tr>
+    <tr
+      onClick={() => props.onStudentRowClick(props.student)}
+      className={`${props.focused && "table-active"}`}
+    >
       <td>{props.student.studentNumber}</td>
       <td>{props.student.fullName}</td>
       <td>{props.student.yearAndSection}</td>

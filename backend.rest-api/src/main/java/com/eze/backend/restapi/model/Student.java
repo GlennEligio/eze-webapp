@@ -88,6 +88,6 @@ public class Student implements Serializable {
                 student.getEmail(),
                 student.getGuardian(),
                 student.getGuardianNumber(),
-                student.getYearLevel().getYearName());
+                student.getYearLevel().getYearNumber());
     }
 }

@@ -9,6 +9,8 @@ import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 import { IRootState } from "../store";
 import AddStudentModal from "../components/UI/Modal/AddStudentModal";
+import UpdateStudentModal from "../components/UI/Modal/UpdateStudentModal";
+import DeleteStudentModal from "../components/UI/Modal/DeleteStudentModal";
 
 const Students = () => {
   const navigate = useNavigate();
@@ -21,10 +23,6 @@ const Students = () => {
     error,
     status,
   } = useHttp<Student[]>(StudentService.getStudents, true);
-
-  const backBtnHandler: MouseEventHandler = () => {
-    navigate("/");
-  };
 
   // Call backend api to populate data in the useHttp
   useEffect(() => {
@@ -43,6 +41,23 @@ const Students = () => {
       dispatch(studentActions.addStudents({ students: data }));
     }
   }, [data]);
+
+  const backBtnHandler: MouseEventHandler = () => {
+    navigate("/");
+  };
+
+  // Updates selectedStudent in Context
+  const studentRowClickHandler = (selectedStudent: Student) => {
+    if (
+      student.selectedStudent?.studentNumber === selectedStudent.studentNumber
+    ) {
+      dispatch(studentActions.updateSelectedStudent({ selectedStudent: null }));
+      return;
+    }
+    dispatch(
+      studentActions.updateSelectedStudent({ selectedStudent: selectedStudent })
+    );
+  };
 
   return (
     <div className="container-md d-flex flex-column h-100">
@@ -112,6 +127,7 @@ const Students = () => {
                     Student
                   </button>
                   <ul className="dropdown-menu">
+                    {/** Buttons for Student CRUD Modals */}
                     <li>
                       <a
                         className="dropdown-item"
@@ -122,12 +138,24 @@ const Students = () => {
                       </a>
                     </li>
                     <li>
-                      <a className="dropdown-item" href="#">
+                      <a
+                        className={`dropdown-item ${
+                          student.selectedStudent === null && "disabled"
+                        }`}
+                        href="#updateStudentModal"
+                        data-bs-toggle="modal"
+                      >
                         Update
                       </a>
                     </li>
                     <li>
-                      <a className="dropdown-item" href="#">
+                      <a
+                        className={`dropdown-item ${
+                          student.selectedStudent === null && "disabled"
+                        }`}
+                        href="#deleteStudentModal"
+                        data-bs-toggle="modal"
+                      >
                         Delete
                       </a>
                     </li>
@@ -180,7 +208,15 @@ const Students = () => {
                   {student.students !== null &&
                     student.students.length > 0 &&
                     student.students.map((s) => (
-                      <StudentItem student={s} key={s.studentNumber} />
+                      <StudentItem
+                        student={s}
+                        key={s.studentNumber}
+                        onStudentRowClick={studentRowClickHandler}
+                        focused={
+                          student.selectedStudent?.studentNumber ===
+                          s.studentNumber
+                        }
+                      />
                     ))}
                 </tbody>
               </table>
@@ -199,6 +235,8 @@ const Students = () => {
       </div>
       <div>
         <AddStudentModal />
+        <UpdateStudentModal />
+        <DeleteStudentModal />
       </div>
     </div>
   );

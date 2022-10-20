@@ -42,9 +42,20 @@ function Equipments() {
   }, [data]);
 
   // onClickHandler to update selected Equipment
-  const onEqItemClickHandler = (equipment: Equipment) => {
+  const onEqItemClickHandler = (selectedEquipment: Equipment) => {
+    if (
+      selectedEquipment.equipmentCode ===
+      equipment.selectedEquipment?.equipmentCode
+    ) {
+      dispatch(
+        equipmentActions.updateSelectedEquipment({ selectedEquipment: null })
+      );
+      return;
+    }
     dispatch(
-      equipmentActions.updateSelectedEquipment({ selectedEquipment: equipment })
+      equipmentActions.updateSelectedEquipment({
+        selectedEquipment: selectedEquipment,
+      })
     );
   };
 

@@ -42,9 +42,13 @@ const Accounts: FC = () => {
   }, [data]);
 
   // onclick handler to update selected account
-  const onUpdateSelectedAccount = (account: Account) => {
+  const onUpdateSelectedAccount = (selectedAccount: Account) => {
+    if (selectedAccount.username === account.selectedAccount?.username) {
+      dispatch(accountActions.updateSelectedAccount({ selectedAccount: null }));
+      return;
+    }
     dispatch(
-      accountActions.updateSelectedAccount({ selectedAccount: account })
+      accountActions.updateSelectedAccount({ selectedAccount: selectedAccount })
     );
   };
 
