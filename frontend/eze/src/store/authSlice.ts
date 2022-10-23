@@ -34,7 +34,6 @@ const checkJwtValidity = (jwt: string) => {
 
 const createIntialState = () => {
   const storedToken = localStorage.getItem("accessToken");
-  console.log(storedToken);
   const username = localStorage.getItem("username");
   const type = localStorage.getItem("accountType");
   const name = localStorage.getItem("fullName");

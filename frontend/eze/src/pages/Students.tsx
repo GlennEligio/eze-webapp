@@ -24,6 +24,8 @@ const Students = () => {
   const student = useSelector((state: IRootState) => state.student);
   const yearLevel = useSelector((state: IRootState) => state.yearLevel);
   const [query, setQuery] = useState("");
+  const [displayedStudents, setDisplayedStudents] = useState<Student[]>([]);
+  const [selectedYearLevel, setSelectedYearLevel] = useState(0);
   const dispatch = useDispatch();
   const {
     sendRequest: getStudents,
@@ -73,8 +75,25 @@ const Students = () => {
     }
   }, [yearLevels]);
 
+  // Updates the students shown based on the selectedYearLevel
+  useEffect(() => {
+    const studentsContext = [...student.students];
+    if (selectedYearLevel === 0) {
+      setDisplayedStudents(studentsContext);
+      return;
+    }
+    setDisplayedStudents(
+      studentsContext.filter((s) => s.yearLevel === selectedYearLevel)
+    );
+  }, [selectedYearLevel, student.students]);
+
+  // Back btn handler
   const backBtnHandler: MouseEventHandler = () => {
     navigate("/");
+  };
+
+  const yearLevelClickHandler = (yearLevel: number) => {
+    setSelectedYearLevel(yearLevel);
   };
 
   // Updates selectedStudent in Context
@@ -121,24 +140,33 @@ const Students = () => {
           {/* <!-- Year level filter --> */}
           <div className="row">
             <div className="col d-flex align-items-center">
-              <div className="flex-grow-1 border-bottom border-info border-3">
+              <div
+                className={`flex-grow-1 border-3 border-bottom ${
+                  selectedYearLevel === 0 ? "border-info" : "border-secondary"
+                }`}
+                onClick={() => yearLevelClickHandler(0)}
+              >
                 <span className="px-3">All Year Level</span>
               </div>
-              <div className="border-bottom border-secondary border-3">
-                <span className="px-3">First Year</span>
-              </div>
-              <div className="border-bottom border-secondary border-3">
-                <span className="px-3">Second Year</span>
-              </div>
-              <div className="border-bottom border-secondary border-3">
-                <span className="px-3">Third Year</span>
-              </div>
-              <div className="border-bottom border-secondary border-3">
-                <span className="px-3">Fourth Year</span>
-              </div>
-              <div className="border-bottom border-secondary border-3">
-                <span className="px-3">Fifth Year</span>
-              </div>
+              {yearLevel.yearLevels &&
+                yearLevel.yearLevels.length > 0 &&
+                [...yearLevel.yearLevels]
+                  .sort((yl1, yl2) => yl1.yearNumber - yl2.yearNumber)
+                  .map((yl) => {
+                    return (
+                      <div
+                        key={yl.yearNumber}
+                        className={`border-bottom border-3 ${
+                          selectedYearLevel === yl.yearNumber
+                            ? `border-info`
+                            : `border-secondary`
+                        }`}
+                        onClick={() => yearLevelClickHandler(yl.yearNumber)}
+                      >
+                        <span className="px-3">{yl.yearName} Year</span>
+                      </div>
+                    );
+                  })}
             </div>
           </div>
           {/* <!-- Student Number search bar --> */}
@@ -297,9 +325,9 @@ const Students = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {student.students !== null &&
-                    student.students.length > 0 &&
-                    student.students
+                  {displayedStudents !== null &&
+                    displayedStudents.length > 0 &&
+                    displayedStudents
                       .filter((s) => s.studentNumber.includes(query))
                       .map((s) => (
                         <StudentItem

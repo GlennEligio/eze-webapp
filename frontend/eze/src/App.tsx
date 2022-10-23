@@ -12,6 +12,7 @@ import "./App.css";
 import { IRootState } from "./store";
 import Unauthorized from "./pages/Unauthorized";
 import Home from "./pages/Home";
+import Professors from "./pages/Professors";
 
 const App = () => {
   const auth = useSelector((state: IRootState) => state.auth);
@@ -37,6 +38,7 @@ const App = () => {
             <Route path="/return" element={<ReturnForm />} />
             <Route path="/equipments" element={<Equipments />} />
             <Route path="/students" element={<Students />} />
+            <Route path="/faculty" element={<Professors />} />
           </>
         )}
         <Route path="/loading" element={<LoginLoading />} />

@@ -1,11 +1,18 @@
+import { useNavigate } from "react-router-dom";
+import { MouseEventHandler } from "react";
+
 function BorrowForm() {
+  const navigate = useNavigate();
+  const backBtnHandler: MouseEventHandler = () => {
+    navigate("/");
+  };
   return (
     <div className="container-md d-flex flex-column h-100">
       <div className="row">
         <header>
           <div className="pt-5 pb-2">
             <div className="d-flex justify-content-between">
-              <div className="my-auto">
+              <div className="my-auto" onClick={backBtnHandler}>
                 <i className="bi bi-arrow-left-circle fs-1"></i>
               </div>
               <div className="d-flex justify-content-end">
@@ -44,16 +51,17 @@ function BorrowForm() {
                   <input
                     className="form-control"
                     type="text"
-                    placeholder="Borrower's Name"
+                    placeholder="Student Number"
                   />
                 </div>
                 <div className="mt-3">
                   <input
                     className="form-control"
                     type="text"
-                    placeholder="Student Number"
+                    placeholder="Borrower's Name"
                   />
                 </div>
+
                 <div className="mt-3">
                   <input
                     className="form-control"

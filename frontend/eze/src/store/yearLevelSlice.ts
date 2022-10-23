@@ -37,7 +37,7 @@ const yearLevelSlice = createSlice({
       state.yearLevels = state.yearLevels.map((yl) => {
         if (yl.yearNumber === action.payload.yearNumber) {
           yl.yearSections = yl.yearSections.filter(
-            (ys) => ys.sectionName != action.payload.sectionName
+            (ys) => ys.sectionName !== action.payload.sectionName
           );
           return yl;
         }

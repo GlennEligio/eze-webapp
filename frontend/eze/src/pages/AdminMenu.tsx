@@ -104,7 +104,7 @@ function AdminMenu() {
                     key="Transactions"
                     imgMaxHeight="100%"
                     imgMaxWidth="100%"
-                    destPage="/transactions"
+                    destPage="/borrow"
                   />
                 </div>
               </div>
