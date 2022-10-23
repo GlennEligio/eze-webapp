@@ -77,9 +77,7 @@ const DeleteStudentModal = () => {
         : ""
     );
     setYearNumber(
-      student.selectedStudent.yearNumber
-        ? student.selectedStudent.yearNumber
-        : 5
+      student.selectedStudent.yearLevel ? student.selectedStudent.yearLevel : 5
     );
   }, [student.selectedStudent]);
 

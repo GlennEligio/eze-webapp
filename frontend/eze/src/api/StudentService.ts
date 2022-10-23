@@ -11,7 +11,7 @@ export interface Student {
   email: string;
   guardian: string;
   guardianNumber: string;
-  yearNumber: number;
+  yearLevel: number;
 }
 
 export interface CreateUpdateStudentDto {

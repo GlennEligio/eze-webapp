@@ -32,7 +32,7 @@ const AddStudentModal: FC<AddStudentModalProps> = (props) => {
   const dispatch = useDispatch();
   const [studentNumber, setStudentNumber] = useState("");
   const [fullName, setFullName] = useState("");
-  const [yearAndSection, setYearAndSection] = useState("BSECE 5-1");
+  const [yearAndSection, setYearAndSection] = useState("BSECE 1-1");
   const [contactNumber, setContactNumber] = useState("");
   const [birthday, setBirthday] = useState("");
   const [address, setAddress] = useState("");
@@ -73,7 +73,17 @@ const AddStudentModal: FC<AddStudentModalProps> = (props) => {
     const selectedYearLevel = yearLevels.find(
       (yl) => yl.yearNumber === yearNumber
     );
-    if (selectedYearLevel) setYearSections(selectedYearLevel.yearSections);
+    if (selectedYearLevel) {
+      if (
+        selectedYearLevel.yearSections &&
+        selectedYearLevel.yearSections.length > 0
+      ) {
+        setYearSections(selectedYearLevel.yearSections);
+        setYearAndSection(selectedYearLevel.yearSections[0].sectionName);
+      } else {
+        setYearSections([]);
+      }
+    }
   }, [yearLevels, yearNumber]);
 
   const onAddStudent = (event: React.FormEvent<HTMLFormElement>) => {
