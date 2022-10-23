@@ -328,7 +328,7 @@ const Students = () => {
         </main>
       </div>
       <div>
-        <AddStudentModal />
+        <AddStudentModal yearLevels={yearLevel.yearLevels} />
         <UpdateStudentModal />
         <DeleteStudentModal />
         <AddYearLevelModal />

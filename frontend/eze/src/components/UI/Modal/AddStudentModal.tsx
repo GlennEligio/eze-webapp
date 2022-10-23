@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, FC } from "react";
 import useHttp, { RequestConfig } from "../../../hooks/useHttp";
 import StudentService, {
   CreateUpdateStudentDto,
@@ -8,6 +8,8 @@ import { useSelector } from "react-redux";
 import { IRootState } from "../../../store";
 import { studentActions } from "../../../store/studentSlice";
 import { useDispatch } from "react-redux";
+import { YearLevel } from "../../../api/YearLevelService";
+import { YearSection } from "../../../api/YearSectionService";
 
 // id: number;
 // studentNumber: string;
@@ -21,7 +23,11 @@ import { useDispatch } from "react-redux";
 // guardianNumber: string;
 // yearLevel: string;
 
-const AddStudentModal = () => {
+interface AddStudentModalProps {
+  yearLevels: YearLevel[];
+}
+
+const AddStudentModal: FC<AddStudentModalProps> = (props) => {
   const auth = useSelector((state: IRootState) => state.auth);
   const dispatch = useDispatch();
   const [studentNumber, setStudentNumber] = useState("");
@@ -34,6 +40,8 @@ const AddStudentModal = () => {
   const [guardian, setGuardian] = useState("");
   const [guardianNumber, setGuardianNumber] = useState("");
   const [yearNumber, setYearNumber] = useState(5);
+  const [yearSections, setYearSections] = useState<YearSection[]>([]);
+  const [yearLevels, setYearLevels] = useState<YearLevel[]>([]);
 
   const {
     sendRequest: createStudent,
@@ -42,11 +50,31 @@ const AddStudentModal = () => {
     status,
   } = useHttp<Student>(StudentService.createStudent, false);
 
+  // Add new Student in Context when request is success
   useEffect(() => {
     if (status == "completed" && error === null) {
       dispatch(studentActions.addStudent({ newStudent: data }));
     }
   }, [data]);
+
+  // Prepopulate the yearLevels state and the value of yearAndSection and yearNumber state
+  useEffect(() => {
+    if (props.yearLevels && props.yearLevels.length > 0) {
+      const sortedYls = [...props.yearLevels].sort(
+        (yl1, yl2) => yl1.yearNumber - yl2.yearNumber
+      );
+      setYearLevels(sortedYls);
+      setYearNumber(sortedYls[0].yearNumber);
+    }
+  }, [props.yearLevels]);
+
+  // Update yearSections based on yearNumber selected
+  useEffect(() => {
+    const selectedYearLevel = yearLevels.find(
+      (yl) => yl.yearNumber === yearNumber
+    );
+    if (selectedYearLevel) setYearSections(selectedYearLevel.yearSections);
+  }, [yearLevels, yearNumber]);
 
   const onAddStudent = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -134,19 +162,6 @@ const AddStudentModal = () => {
                 />
                 <label htmlFor="newStudentFullName">Full name</label>
               </div>
-              {/** Year and Section input */}
-              <div className="form-floating mb-3">
-                <select
-                  className="form-select"
-                  id="newStudentYearSection"
-                  onChange={(e) => setYearAndSection(e.currentTarget.value)}
-                  value={yearAndSection}
-                >
-                  <option value="BSECE 5-1">BSECE 5-1</option>
-                  <option value="BSECE 5-1P">BSECE 5-1P</option>
-                </select>
-                <label htmlFor="newStudentYearSection">Section</label>
-              </div>
               {/** Year Number */}
               <div className="form-floating mb-3">
                 <select
@@ -157,9 +172,31 @@ const AddStudentModal = () => {
                   }
                   value={yearNumber}
                 >
-                  <option value="5">5</option>
+                  {yearLevels.map((yl) => (
+                    <option key={yl.yearName} value={yl.yearNumber.toString()}>
+                      {yl.yearName}
+                    </option>
+                  ))}
                 </select>
                 <label htmlFor="newStudentYearNumber">Year Level</label>
+              </div>
+              {/** Year and Section input */}
+              <div className="form-floating mb-3">
+                <select
+                  className="form-select"
+                  id="newStudentYearSection"
+                  onChange={(e) => setYearAndSection(e.currentTarget.value)}
+                  value={yearAndSection}
+                >
+                  {yearSections &&
+                    yearSections.length > 0 &&
+                    yearSections.map((ys) => (
+                      <option key={ys.sectionName} value={ys.sectionName}>
+                        {ys.sectionName}
+                      </option>
+                    ))}
+                </select>
+                <label htmlFor="newStudentYearSection">Section</label>
               </div>
               {/** Email */}
               <div className="form-floating mb-3">
