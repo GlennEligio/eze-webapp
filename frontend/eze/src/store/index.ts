@@ -5,6 +5,7 @@ import uiReducer, { UiState } from "./uiSlice";
 import accountReducer, { AccountState } from "./accountSlice";
 import studentReducer, { StudentState } from "./studentSlice";
 import yearLevelReducer, { YearLevelState } from "./yearLevelSlice";
+import professorReducer, { ProfessorState } from "./professorSlice";
 
 export interface IRootState {
   auth: AuthState;
@@ -13,6 +14,7 @@ export interface IRootState {
   account: AccountState;
   student: StudentState;
   yearLevel: YearLevelState;
+  professor: ProfessorState;
 }
 
 const store = configureStore({
@@ -23,6 +25,7 @@ const store = configureStore({
     account: accountReducer,
     student: studentReducer,
     yearLevel: yearLevelReducer,
+    professor: professorReducer,
   },
   devTools: process.env.NODE_ENV !== "production",
 });

@@ -1,11 +1,62 @@
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { MouseEventHandler } from "react";
+import useHttp, { RequestConfig } from "../hooks/useHttp";
+import { Professor } from "../api/ProfessorService";
+import ProfessorService from "../api/ProfessorService";
+import { useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
+import { IRootState } from "../store";
+import { professorActions } from "../store/professorSlice";
+import ProfessorItem from "../components/Professor/ProfessorItem";
 
 const Professors = () => {
+  const professor = useSelector((state: IRootState) => state.professor);
+  const auth = useSelector((state: IRootState) => state.auth);
+  const dispatch = useDispatch();
+  const {
+    sendRequest: getProfessors,
+    data,
+    error,
+    status,
+  } = useHttp<Professor[]>(ProfessorService.getProfessors, true);
   const navigate = useNavigate();
 
+  // Fetch data in the backend
+  useEffect(() => {
+    const requestConfig: RequestConfig = {
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`,
+      },
+      relativeUrl: "/api/v1/professors",
+    };
+    getProfessors(requestConfig);
+  }, []);
+
+  // Prepopulate the Professor in Redux using useHttp data
+  useEffect(() => {
+    if (status === "completed" && error === null && data && data.length > 0) {
+      dispatch(professorActions.addProfessors({ professors: data }));
+    }
+  }, [data]);
+
+  // Back button navigation handler
   const backBtnHandler: MouseEventHandler = () => {
     navigate("/");
+  };
+
+  // Update selected professor handler
+  const profItemClickHandler = (prof: Professor) => {
+    const selectedProf = professor.selectedProfessor;
+    if (selectedProf && selectedProf.name === prof.name) {
+      dispatch(
+        professorActions.updateSelectedProfessor({ selectedProfessor: null })
+      );
+      return;
+    }
+    dispatch(
+      professorActions.updateSelectedProfessor({ selectedProfessor: prof })
+    );
   };
 
   return (
@@ -39,7 +90,16 @@ const Professors = () => {
           {/* <!-- Student Number search bar --> */}
           <div className="row mt-2 gx-1">
             <div className="col d-flex align-items-center justify-content-end">
-              <i className="bi bi-arrow-repeat fs-3"></i>
+              <button className="btn btn-primary">
+                <i className="bi bi-person-check-fill"></i> Add
+              </button>
+              <button className="btn btn-primary ms-2">
+                <i className="bi bi-person-dash-fill"></i> Delete
+              </button>
+              <button className="btn btn-primary ms-2">
+                <i className="bi bi-person-lines-fill"></i> Update
+              </button>
+              <i className="bi bi-arrow-repeat fs-3 ms-2"></i>
             </div>
             <div className="col-4 d-flex align-items-center justify-content-end">
               <form className="w-100">
@@ -63,24 +123,26 @@ const Professors = () => {
           {/* <!-- User info table --> */}
           <div className="row mt-2 gx-0 overflow-auto">
             <div className="table-responsive-xxl">
-              <table
-                className="table table-hover"
-                style={{ minWidth: "1500px" }}
-              >
+              <table className="table table-hover">
                 <thead className="table-dark">
                   <tr>
-                    <th>Student Number</th>
-                    <th>Full Name</th>
-                    <th>Year and Section</th>
+                    <th>Id</th>
+                    <th>Name</th>
                     <th>Contact Number</th>
-                    <th>Birthday</th>
-                    <th>Address</th>
-                    <th>Email</th>
-                    <th>Guardian</th>
-                    <th>Guardian Number</th>
                   </tr>
                 </thead>
-                <tbody></tbody>
+                <tbody>
+                  {professor.professors &&
+                    professor.professors.length > 0 &&
+                    [...professor.professors].map((p) => (
+                      <ProfessorItem
+                        key={p.id}
+                        professor={p}
+                        onProfItemClick={profItemClickHandler}
+                        focused={professor.selectedProfessor?.name === p.name}
+                      />
+                    ))}
+                </tbody>
               </table>
             </div>
           </div>
@@ -88,7 +150,9 @@ const Professors = () => {
           <div className="row py-3 mt-auto">
             <div className="col d-flex justify-content-between align-items-center">
               <div>
-                <h5>Overall registered professors: 3</h5>
+                <h5>
+                  Overall registered professors: {professor.professors.length}
+                </h5>
               </div>
             </div>
           </div>

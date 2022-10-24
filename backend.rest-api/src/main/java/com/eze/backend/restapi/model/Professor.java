@@ -1,5 +1,6 @@
 package com.eze.backend.restapi.model;
 
+import com.eze.backend.restapi.dtos.ProfessorDto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,13 +25,15 @@ public class Professor implements Serializable {
     private String name;
     private String contactNumber;
     @OneToMany(mappedBy = "professor")
-    // TODO: Temp fix for stackoverflow error, create DTO for this class that doesnt include this field
-    @JsonIgnore
     private List<Transaction> transactions;
 
     public void update(Professor newProf) {
         if(newProf.getContactNumber() != null) {
             this.contactNumber = newProf.getContactNumber();
         }
+    }
+
+    public static ProfessorDto toProfessorDto(Professor professor) {
+        return new ProfessorDto(professor.getId(), professor.getName(), professor.getContactNumber());
     }
 }
