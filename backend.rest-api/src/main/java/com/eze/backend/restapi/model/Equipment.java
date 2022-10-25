@@ -1,5 +1,6 @@
 package com.eze.backend.restapi.model;
 
+import com.eze.backend.restapi.dtos.EquipmentDto;
 import com.eze.backend.restapi.enums.EqStatus;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
@@ -58,5 +59,16 @@ public class Equipment implements Serializable {
         if(newEquipment.getIsBorrowed() != null) {
             this.isBorrowed = newEquipment.getIsBorrowed();
         }
+    }
+
+    public static EquipmentDto toEquipmentDto (Equipment equipment) {
+        return new EquipmentDto(equipment.getId(),
+                equipment.getEquipmentCode(),
+                equipment.getName(),
+                equipment.getBarcode(),
+                equipment.getStatus(),
+                equipment.getDefectiveSince(),
+                equipment.getIsDuplicable(),
+                equipment.getIsBorrowed());
     }
 }

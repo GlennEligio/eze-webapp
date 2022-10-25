@@ -1,5 +1,6 @@
 package com.eze.backend.restapi.controller;
 
+import com.eze.backend.restapi.dtos.EquipmentDto;
 import com.eze.backend.restapi.model.Equipment;
 import com.eze.backend.restapi.service.EquipmentService;
 import lombok.RequiredArgsConstructor;
@@ -18,25 +19,25 @@ public class EquipmentController {
     private final EquipmentService equipmentService;
 
     @GetMapping("/equipments")
-    public ResponseEntity<List<Equipment>> getEquipments() {
-        return ResponseEntity.ok(equipmentService.getAll());
+    public ResponseEntity<List<EquipmentDto>> getEquipments() {
+        return ResponseEntity.ok(equipmentService.getAll().stream().map(Equipment::toEquipmentDto).toList());
     }
 
     @GetMapping("/equipments/{code}")
-    public ResponseEntity<Equipment> getEquipment(@PathVariable("code") String code) {
-        return ResponseEntity.ok(equipmentService.get(code));
+    public ResponseEntity<EquipmentDto> getEquipment(@PathVariable("code") String code) {
+        return ResponseEntity.ok(Equipment.toEquipmentDto(equipmentService.get(code)));
     }
 
     @PostMapping("/equipments")
-    public ResponseEntity<Equipment> createEquipment(@RequestBody Equipment equipment) {
+    public ResponseEntity<EquipmentDto> createEquipment(@RequestBody Equipment equipment) {
         Equipment newEq = equipmentService.create(equipment);
-        return ResponseEntity.created(URI.create("/equipments/" + newEq.getId())).body(newEq);
+        return ResponseEntity.created(URI.create("/equipments/" + newEq.getId())).body(Equipment.toEquipmentDto(newEq));
     }
 
     @PutMapping("/equipments/{code}")
-    public ResponseEntity<Equipment> updateEquipment(@PathVariable("code") String code, @RequestBody Equipment equipment) {
+    public ResponseEntity<EquipmentDto> updateEquipment(@PathVariable("code") String code, @RequestBody Equipment equipment) {
         Equipment newEq = equipmentService.update(equipment, code);
-        return ResponseEntity.ok(newEq);
+        return ResponseEntity.ok(Equipment.toEquipmentDto(newEq));
     }
 
     @DeleteMapping("/equipments/{code}")

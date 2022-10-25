@@ -1,5 +1,7 @@
 package com.eze.backend.restapi.model;
 
+import com.eze.backend.restapi.dtos.TransactionDto;
+import com.eze.backend.restapi.dtos.TransactionListDto;
 import com.eze.backend.restapi.enums.TxStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -61,6 +63,27 @@ public class Transaction implements Serializable {
         if(newTransaction.getStatus() != null) {
             this.status = newTransaction.getStatus();
         }
+    }
 
+    public static TransactionListDto toTransactionListDto(Transaction transaction) {
+        return new TransactionListDto(transaction.getTxCode(),
+                transaction.getEquipments().size(),
+                transaction.getBorrower().getFullName(),
+                transaction.getBorrower().getYearAndSection().getSectionName(),
+                transaction.getProfessor().getName(),
+                transaction.getBorrowedAt(),
+                transaction.getReturnedAt(),
+                transaction.getStatus());
+    }
+
+    public static TransactionDto toTransactionDto(Transaction transaction) {
+        return new TransactionDto(transaction.getTxCode(),
+                transaction.getEquipments().stream().map(Equipment::toEquipmentDto).toList(),
+                transaction.getBorrower().getFullName(),
+                transaction.getBorrower().getYearAndSection().getSectionName(),
+                transaction.getProfessor().getName(),
+                transaction.getBorrowedAt(),
+                transaction.getReturnedAt(),
+                transaction.getStatus());
     }
 }

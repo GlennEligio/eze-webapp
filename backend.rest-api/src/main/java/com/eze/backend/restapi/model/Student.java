@@ -1,9 +1,9 @@
 package com.eze.backend.restapi.model;
 
 import com.eze.backend.restapi.dtos.StudentDto;
+import com.eze.backend.restapi.dtos.StudentListDto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.lang.NonNull;
@@ -77,8 +77,8 @@ public class Student implements Serializable {
         }
     }
 
-    public static StudentDto toStudentDto(Student student) {
-        return new StudentDto(student.getId(),
+    public static StudentListDto toStudentListDto(Student student) {
+        return new StudentListDto(student.getId(),
                 student.getStudentNumber(),
                 student.getFullName(),
                 student.getYearAndSection().getSectionName(),
@@ -89,5 +89,9 @@ public class Student implements Serializable {
                 student.getGuardian(),
                 student.getGuardianNumber(),
                 student.getYearLevel().getYearNumber());
+    }
+
+    public static StudentDto toStudentDto(Student student) {
+        
     }
 }

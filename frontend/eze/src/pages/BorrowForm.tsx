@@ -1,7 +1,13 @@
 import { useNavigate } from "react-router-dom";
-import { MouseEventHandler } from "react";
+import { MouseEventHandler, useState } from "react";
+import { Student } from "../api/StudentService";
+import { Professor } from "../api/ProfessorService";
+import { Equipment } from "../api/EquipmentService";
 
 function BorrowForm() {
+  const [student, setStudent] = useState<Student>();
+  const [professor, setProfessor] = useState<Professor>();
+  const [equipments, setEquipments] = useState<Equipment[]>([]);
   const navigate = useNavigate();
   const backBtnHandler: MouseEventHandler = () => {
     navigate("/");
@@ -53,9 +59,9 @@ function BorrowForm() {
                     className="form-control"
                     placeholder="Student Number"
                   />
-                  <span className="input-group-text">
+                  <a type="button" className="btn btn-outline-secondary">
                     <i className="bi bi-search"></i>
-                  </span>
+                  </a>
                 </div>
                 <div className="mt-3">
                   <input
@@ -73,15 +79,15 @@ function BorrowForm() {
                 </div>
                 <div className="mt-3 row">
                   <div className="col-6">
-                    <div className="input-group mb-3">
+                    <div className="input-group">
                       <input
                         type="text"
                         className="form-control"
                         placeholder="Professor Name"
                       />
-                      <span className="input-group-text">
+                      <a type="button" className="btn btn-outline-secondary">
                         <i className="bi bi-search"></i>
-                      </span>
+                      </a>
                     </div>
                   </div>
                   <div className="col-6">
@@ -116,13 +122,13 @@ function BorrowForm() {
                 </div>
                 <div className="mt-3 row gx-2">
                   <div className="col-7">
-                    <button className="btn btn-secondary w-100">
-                      Borrow Equipment
+                    <button type="button" className="btn btn-secondary w-100">
+                      Add Equipment
                     </button>
                   </div>
                   <div className="col-5">
-                    <button className="btn btn-secondary w-100">
-                      Send code
+                    <button type="button" className="btn btn-secondary w-100">
+                      Borrow
                     </button>
                   </div>
                 </div>
@@ -138,9 +144,10 @@ function BorrowForm() {
                 <thead className="table-dark">
                   <tr>
                     <th>Student Number</th>
+                    <th>Transaction Code</th>
                     <th>Borrower</th>
                     <th>Year and Section</th>
-                    <th>Equipments</th>
+                    <th>Equipmentst</th>
                     <th>Professor</th>
                     <th>Borrowed At</th>
                     <th>Returned At</th>

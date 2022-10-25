@@ -1,7 +1,6 @@
 package com.eze.backend.restapi.model;
 
 import com.eze.backend.restapi.dtos.ProfessorDto;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

@@ -6,6 +6,7 @@ import com.eze.backend.restapi.model.Transaction;
 import com.eze.backend.restapi.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -15,13 +16,20 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-@RequiredArgsConstructor
 public class TransactionService implements IService<Transaction> {
 
     private final TransactionRepository txRepo;
     private final EquipmentService eqService;
     private final ProfessorService profService;
     private final StudentService studentService;
+
+    @Autowired
+    public TransactionService(TransactionRepository txRepo, EquipmentService eqService, ProfessorService profService, StudentService studentService) {
+        this.txRepo = txRepo;
+        this.eqService = eqService;
+        this.profService = profService;
+        this.studentService = studentService;
+    }
 
     @Override
     public List<Transaction> getAll() {

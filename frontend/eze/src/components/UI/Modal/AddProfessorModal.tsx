@@ -23,7 +23,7 @@ const AddProfessorModal = () => {
 
   // Add the received Professor to the Redux
   useEffect(() => {
-    if (status == "completed" && error === null) {
+    if (status === "completed" && error === null) {
       dispatch(professorActions.addProfessor({ newProfessor: data }));
     }
   }, [data, status, error]);

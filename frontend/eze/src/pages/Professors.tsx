@@ -11,7 +11,6 @@ import { professorActions } from "../store/professorSlice";
 import ProfessorItem from "../components/Professor/ProfessorItem";
 import AddProfessorModal from "../components/UI/Modal/AddProfessorModal";
 import DeleteProfessorModal from "../components/UI/Modal/DeleteProfessorModal";
-import UpdateAccountModal from "../components/UI/Modal/UpdateAccountModal";
 import UpdateProfessorModal from "../components/UI/Modal/UpdateProfessorModal";
 
 const Professors = () => {
@@ -35,14 +34,14 @@ const Professors = () => {
       relativeUrl: "/api/v1/professors",
     };
     getProfessors(requestConfig);
-  }, []);
+  }, [auth.accessToken, getProfessors]);
 
   // Prepopulate the Professor in Redux using useHttp data
   useEffect(() => {
     if (status === "completed" && error === null && data && data.length > 0) {
       dispatch(professorActions.addProfessors({ professors: data }));
     }
-  }, [data]);
+  }, [data, status, error, dispatch]);
 
   // Back button navigation handler
   const backBtnHandler: MouseEventHandler = () => {
