@@ -9,6 +9,10 @@ import { useSelector } from "react-redux";
 import { IRootState } from "../store";
 import { professorActions } from "../store/professorSlice";
 import ProfessorItem from "../components/Professor/ProfessorItem";
+import AddProfessorModal from "../components/UI/Modal/AddProfessorModal";
+import DeleteProfessorModal from "../components/UI/Modal/DeleteProfessorModal";
+import UpdateAccountModal from "../components/UI/Modal/UpdateAccountModal";
+import UpdateProfessorModal from "../components/UI/Modal/UpdateProfessorModal";
 
 const Professors = () => {
   const professor = useSelector((state: IRootState) => state.professor);
@@ -90,13 +94,27 @@ const Professors = () => {
           {/* <!-- Student Number search bar --> */}
           <div className="row mt-2 gx-1">
             <div className="col d-flex align-items-center justify-content-end">
-              <button className="btn btn-primary">
+              <button
+                className="btn btn-primary"
+                data-bs-target="#addProfessorModal"
+                data-bs-toggle="modal"
+              >
                 <i className="bi bi-person-check-fill"></i> Add
               </button>
-              <button className="btn btn-primary ms-2">
+              <button
+                className="btn btn-primary ms-2"
+                data-bs-target="#deleteProfessorModal"
+                data-bs-toggle="modal"
+                disabled={professor.selectedProfessor === null}
+              >
                 <i className="bi bi-person-dash-fill"></i> Delete
               </button>
-              <button className="btn btn-primary ms-2">
+              <button
+                className="btn btn-primary ms-2"
+                data-bs-target="#updateProfessorModal"
+                data-bs-toggle="modal"
+                disabled={professor.selectedProfessor === null}
+              >
                 <i className="bi bi-person-lines-fill"></i> Update
               </button>
               <i className="bi bi-arrow-repeat fs-3 ms-2"></i>
@@ -157,6 +175,19 @@ const Professors = () => {
             </div>
           </div>
         </main>
+      </div>
+      <div>
+        <AddProfessorModal />
+        <DeleteProfessorModal
+          selectedProfessor={
+            professor.selectedProfessor ? professor.selectedProfessor : null
+          }
+        />
+        <UpdateProfessorModal
+          selectedProfessor={
+            professor.selectedProfessor ? professor.selectedProfessor : null
+          }
+        />
       </div>
     </div>
   );

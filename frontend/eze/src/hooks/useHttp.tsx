@@ -36,6 +36,7 @@ const createDataFetchReducer =
           ...state,
           status: "pending",
           error: null,
+          data: null,
         } as RequestState<T>;
       case RequestActionKind.SUCCESS: {
         return {
@@ -50,6 +51,7 @@ const createDataFetchReducer =
           ...state,
           error: action.errorMessage,
           status: "completed",
+          data: null,
         } as RequestState<T>;
       default:
         throw new Error("Action not supported");
