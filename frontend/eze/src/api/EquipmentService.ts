@@ -38,6 +38,22 @@ const getEquipments = async (requestConfig: RequestConfig) => {
   return responseObj;
 };
 
+const getEquipmentByBarcode = async (requestConfig: RequestConfig) => {
+  const responseObj: Equipment = await fetch(
+    `${BACKEND_URI}${requestConfig.relativeUrl}`,
+    {
+      method: requestConfig.method || "GET",
+      headers: requestConfig.headers != null ? requestConfig.headers : {},
+    }
+  ).then((response) => {
+    if (response.ok) {
+      return response.json();
+    }
+    throw new Error("Failed to fetch equipment");
+  });
+  return responseObj;
+};
+
 const createEquipment = async (requestConfig: RequestConfig) => {
   const responseObj: Equipment = await fetch(
     `${BACKEND_URI}/api/v1/equipments`,
@@ -95,4 +111,10 @@ const deleteEquipment = async (requestConfig: RequestConfig) => {
   return responseObj;
 };
 
-export { getEquipments, createEquipment, updateEquipment, deleteEquipment };
+export {
+  getEquipments,
+  getEquipmentByBarcode,
+  createEquipment,
+  updateEquipment,
+  deleteEquipment,
+};

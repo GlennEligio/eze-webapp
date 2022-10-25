@@ -49,6 +49,22 @@ const getStudents = async (requestConfig: RequestConfig) => {
   return responseObj;
 };
 
+const getStudentByStudentNumber = async (requestConfig: RequestConfig) => {
+  const responseObj: Student = await fetch(
+    `${BACKEND_URI}${requestConfig.relativeUrl}` as string,
+    {
+      method: requestConfig.method || "GET",
+      headers: requestConfig.headers != null ? requestConfig.headers : {},
+    }
+  ).then((response) => {
+    if (response.ok) {
+      return response.json();
+    }
+    throw new Error("Failed to fetch student");
+  });
+  return responseObj;
+};
+
 const createStudent = async (requestConfig: RequestConfig) => {
   const responseObj: Student = await fetch(
     `${BACKEND_URI}${requestConfig.relativeUrl}` as string,
@@ -99,4 +115,10 @@ const deleteStudent = async (requestConfig: RequestConfig) => {
   return responseObj;
 };
 
-export default { getStudents, createStudent, updateStudent, deleteStudent };
+export default {
+  getStudents,
+  getStudentByStudentNumber,
+  createStudent,
+  updateStudent,
+  deleteStudent,
+};

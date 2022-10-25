@@ -10,7 +10,7 @@ function BorrowForm() {
     <div className="container-md d-flex flex-column h-100">
       <div className="row">
         <header>
-          <div className="pt-5 pb-2">
+          <div className="pt-2 pb-2">
             <div className="d-flex justify-content-between">
               <div className="my-auto" onClick={backBtnHandler}>
                 <i className="bi bi-arrow-left-circle fs-1"></i>
@@ -47,12 +47,15 @@ function BorrowForm() {
             </div>
             <div className="col-5">
               <form>
-                <div>
+                <div className="input-group mb-3">
                   <input
-                    className="form-control"
                     type="text"
+                    className="form-control"
                     placeholder="Student Number"
                   />
+                  <span className="input-group-text">
+                    <i className="bi bi-search"></i>
+                  </span>
                 </div>
                 <div className="mt-3">
                   <input
@@ -61,7 +64,6 @@ function BorrowForm() {
                     placeholder="Borrower's Name"
                   />
                 </div>
-
                 <div className="mt-3">
                   <input
                     className="form-control"
@@ -71,11 +73,16 @@ function BorrowForm() {
                 </div>
                 <div className="mt-3 row">
                   <div className="col-6">
-                    <input
-                      className="form-control"
-                      type="text"
-                      placeholder="Professor's Name"
-                    />
+                    <div className="input-group mb-3">
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Professor Name"
+                      />
+                      <span className="input-group-text">
+                        <i className="bi bi-search"></i>
+                      </span>
+                    </div>
                   </div>
                   <div className="col-6">
                     <input
@@ -90,18 +97,21 @@ function BorrowForm() {
             <div className="col-4 d-flex align-items-end">
               <form className="w-100">
                 <p className="text-center fs-5">12:30 AM | 12 Oct 2019</p>
-                <div className="mt-3">
+                <div className="input-group mb-3">
                   <input
-                    className="form-control"
                     type="text"
+                    className="form-control"
                     placeholder="Enter barcode"
                   />
+                  <a type="button" className="btn btn-outline-secondary">
+                    <i className="bi bi-search"></i>
+                  </a>
                 </div>
                 <div className="mt-3">
                   <input
                     className="form-control"
                     type="text"
-                    placeholder="Equipment"
+                    placeholder="Equipments..."
                   />
                 </div>
                 <div className="mt-3 row gx-2">
@@ -152,12 +162,12 @@ function BorrowForm() {
               </table>
             </div>
           </div>
-          <div className="row py-3" style={{ marginTop: "auto" }}>
-            <div className="col">
-              <h3 className="text-center fs-5">Borrowed items: 1</h3>
-            </div>
-          </div>
         </main>
+      </div>
+      <div className="row" style={{ marginTop: "auto" }}>
+        <div className="col">
+          <h3 className="text-center fs-5">Borrowed items: 1</h3>
+        </div>
       </div>
     </div>
   );
