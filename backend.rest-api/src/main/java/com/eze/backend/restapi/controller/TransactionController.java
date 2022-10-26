@@ -25,23 +25,23 @@ public class TransactionController {
 
     @GetMapping("/transactions/{code}")
     public ResponseEntity<Object> getTransaction(@PathVariable("code") String code,
-    @RequestParam(name = "full") String complete) {
-        if(complete.equalsIgnoreCase("true")) {
-            return ResponseEntity.ok(service.get(code));
-        } else {
+    @RequestParam(required = false) String complete) {
+        if(complete != null && complete.equalsIgnoreCase("true")) {
             return ResponseEntity.ok(Transaction.toTransactionDto(service.get(code)));
+        } else {
+            return ResponseEntity.ok(Transaction.toTransactionListDto(service.get(code)));
         }
     }
 
     @PostMapping("/transactions")
-    public ResponseEntity<Transaction> createTransaction(@RequestBody Transaction transaction) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(service.create(transaction));
+    public ResponseEntity<TransactionDto> createTransaction(@RequestBody Transaction transaction) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(Transaction.toTransactionDto(service.create(transaction)));
     }
 
     @PutMapping("/transactions/{code}")
-    public ResponseEntity<Transaction> updateTransaction(@RequestBody Transaction transaction,
+    public ResponseEntity<TransactionDto> updateTransaction(@RequestBody Transaction transaction,
                                                          @PathVariable("code") String code) {
-        return ResponseEntity.ok(service.update(transaction, code));
+        return ResponseEntity.ok(Transaction.toTransactionDto(service.update(transaction, code)));
     }
 
     @DeleteMapping("/transactions/{code}")

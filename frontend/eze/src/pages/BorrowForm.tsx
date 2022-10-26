@@ -1,17 +1,53 @@
 import { useNavigate } from "react-router-dom";
-import { MouseEventHandler, useState } from "react";
+import { MouseEventHandler, useEffect, useState } from "react";
 import { Student } from "../api/StudentService";
 import { Professor } from "../api/ProfessorService";
 import { Equipment } from "../api/EquipmentService";
+import { useSelector } from "react-redux";
+import { IRootState } from "../store";
+import { transactionAction } from "../store/transactionSlice";
+import TransactionService, { Transaction } from "../api/TransactionService";
+import useHttp, { RequestConfig } from "../hooks/useHttp";
+import { useDispatch } from "react-redux";
+import TransactionItem from "../components/Transaction/TransactionItem";
 
 function BorrowForm() {
   const [student, setStudent] = useState<Student>();
   const [professor, setProfessor] = useState<Professor>();
   const [equipments, setEquipments] = useState<Equipment[]>([]);
+  const dispatch = useDispatch();
+  const transaction = useSelector((state: IRootState) => state.transaction);
+  const auth = useSelector((state: IRootState) => state.auth);
+  const {
+    sendRequest: getTransactions,
+    data: transactions,
+    error,
+    status,
+  } = useHttp<Transaction[]>(TransactionService.getTransactions, true);
   const navigate = useNavigate();
+
+  // Get transactions on component mount
+  useEffect(() => {
+    const requestConfig: RequestConfig = {
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`,
+      },
+      relativeUrl: "/api/v1/transactions",
+    };
+    getTransactions(requestConfig);
+  }, [auth.accessToken]);
+
+  // Populate Transactions in Redux Store
+  useEffect(() => {
+    if (transactions && status === "completed" && error === null) {
+      dispatch(transactionAction.addTransactions({ transactions }));
+    }
+  }, [transaction, error, status]);
+
   const backBtnHandler: MouseEventHandler = () => {
     navigate("/");
   };
+
   return (
     <div className="container-md d-flex flex-column h-100">
       <div className="row">
@@ -139,15 +175,14 @@ function BorrowForm() {
             <div className="col-12 table-responsive-xxl">
               <table
                 className="table table-hover"
-                style={{ minWidth: "1200px" }}
+                style={{ minWidth: "1500px" }}
               >
                 <thead className="table-dark">
                   <tr>
-                    <th>Student Number</th>
                     <th>Transaction Code</th>
                     <th>Borrower</th>
                     <th>Year and Section</th>
-                    <th>Equipmentst</th>
+                    <th>Equipment Count</th>
                     <th>Professor</th>
                     <th>Borrowed At</th>
                     <th>Returned At</th>
@@ -155,16 +190,16 @@ function BorrowForm() {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td>2015-00129-MN-0</td>
-                    <td>John Glenn L. Eligio</td>
-                    <td>5-3</td>
-                    <td>Voltemeter, Tester</td>
-                    <td>Sir. Carascal</td>
-                    <td>Apr 24 2015</td>
-                    <td>Jan 24 2016</td>
-                    <td>Accepted</td>
-                  </tr>
+                  {[...transaction.transactions].map((t) => {
+                    return (
+                      <TransactionItem
+                        key={t.txCode}
+                        transaction={t}
+                        focused={false}
+                        onTransactionItemClick={() => {}}
+                      />
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -173,7 +208,9 @@ function BorrowForm() {
       </div>
       <div className="row" style={{ marginTop: "auto" }}>
         <div className="col">
-          <h3 className="text-center fs-5">Borrowed items: 1</h3>
+          <h3 className="text-center fs-5">
+            Borrowed items: {transaction.transactions.length}
+          </h3>
         </div>
       </div>
     </div>

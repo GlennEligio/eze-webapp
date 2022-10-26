@@ -1,6 +1,7 @@
 package com.eze.backend.restapi.controller;
 
 import com.eze.backend.restapi.dtos.YearSectionDto;
+import com.eze.backend.restapi.dtos.YearSectionWithYearLevelDto;
 import com.eze.backend.restapi.model.YearSection;
 import com.eze.backend.restapi.service.YearSectionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,19 +23,19 @@ public class YearSectionController {
     }
 
     @GetMapping("/yearSections/{sectionName}")
-    public ResponseEntity<YearSectionDto> getYearSection(@PathVariable("sectionName") String sectionName) {
-        return ResponseEntity.ok(YearSection.toYearSectionDto(service.get(sectionName)));
+    public ResponseEntity<YearSectionWithYearLevelDto> getYearSection(@PathVariable("sectionName") String sectionName) {
+        return ResponseEntity.ok(YearSection.toYearSectionWithYearLevelDto(service.get(sectionName)));
     }
 
     @PostMapping("/yearSections")
-    public ResponseEntity<YearSectionDto> createYearSection(@RequestBody YearSection yearSection) {
-        return ResponseEntity.ok(YearSection.toYearSectionDto(service.create(yearSection)));
+    public ResponseEntity<YearSectionWithYearLevelDto> createYearSection(@RequestBody YearSection yearSection) {
+        return ResponseEntity.ok(YearSection.toYearSectionWithYearLevelDto(service.create(yearSection)));
     }
 
     @PutMapping("/yearSections/{sectionName}")
-    public ResponseEntity<YearSectionDto> updateYearSection(@RequestBody YearSection yearSection,
+    public ResponseEntity<YearSectionWithYearLevelDto> updateYearSection(@RequestBody YearSection yearSection,
                                                          @PathVariable("sectionName") String sectionName) {
-        return ResponseEntity.ok(YearSection.toYearSectionDto(service.update(yearSection, sectionName)));
+        return ResponseEntity.ok(YearSection.toYearSectionWithYearLevelDto(service.update(yearSection, sectionName)));
     }
 
     @DeleteMapping("/yearSections/{sectionName}")

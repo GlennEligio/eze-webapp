@@ -38,8 +38,6 @@ public class Student implements Serializable {
     private YearLevel yearLevel;
     private byte[] image;
     @OneToMany(mappedBy = "borrower")
-    // TODO: Temp fix for stackoverflow error, create DTO for this class that doesnt include this field
-    @JsonIgnore
     private List<Transaction> transactions;
 //    @OneToOne(mappedBy = "student")
 //    private StudentFingerprint studentFingerprint;
@@ -92,6 +90,16 @@ public class Student implements Serializable {
     }
 
     public static StudentDto toStudentDto(Student student) {
-        
+        return new StudentDto(student.getId(),
+                student.getStudentNumber(),
+                student.getFullName(),
+                YearSection.toYearSectionDto(student.getYearAndSection()),
+                student.getContactNumber(),
+                student.getBirthday(),
+                student.getAddress(),
+                student.getEmail(),
+                student.getGuardian(),
+                student.getGuardianNumber(),
+                YearLevel.toYearLevelDto(student.getYearLevel()));
     }
 }

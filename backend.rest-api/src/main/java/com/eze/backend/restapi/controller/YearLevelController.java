@@ -1,6 +1,7 @@
 package com.eze.backend.restapi.controller;
 
 import com.eze.backend.restapi.dtos.YearLevelDto;
+import com.eze.backend.restapi.dtos.YearLevelWithSectionsDto;
 import com.eze.backend.restapi.model.YearLevel;
 import com.eze.backend.restapi.service.YearLevelService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,13 +18,13 @@ public class YearLevelController {
     private YearLevelService service;
 
     @GetMapping("/yearLevels")
-    public ResponseEntity<List<YearLevelDto>> getYearLevels() {
-        return ResponseEntity.ok(service.getAll().stream().map(YearLevel::toYearLevelDto).toList());
+    public ResponseEntity<List<YearLevelWithSectionsDto>> getYearLevels() {
+        return ResponseEntity.ok(service.getAll().stream().map(YearLevel::toYearLevelWithSectionsDto).toList());
     }
 
     @GetMapping("/yearLevels/{yearNumber}")
-    public ResponseEntity<YearLevelDto> getYearLevel(@PathVariable("yearNumber") String yearNumber) {
-        return ResponseEntity.ok(YearLevel.toYearLevelDto(service.get(yearNumber)));
+    public ResponseEntity<YearLevelWithSectionsDto> getYearLevel(@PathVariable("yearNumber") String yearNumber) {
+        return ResponseEntity.ok(YearLevel.toYearLevelWithSectionsDto(service.get(yearNumber)));
     }
 
     @PostMapping("/yearLevels")
@@ -32,9 +33,9 @@ public class YearLevelController {
     }
 
     @PutMapping("/yearLevels/{yearNumber}")
-    public ResponseEntity<YearLevelDto> updateYearLevel(@RequestBody YearLevel yearLevel,
+    public ResponseEntity<YearLevelWithSectionsDto> updateYearLevel(@RequestBody YearLevel yearLevel,
                                                      @PathVariable("yearNumber") String yearNumber) {
-        return ResponseEntity.ok(YearLevel.toYearLevelDto(service.update(yearLevel, yearNumber)));
+        return ResponseEntity.ok(YearLevel.toYearLevelWithSectionsDto(service.update(yearLevel, yearNumber)));
     }
 
     @DeleteMapping("/yearLevels/{yearNumber}")

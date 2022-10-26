@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -69,6 +70,7 @@ public class TransactionService implements IService<Transaction> {
 
         // Set the transaction code
         transaction.setTxCode(new ObjectId().toHexString());
+        transaction.setBorrowedAt(LocalDateTime.now());
 
         return txRepo.save(transaction);
     }

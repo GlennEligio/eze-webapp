@@ -13,5 +13,4 @@ public class YearLevelDto {
     private Long id;
     private Integer yearNumber;
     private String yearName;
-    private List<YearSectionDto> yearSections;
 }

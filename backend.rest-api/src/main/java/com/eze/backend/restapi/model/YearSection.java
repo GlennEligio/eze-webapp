@@ -1,6 +1,7 @@
 package com.eze.backend.restapi.model;
 
 import com.eze.backend.restapi.dtos.YearSectionDto;
+import com.eze.backend.restapi.dtos.YearSectionWithYearLevelDto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -27,5 +28,9 @@ public class YearSection implements Serializable {
 
     public static YearSectionDto toYearSectionDto(YearSection ys) {
         return new YearSectionDto(ys.getId(), ys.getSectionName());
+    }
+
+    public static YearSectionWithYearLevelDto toYearSectionWithYearLevelDto (YearSection ys) {
+        return new YearSectionWithYearLevelDto(ys.getId(), ys.getSectionName(), YearLevel.toYearLevelDto(ys.getYearLevel()));
     }
 }

@@ -19,28 +19,28 @@ public class StudentController {
     private StudentService service;
 
     @GetMapping("/students")
-    public ResponseEntity<List<StudentListDto>> getStudents(@RequestParam String complete) {
+    public ResponseEntity<List<StudentListDto>> getStudents() {
         return ResponseEntity.ok(service.getAll().stream().map(Student::toStudentListDto).toList());
     }
 
     @GetMapping("/students/{studentNo}")
     public ResponseEntity<Object> getStudent(@PathVariable("studentNo") String studentNo,
-                                                 @RequestParam String full) {
-        if(full.equalsIgnoreCase("true")) {
-            return ResponseEntity.ok(Student.)
+                                                 @RequestParam(required = false) String complete) {
+        if(complete != null && complete.equalsIgnoreCase("true")) {
+            return ResponseEntity.ok(Student.toStudentDto(service.get(studentNo)));
         }
         return ResponseEntity.ok(Student.toStudentListDto(service.get(studentNo)));
     }
 
     @PostMapping("/students")
     public ResponseEntity<StudentDto> createStudent(@RequestBody Student student) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(Student.toStudentListDto(service.create(student)));
+        return ResponseEntity.status(HttpStatus.CREATED).body(Student.toStudentDto(service.create(student)));
     }
 
     @PutMapping("/students/{studentNo}")
     public ResponseEntity<StudentDto> updateStudent(@RequestBody Student student,
                                                  @PathVariable("studentNo") String studentNo) {
-        return ResponseEntity.ok(Student.toStudentListDto(service.update(student, studentNo)));
+        return ResponseEntity.ok(Student.toStudentDto(service.update(student, studentNo)));
     }
 
     @DeleteMapping("/students/{studentNo}")

@@ -1,6 +1,8 @@
 package com.eze.backend.restapi.model;
 
 import com.eze.backend.restapi.dtos.YearLevelDto;
+import com.eze.backend.restapi.dtos.YearLevelWithSectionsDto;
+import com.eze.backend.restapi.dtos.YearSectionWithYearLevelDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -31,7 +33,10 @@ public class YearLevel implements Serializable {
         if(yl.getId() != null) dto.setId(yl.getId());
         if(yl.getYearName() != null) dto.setYearName(yl.getYearName());
         if(yl.getYearNumber() != null) dto.setYearNumber(yl.getYearNumber());
-        if(yl.getYearSections() != null) dto.setYearSections(yl.getYearSections().stream().map(YearSection::toYearSectionDto).toList());
         return dto;
+    }
+
+    public static YearLevelWithSectionsDto toYearLevelWithSectionsDto (YearLevel yl) {
+        return new YearLevelWithSectionsDto(yl.getId(), yl.getYearNumber(), yl.getYearName(), yl.getYearSections().stream().map(YearSection::toYearSectionDto).toList());
     }
 }
