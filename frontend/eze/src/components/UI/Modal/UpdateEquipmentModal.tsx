@@ -1,10 +1,9 @@
 import React, { useRef, useState, useEffect } from "react";
 import useHttp, { RequestConfig } from "../../../hooks/useHttp";
-import {
+import EquipmentService, {
   Equipment,
   CreateUpdateEquipmentDto,
 } from "../../../api/EquipmentService";
-import * as EquipmentService from "../../../api/EquipmentService";
 import { useSelector } from "react-redux";
 import { IRootState } from "../../../store";
 import { equipmentActions } from "../../../store/equipmentSlice";
@@ -28,12 +27,16 @@ const UpdateEquipmentModal = () => {
 
   useEffect(() => {
     const selectedEquipment = equipment.selectedEquipment;
-    if (selectedEquipment == null) return;
-    setName(selectedEquipment?.name as string);
-    setBarcode(selectedEquipment?.barcode as string);
-    setStatus(selectedEquipment?.status as string);
-    setDefectiveSince(selectedEquipment?.defectiveSince as string);
-    setIsDuplicable(selectedEquipment?.isDuplicable as boolean);
+    if (selectedEquipment === null) return;
+    setName(selectedEquipment.name ? selectedEquipment.name : "");
+    setBarcode(selectedEquipment.barcode ? selectedEquipment.barcode : "");
+    setStatus(selectedEquipment.status ? selectedEquipment.status : "");
+    setDefectiveSince(
+      selectedEquipment.defectiveSince ? selectedEquipment.defectiveSince : ""
+    );
+    setIsDuplicable(
+      selectedEquipment.isDuplicable ? selectedEquipment.isDuplicable : true
+    );
   }, [equipment.selectedEquipment]);
 
   useEffect(() => {

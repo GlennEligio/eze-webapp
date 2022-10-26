@@ -1,10 +1,9 @@
 import React, { useRef, useState, useEffect } from "react";
 import useHttp, { RequestConfig } from "../../../hooks/useHttp";
-import {
+import EquipmentService, {
   Equipment,
   CreateUpdateEquipmentDto,
 } from "../../../api/EquipmentService";
-import * as EquipmentService from "../../../api/EquipmentService";
 import { useSelector } from "react-redux";
 import { IRootState } from "../../../store";
 import { equipmentActions } from "../../../store/equipmentSlice";

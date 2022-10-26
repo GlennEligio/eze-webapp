@@ -111,7 +111,7 @@ const deleteEquipment = async (requestConfig: RequestConfig) => {
   return responseObj;
 };
 
-export {
+export default {
   getEquipments,
   getEquipmentByBarcode,
   createEquipment,

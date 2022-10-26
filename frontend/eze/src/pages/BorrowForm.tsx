@@ -2,11 +2,11 @@ import { useNavigate } from "react-router-dom";
 import { MouseEventHandler, useEffect, useState } from "react";
 import StudentService, { Student } from "../api/StudentService";
 import ProfessorService, { Professor } from "../api/ProfessorService";
-import { Equipment } from "../api/EquipmentService";
+import TransactionService, { Transaction } from "../api/TransactionService";
+import EquipmentService, { Equipment } from "../api/EquipmentService";
 import { useSelector } from "react-redux";
 import { IRootState } from "../store";
 import { transactionAction } from "../store/transactionSlice";
-import TransactionService, { Transaction } from "../api/TransactionService";
 import useHttp, { RequestConfig } from "../hooks/useHttp";
 import { useDispatch } from "react-redux";
 import TransactionItem from "../components/Transaction/TransactionItem";
@@ -16,7 +16,7 @@ function BorrowForm() {
   const [studentNumber, setStudentNumber] = useState("");
   const [professorName, setProfessorName] = useState("");
   const [professorContactNumber, setProfessorContactNumber] = useState("");
-  const [equipmentCode, setEquipmentCode] = useState("");
+  const [equipmentBarcode, setEquipmentBarcode] = useState("");
   const [studentName, setStudentName] = useState("");
   const [yearAndSection, setYearAndSection] = useState("");
   const [equipmentNameList, setEquipmentNameList] = useState("");
@@ -26,18 +26,25 @@ function BorrowForm() {
   const dispatch = useDispatch();
   const transaction = useSelector((state: IRootState) => state.transaction);
   const auth = useSelector((state: IRootState) => state.auth);
+  const navigate = useNavigate();
+
+  // useHttp for Transaction list
   const {
     sendRequest: getTransactions,
     data: transactions,
     error: getTransactionsError,
     status: getTransactionsStatus,
   } = useHttp<Transaction[]>(TransactionService.getTransactions, true);
+
+  // useHttp for Student search
   const {
     sendRequest: getStudentByStudentNumber,
     data: studentData,
     error: getStudentByStudentNumberError,
     status: getStudentByStudentNumberStatus,
   } = useHttp<Student>(StudentService.getStudentByStudentNumber, false);
+
+  // useHttp for Professor Search
   const {
     sendRequest: getProfessorByName,
     data: professorData,
@@ -45,7 +52,13 @@ function BorrowForm() {
     status: getProfessorByNameStatus,
   } = useHttp<Professor>(ProfessorService.getProfessorByName, false);
 
-  const navigate = useNavigate();
+  // useHttp for Equipment Search
+  const {
+    sendRequest: getEquipmentByBarcode,
+    data: equipmentData,
+    error: getEquipmentByBarcodeError,
+    status: getEquipmentByBarcodeStatus,
+  } = useHttp<Equipment>(EquipmentService.getEquipmentByBarcode, false);
 
   // Get transactions on component mount
   useEffect(() => {
@@ -98,6 +111,23 @@ function BorrowForm() {
     }
   }, [professorData, getProfessorByNameError, getProfessorByNameStatus]);
 
+  // Populate Equipment State and its inputs
+  useEffect(() => {
+    if (
+      equipmentData &&
+      getEquipmentByBarcodeError === null &&
+      getEquipmentByBarcodeStatus === "completed"
+    ) {
+      setEquipments((oldEqs) => [...oldEqs, equipmentData]);
+      setEquipmentNameList((oldEqNames) => {
+        if (oldEqNames === "") {
+          return equipmentData.name;
+        }
+        return oldEqNames.concat(", ", equipmentData.name);
+      });
+    }
+  }, [equipmentData, getEquipmentByBarcodeError, getEquipmentByBarcodeStatus]);
+
   // Back button navigation handler
   const backBtnHandler: MouseEventHandler = () => {
     navigate("/");
@@ -123,6 +153,17 @@ function BorrowForm() {
       relativeUrl: `/api/v1/professors/${professorName}`,
     };
     getProfessorByName(requestConfig);
+  };
+
+  // Search equipment handler
+  const searchEquipmentHandler: MouseEventHandler = () => {
+    const requestConfig: RequestConfig = {
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`,
+      },
+      relativeUrl: `/api/v1/equipments/${equipmentBarcode}`,
+    };
+    getEquipmentByBarcode(requestConfig);
   };
 
   return (
@@ -239,8 +280,14 @@ function BorrowForm() {
                     type="text"
                     className="form-control"
                     placeholder="Enter barcode"
+                    onChange={(e) => setEquipmentBarcode(e.target.value)}
+                    value={equipmentBarcode}
                   />
-                  <a type="button" className="btn btn-outline-secondary">
+                  <a
+                    type="button"
+                    className="btn btn-outline-secondary"
+                    onClick={searchEquipmentHandler}
+                  >
                     <i className="bi bi-search"></i>
                   </a>
                 </div>
@@ -249,12 +296,14 @@ function BorrowForm() {
                     className="form-control"
                     type="text"
                     placeholder="Equipments..."
+                    disabled
+                    value={equipmentNameList}
                   />
                 </div>
                 <div className="mt-3 row gx-2">
                   <div className="col-7">
                     <button type="button" className="btn btn-secondary w-100">
-                      Add Equipment
+                      Clear Equipments
                     </button>
                   </div>
                   <div className="col-5">

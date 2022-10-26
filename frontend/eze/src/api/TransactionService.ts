@@ -1,4 +1,7 @@
 import { RequestConfig } from "../hooks/useHttp";
+import { Equipment } from "./EquipmentService";
+import { Professor } from "./ProfessorService";
+import { Student } from "./StudentService";
 
 export interface Transaction {
   txCode: number;
@@ -9,6 +12,13 @@ export interface Transaction {
   borrowedAt: string;
   returnedAt: string;
   status: string;
+}
+
+export interface CreateUpdateTransaction {
+  equipments: Equipment[];
+  borrower: Student;
+  professor: Professor;
+  status: "PENDING" | "ACCEPTED" | "DENIED";
 }
 
 const BACKEND_URI = "http://localhost:8080";

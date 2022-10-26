@@ -33,6 +33,7 @@ public class TransactionController {
         }
     }
 
+    // TODO: Add option to receive full or DTO version of new Transaction
     @PostMapping("/transactions")
     public ResponseEntity<TransactionDto> createTransaction(@RequestBody Transaction transaction) {
         return ResponseEntity.status(HttpStatus.CREATED).body(Transaction.toTransactionDto(service.create(transaction)));

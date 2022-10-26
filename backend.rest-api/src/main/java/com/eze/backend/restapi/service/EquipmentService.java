@@ -6,6 +6,7 @@ import com.eze.backend.restapi.repository.EquipmentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -15,24 +16,26 @@ import java.util.Optional;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
 public class EquipmentService implements IService<Equipment>{
 
-    private final EquipmentRepository repository;
+    @Autowired
+    private EquipmentRepository repository;
 
     @Override
     public List<Equipment> getAll() {
+        log.info("Fetching all equipments");
         return repository.findAll();
     }
 
     @Override
     public Equipment get(Serializable code) {
+        log.info("Fetching equipments with equipment code: {}", code);
         return repository.findByEquipmentCode(code.toString()).orElseThrow(() -> new ApiException(notFound(code), HttpStatus.NOT_FOUND));
     }
 
     @Override
     public Equipment create(Equipment equipment) {
-        log.info("Creating equipment");
+        log.info("Creating equipment {}", equipment);
         if(equipment.getEquipmentCode() != null) {
             Optional<Equipment> optionalEquipment = repository.findByEquipmentCode(equipment.getEquipmentCode());
             if(optionalEquipment.isPresent()) {
@@ -53,6 +56,7 @@ public class EquipmentService implements IService<Equipment>{
 
     @Override
     public void delete(Serializable code) {
+        log.info("Deleting equipment with code {}", code);
         Equipment equipment = repository.findByEquipmentCode(code.toString()).orElseThrow(() -> new ApiException(notFound(code), HttpStatus.NOT_FOUND));
         repository.delete(equipment);
     }

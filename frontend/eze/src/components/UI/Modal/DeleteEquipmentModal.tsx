@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import useHttp, { RequestConfig } from "../../../hooks/useHttp";
-import * as EquipmentService from "../../../api/EquipmentService";
+import EquipmentService from "../../../api/EquipmentService";
 import { useSelector } from "react-redux";
 import { IRootState } from "../../../store";
 import { equipmentActions } from "../../../store/equipmentSlice";
@@ -37,11 +37,11 @@ const DeleteEquipmentModal = () => {
   useEffect(() => {
     const selectedEquipment = equipment.selectedEquipment;
     if (selectedEquipment == null) return;
-    setName(selectedEquipment?.name as string);
-    setBarcode(selectedEquipment?.barcode as string);
-    setStatus(selectedEquipment?.status as string);
-    setDefectiveSince(selectedEquipment?.defectiveSince as string);
-    setIsDuplicable(selectedEquipment?.isDuplicable as boolean);
+    setName(selectedEquipment.name || "");
+    setBarcode(selectedEquipment.barcode || "");
+    setStatus(selectedEquipment.status || "");
+    setDefectiveSince(selectedEquipment.defectiveSince || "");
+    setIsDuplicable(selectedEquipment.isDuplicable || false);
   }, [equipment.selectedEquipment]);
 
   const ondeleteEquipment = (event: React.FormEvent<HTMLFormElement>) => {
