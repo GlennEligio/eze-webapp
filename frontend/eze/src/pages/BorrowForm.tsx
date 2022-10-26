@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { MouseEventHandler, useEffect, useState } from "react";
-import { Student } from "../api/StudentService";
-import { Professor } from "../api/ProfessorService";
+import StudentService, { Student } from "../api/StudentService";
+import ProfessorService, { Professor } from "../api/ProfessorService";
 import { Equipment } from "../api/EquipmentService";
 import { useSelector } from "react-redux";
 import { IRootState } from "../store";
@@ -12,6 +12,14 @@ import { useDispatch } from "react-redux";
 import TransactionItem from "../components/Transaction/TransactionItem";
 
 function BorrowForm() {
+  // Borrow Form input states
+  const [studentNumber, setStudentNumber] = useState("");
+  const [professorName, setProfessorName] = useState("");
+  const [professorContactNumber, setProfessorContactNumber] = useState("");
+  const [equipmentCode, setEquipmentCode] = useState("");
+  const [studentName, setStudentName] = useState("");
+  const [yearAndSection, setYearAndSection] = useState("");
+  const [equipmentNameList, setEquipmentNameList] = useState("");
   const [student, setStudent] = useState<Student>();
   const [professor, setProfessor] = useState<Professor>();
   const [equipments, setEquipments] = useState<Equipment[]>([]);
@@ -21,9 +29,22 @@ function BorrowForm() {
   const {
     sendRequest: getTransactions,
     data: transactions,
-    error,
-    status,
+    error: getTransactionsError,
+    status: getTransactionsStatus,
   } = useHttp<Transaction[]>(TransactionService.getTransactions, true);
+  const {
+    sendRequest: getStudentByStudentNumber,
+    data: studentData,
+    error: getStudentByStudentNumberError,
+    status: getStudentByStudentNumberStatus,
+  } = useHttp<Student>(StudentService.getStudentByStudentNumber, false);
+  const {
+    sendRequest: getProfessorByName,
+    data: professorData,
+    error: getProfessorByNameError,
+    status: getProfessorByNameStatus,
+  } = useHttp<Professor>(ProfessorService.getProfessorByName, false);
+
   const navigate = useNavigate();
 
   // Get transactions on component mount
@@ -39,13 +60,69 @@ function BorrowForm() {
 
   // Populate Transactions in Redux Store
   useEffect(() => {
-    if (transactions && status === "completed" && error === null) {
+    if (
+      transactions &&
+      getTransactionsStatus === "completed" &&
+      getTransactionsError === null
+    ) {
       dispatch(transactionAction.addTransactions({ transactions }));
     }
-  }, [transaction, error, status]);
+  }, [transaction, getTransactionsError, getTransactionsStatus]);
 
+  // Populate Student State and its inputs when data from getStudent useHttp updates
+  useEffect(() => {
+    if (
+      studentData &&
+      getStudentByStudentNumberError === null &&
+      getStudentByStudentNumberStatus === "completed"
+    ) {
+      setStudent(studentData);
+      setStudentName(studentData.fullName);
+      setYearAndSection(studentData.yearAndSection);
+    }
+  }, [
+    studentData,
+    getStudentByStudentNumberError,
+    getStudentByStudentNumberStatus,
+  ]);
+
+  // Populate Professor State and its input
+  useEffect(() => {
+    if (
+      professorData &&
+      getProfessorByNameError === null &&
+      getProfessorByNameStatus === "completed"
+    ) {
+      setProfessor(professorData);
+      setProfessorContactNumber(professorData.contactNumber);
+    }
+  }, [professorData, getProfessorByNameError, getProfessorByNameStatus]);
+
+  // Back button navigation handler
   const backBtnHandler: MouseEventHandler = () => {
     navigate("/");
+  };
+
+  // Search student handler
+  const searchStudentHandler: MouseEventHandler = () => {
+    const requestConfig: RequestConfig = {
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`,
+      },
+      relativeUrl: `/api/v1/students/${studentNumber}`,
+    };
+    getStudentByStudentNumber(requestConfig);
+  };
+
+  // Search professor handler
+  const searchProfessorHandler: MouseEventHandler = () => {
+    const requestConfig: RequestConfig = {
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`,
+      },
+      relativeUrl: `/api/v1/professors/${professorName}`,
+    };
+    getProfessorByName(requestConfig);
   };
 
   return (
@@ -94,8 +171,14 @@ function BorrowForm() {
                     type="text"
                     className="form-control"
                     placeholder="Student Number"
+                    onChange={(e) => setStudentNumber(e.target.value)}
+                    value={studentNumber}
                   />
-                  <a type="button" className="btn btn-outline-secondary">
+                  <a
+                    type="button"
+                    className="btn btn-outline-secondary"
+                    onClick={searchStudentHandler}
+                  >
                     <i className="bi bi-search"></i>
                   </a>
                 </div>
@@ -104,6 +187,8 @@ function BorrowForm() {
                     className="form-control"
                     type="text"
                     placeholder="Borrower's Name"
+                    disabled
+                    value={studentName}
                   />
                 </div>
                 <div className="mt-3">
@@ -111,6 +196,8 @@ function BorrowForm() {
                     className="form-control"
                     type="text"
                     placeholder="Year and Section"
+                    disabled
+                    value={yearAndSection}
                   />
                 </div>
                 <div className="mt-3 row">
@@ -120,8 +207,14 @@ function BorrowForm() {
                         type="text"
                         className="form-control"
                         placeholder="Professor Name"
+                        onChange={(e) => setProfessorName(e.target.value)}
+                        value={professorName}
                       />
-                      <a type="button" className="btn btn-outline-secondary">
+                      <a
+                        type="button"
+                        className="btn btn-outline-secondary"
+                        onClick={searchProfessorHandler}
+                      >
                         <i className="bi bi-search"></i>
                       </a>
                     </div>
@@ -131,6 +224,8 @@ function BorrowForm() {
                       className="form-control"
                       type="text"
                       placeholder="Professor's Number"
+                      value={professorContactNumber}
+                      disabled
                     />
                   </div>
                 </div>

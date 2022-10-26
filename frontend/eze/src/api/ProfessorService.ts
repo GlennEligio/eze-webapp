@@ -103,4 +103,5 @@ export default {
   createProfessor,
   updateProfessor,
   deleteProfessor,
+  getProfessorByName,
 };
