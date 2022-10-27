@@ -14,7 +14,6 @@ import MiniClock from "../components/UI/Other/MiniClock";
 
 function Equipments() {
   const equipment = useSelector((state: IRootState) => state.equipment);
-  const [equipments, setEquipments] = useState([]);
   const auth = useSelector((state: IRootState) => state.auth);
   const dispatch = useDispatch();
   const {

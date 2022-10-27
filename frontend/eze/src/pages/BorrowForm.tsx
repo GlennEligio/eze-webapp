@@ -1,8 +1,11 @@
 import { useNavigate } from "react-router-dom";
 import { MouseEventHandler, useEffect, useState } from "react";
-import StudentService, { Student } from "../api/StudentService";
+import StudentService, { StudentFull } from "../api/StudentService";
 import ProfessorService, { Professor } from "../api/ProfessorService";
-import TransactionService, { Transaction } from "../api/TransactionService";
+import TransactionService, {
+  Transaction,
+  CreateUpdateTransaction,
+} from "../api/TransactionService";
 import EquipmentService, { Equipment } from "../api/EquipmentService";
 import { useSelector } from "react-redux";
 import { IRootState } from "../store";
@@ -19,8 +22,7 @@ function BorrowForm() {
   const [equipmentBarcode, setEquipmentBarcode] = useState("");
   const [studentName, setStudentName] = useState("");
   const [yearAndSection, setYearAndSection] = useState("");
-  const [equipmentNameList, setEquipmentNameList] = useState("");
-  const [student, setStudent] = useState<Student>();
+  const [student, setStudent] = useState<StudentFull>();
   const [professor, setProfessor] = useState<Professor>();
   const [equipments, setEquipments] = useState<Equipment[]>([]);
   const dispatch = useDispatch();
@@ -42,7 +44,7 @@ function BorrowForm() {
     data: studentData,
     error: getStudentByStudentNumberError,
     status: getStudentByStudentNumberStatus,
-  } = useHttp<Student>(StudentService.getStudentByStudentNumber, false);
+  } = useHttp<StudentFull>(StudentService.getStudentByStudentNumber, false);
 
   // useHttp for Professor Search
   const {
@@ -59,6 +61,14 @@ function BorrowForm() {
     error: getEquipmentByBarcodeError,
     status: getEquipmentByBarcodeStatus,
   } = useHttp<Equipment>(EquipmentService.getEquipmentByBarcode, false);
+
+  // useHttp for creating Transaction/Borrow
+  const {
+    sendRequest: createTransaction,
+    data: newTransaction,
+    error: createTransactionError,
+    status: createTransactionStatus,
+  } = useHttp<Transaction>(TransactionService.createTransaction, false);
 
   // Get transactions on component mount
   useEffect(() => {
@@ -80,7 +90,7 @@ function BorrowForm() {
     ) {
       dispatch(transactionAction.addTransactions({ transactions }));
     }
-  }, [transaction, getTransactionsError, getTransactionsStatus]);
+  }, [transactions, getTransactionsError, getTransactionsStatus]);
 
   // Populate Student State and its inputs when data from getStudent useHttp updates
   useEffect(() => {
@@ -91,7 +101,7 @@ function BorrowForm() {
     ) {
       setStudent(studentData);
       setStudentName(studentData.fullName);
-      setYearAndSection(studentData.yearAndSection);
+      setYearAndSection(studentData.yearAndSection.sectionName);
     }
   }, [
     studentData,
@@ -119,14 +129,19 @@ function BorrowForm() {
       getEquipmentByBarcodeStatus === "completed"
     ) {
       setEquipments((oldEqs) => [...oldEqs, equipmentData]);
-      setEquipmentNameList((oldEqNames) => {
-        if (oldEqNames === "") {
-          return equipmentData.name;
-        }
-        return oldEqNames.concat(", ", equipmentData.name);
-      });
     }
   }, [equipmentData, getEquipmentByBarcodeError, getEquipmentByBarcodeStatus]);
+
+  // Add new Transaction in the Redux Store
+  useEffect(() => {
+    if (
+      newTransaction &&
+      createTransactionError === null &&
+      createTransactionStatus === "completed"
+    ) {
+      dispatch(transactionAction.addTransaction({ newTransaction }));
+    }
+  }, [newTransaction, createTransactionError, createTransactionStatus]);
 
   // Back button navigation handler
   const backBtnHandler: MouseEventHandler = () => {
@@ -135,11 +150,14 @@ function BorrowForm() {
 
   // Search student handler
   const searchStudentHandler: MouseEventHandler = () => {
+    const params = { complete: "true" };
     const requestConfig: RequestConfig = {
       headers: {
         Authorization: `Bearer ${auth.accessToken}`,
       },
-      relativeUrl: `/api/v1/students/${studentNumber}`,
+      relativeUrl: `/api/v1/students/${studentNumber}?${new URLSearchParams(
+        params
+      ).toString()}`,
     };
     getStudentByStudentNumber(requestConfig);
   };
@@ -164,6 +182,33 @@ function BorrowForm() {
       relativeUrl: `/api/v1/equipments/${equipmentBarcode}`,
     };
     getEquipmentByBarcode(requestConfig);
+  };
+
+  // Clear Equipments list
+  const clearEquipmentsHandler: MouseEventHandler = () => {
+    setEquipments([]);
+  };
+
+  // Borrow Equipments handler
+  const borrowEquipmentHandler = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (student && professor && equipments.length > 0) {
+      const newTransaction: CreateUpdateTransaction = {
+        borrower: student,
+        equipments: equipments,
+        professor: professor,
+        status: "PENDING",
+      };
+      const requestConfig: RequestConfig = {
+        body: newTransaction,
+        headers: {
+          Authorization: `Bearer ${auth.accessToken}`,
+          "Content-type": "application/json",
+        },
+        relativeUrl: `/api/v1/transactions?complete=true`,
+      };
+      createTransaction(requestConfig);
+    }
   };
 
   return (
@@ -273,7 +318,7 @@ function BorrowForm() {
               </form>
             </div>
             <div className="col-4 d-flex align-items-end">
-              <form className="w-100">
+              <form className="w-100" onSubmit={borrowEquipmentHandler}>
                 <p className="text-center fs-5">12:30 AM | 12 Oct 2019</p>
                 <div className="input-group mb-3">
                   <input
@@ -297,17 +342,21 @@ function BorrowForm() {
                     type="text"
                     placeholder="Equipments..."
                     disabled
-                    value={equipmentNameList}
+                    value={equipments.map((e) => e.name).join(", ")}
                   />
                 </div>
                 <div className="mt-3 row gx-2">
                   <div className="col-7">
-                    <button type="button" className="btn btn-secondary w-100">
+                    <button
+                      type="button"
+                      className="btn btn-secondary w-100"
+                      onClick={clearEquipmentsHandler}
+                    >
                       Clear Equipments
                     </button>
                   </div>
                   <div className="col-5">
-                    <button type="button" className="btn btn-secondary w-100">
+                    <button type="submit" className="btn btn-secondary w-100">
                       Borrow
                     </button>
                   </div>

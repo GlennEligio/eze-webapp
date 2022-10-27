@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import useHttp, { RequestConfig } from "../../../hooks/useHttp";
 import EquipmentService, {
   Equipment,
@@ -10,7 +10,6 @@ import { equipmentActions } from "../../../store/equipmentSlice";
 import { useDispatch } from "react-redux";
 
 const AddEquipmentModal = () => {
-  const submitButton = useRef<HTMLButtonElement>(null);
   const auth = useSelector((state: IRootState) => state.auth);
   const dispatch = useDispatch();
   const [name, setName] = useState("");
@@ -26,8 +25,8 @@ const AddEquipmentModal = () => {
   } = useHttp<Equipment>(EquipmentService.createEquipment, false);
 
   useEffect(() => {
-    if (requestStatus == "completed") {
-      if (error == null) {
+    if (requestStatus === "completed") {
+      if (error === null) {
         dispatch(equipmentActions.addEquipment({ newEquipment: data }));
       }
     }

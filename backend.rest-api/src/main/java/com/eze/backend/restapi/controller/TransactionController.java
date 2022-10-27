@@ -25,23 +25,26 @@ public class TransactionController {
 
     @GetMapping("/transactions/{code}")
     public ResponseEntity<Object> getTransaction(@PathVariable("code") String code,
-    @RequestParam(required = false) String complete) {
-        if(complete != null && complete.equalsIgnoreCase("true")) {
+                                                 @RequestParam(required = false) String complete) {
+        if (complete != null && complete.equalsIgnoreCase("true")) {
             return ResponseEntity.ok(Transaction.toTransactionDto(service.get(code)));
-        } else {
-            return ResponseEntity.ok(Transaction.toTransactionListDto(service.get(code)));
         }
+        return ResponseEntity.ok(Transaction.toTransactionListDto(service.get(code)));
     }
 
-    // TODO: Add option to receive full or DTO version of new Transaction
+    // TODO: Add option to receive either TX with full equipments list or only eq count version of new Transaction
     @PostMapping("/transactions")
-    public ResponseEntity<TransactionDto> createTransaction(@RequestBody Transaction transaction) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(Transaction.toTransactionDto(service.create(transaction)));
+    public ResponseEntity<Object> createTransaction(@RequestBody Transaction transaction,
+                                                    @RequestParam(required = false) String complete) {
+        if (complete != null && complete.equalsIgnoreCase("true")) {
+            return ResponseEntity.status(HttpStatus.CREATED).body(Transaction.toTransactionDto(service.create(transaction)));
+        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(Transaction.toTransactionListDto(service.create(transaction)));
     }
 
     @PutMapping("/transactions/{code}")
     public ResponseEntity<TransactionDto> updateTransaction(@RequestBody Transaction transaction,
-                                                         @PathVariable("code") String code) {
+                                                            @PathVariable("code") String code) {
         return ResponseEntity.ok(Transaction.toTransactionDto(service.update(transaction, code)));
     }
 

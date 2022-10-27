@@ -1,4 +1,5 @@
 import { RequestConfig } from "../hooks/useHttp";
+import { YearSection } from "./YearSectionService";
 
 export interface Student {
   id: number;
@@ -12,6 +13,27 @@ export interface Student {
   guardian: string;
   guardianNumber: string;
   yearLevel: number;
+}
+
+export interface StudentFull {
+  id: number;
+  studentNumber: string;
+  fullName: string;
+  yearAndSection: {
+    id: number;
+    sectionName: string;
+  };
+  contactNumber: string;
+  birthday: string;
+  address: string;
+  email: string;
+  guardian: string;
+  guardianNumber: string;
+  yearLevel: {
+    id: number;
+    yearNumber: number;
+    yearName: string;
+  };
 }
 
 export interface CreateUpdateStudentDto {
@@ -50,7 +72,7 @@ const getStudents = async (requestConfig: RequestConfig) => {
 };
 
 const getStudentByStudentNumber = async (requestConfig: RequestConfig) => {
-  const responseObj: Student = await fetch(
+  const responseObj: Student | StudentFull = await fetch(
     `${BACKEND_URI}${requestConfig.relativeUrl}` as string,
     {
       method: requestConfig.method || "GET",
