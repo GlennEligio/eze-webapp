@@ -9,6 +9,6 @@ public record TransactionListDto (String txCode,
                               String borrower,
                               String yearAndSection,
                               String professor,
-                              LocalDateTime borrowedAt,
-                              LocalDateTime returnedAt,
+                              String borrowedAt,
+                              String returnedAt,
                               TxStatus status) { }

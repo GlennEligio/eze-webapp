@@ -1,19 +1,28 @@
-import { MouseEventHandler, useEffect } from "react";
+import { MouseEventHandler, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { IRootState } from "../store";
 import { authActions } from "../store/authSlice";
-import MenuButton from "../components/Menu/MenuButton";
+import EzeMenuButton from "../components/Menu/EzeMenuButton";
 import MenuHeader from "../components/Menu/MenuHeader";
 import MenuClock from "../components/Menu/MenuClock";
 import MenuOffcanvas from "../components/Menu/MenuOffcanvas";
+import {
+  ClickEvent,
+  ControlledMenu,
+  MenuItem,
+  useMenuState,
+} from "@szhsin/react-menu";
 
 function AdminMenu() {
   const auth = useSelector((state: IRootState) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [menuProps, toggleMenu] = useMenuState({ transition: true });
+  const [anchorPoint, setAnchorPoint] = useState({ x: 0, y: 0 });
 
+  // Checks if accessToken is present
   useEffect(() => {
     if (!!auth.accessToken && ["SADMIN", "ADMIN"].includes(auth.accountType))
       return;
@@ -22,6 +31,12 @@ function AdminMenu() {
 
   const logout = () => {
     dispatch(authActions.removeAuth());
+  };
+
+  const transactionClickHandler: MouseEventHandler = (e) => {
+    e.preventDefault();
+    setAnchorPoint({ x: e.clientX, y: e.clientY });
+    toggleMenu(true);
   };
 
   return (
@@ -41,7 +56,7 @@ function AdminMenu() {
             <div className="row flex-grow-1 gx-2">
               <div className="col-6 d-flex flex-column">
                 <div className="row gx-0 flex-grow-1">
-                  <MenuButton
+                  <EzeMenuButton
                     backgroundColor="#a43ae3"
                     imageLoc="/img/Contacts.png"
                     title="Faculty"
@@ -50,7 +65,7 @@ function AdminMenu() {
                   />
                 </div>
                 <div className="row gx-0 gy-1 flex-grow-1 mt-1">
-                  <MenuButton
+                  <EzeMenuButton
                     backgroundColor="#f2a114"
                     imageLoc="/img/resized_inventory.jpg"
                     title="Inventory"
@@ -58,7 +73,7 @@ function AdminMenu() {
                     destPage="/equipments"
                     leftSpacer={true}
                   />
-                  <MenuButton
+                  <EzeMenuButton
                     backgroundColor="#d68a3a"
                     imageLoc="/img/User Accounts.png"
                     title="Accounts"
@@ -67,7 +82,7 @@ function AdminMenu() {
                   />
                 </div>
                 <div className="row gx-0 gy-1 flex-grow-1 mt-1">
-                  <MenuButton
+                  <EzeMenuButton
                     backgroundColor="#662d91"
                     imageLoc="/img/Calendar.png"
                     title="Schedule"
@@ -75,7 +90,7 @@ function AdminMenu() {
                     destPage="/schedules"
                     leftSpacer={true}
                   />
-                  <MenuButton
+                  <EzeMenuButton
                     backgroundColor="#d24826"
                     imageLoc="/img/camera2.png"
                     title="Camera"
@@ -86,7 +101,7 @@ function AdminMenu() {
               </div>
               <div className="col-3 d-flex flex-column">
                 <div className="row gx-0 flex-grow-1">
-                  <MenuButton
+                  <EzeMenuButton
                     backgroundColor="#00aeef"
                     imageLoc="/img/Documents Library.png"
                     title="Student Database"
@@ -97,15 +112,30 @@ function AdminMenu() {
                   />
                 </div>
                 <div className="row gx-0 flex-grow-1 mt-2">
-                  <MenuButton
+                  <EzeMenuButton
+                    onContextMenu={transactionClickHandler}
                     backgroundColor="#48ac3f"
                     imageLoc="/img/Sync Center.png"
                     title="Transactions"
                     key="Transactions"
                     imgMaxHeight="100%"
                     imgMaxWidth="100%"
-                    destPage="/borrow"
-                  />
+                  >
+                    <ControlledMenu
+                      {...menuProps}
+                      anchorPoint={anchorPoint}
+                      direction="right"
+                      onClose={() => toggleMenu(false)}
+                      menuClassName={"eze-menu"}
+                    >
+                      <MenuItem onClick={() => navigate("/borrow")}>
+                        Borrow
+                      </MenuItem>
+                      <MenuItem onClick={() => navigate("/return")}>
+                        Return
+                      </MenuItem>
+                    </ControlledMenu>
+                  </EzeMenuButton>
                 </div>
               </div>
               <div className="col-3 d-flex flex-column">

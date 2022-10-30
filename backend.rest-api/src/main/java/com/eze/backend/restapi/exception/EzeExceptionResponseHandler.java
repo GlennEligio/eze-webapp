@@ -15,13 +15,13 @@ import java.time.LocalDateTime;
 @RestControllerAdvice
 public class EzeExceptionResponseHandler extends ResponseEntityExceptionHandler {
 
-    @ExceptionHandler(value = Exception.class)
-    public ResponseEntity<ExceptionResponse> handleAllException (Exception ex, WebRequest request){
-        ExceptionResponse response = new ExceptionResponse(ex.getMessage(),
-                LocalDateTime.now(),
-                request.getDescription(false));
-        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+//    @ExceptionHandler(value = Exception.class)
+//    public ResponseEntity<ExceptionResponse> handleAllException (Exception ex, WebRequest request){
+//        ExceptionResponse response = new ExceptionResponse(ex.getMessage(),
+//                LocalDateTime.now(),
+//                request.getDescription(false));
+//        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+//    }
 
     @ExceptionHandler(value = ApiException.class)
     public ResponseEntity<ExceptionResponse> handleApiException (ApiException ex, WebRequest request){

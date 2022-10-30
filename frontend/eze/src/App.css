@@ -40,3 +40,28 @@
   border: 2px solid #b40e0e !important;
   background-color: #fddddd !important;
 }
+
+.eze-menu {
+  font-family: sans-serif;
+  font-size: 0.925rem;
+  user-select: none;
+  box-shadow: 1px 1px 20px 1px rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+  padding: 6px;
+  min-width: 10rem;
+  list-style: none;
+  background-color: white;
+}
+
+.eze-menu li {
+  border-radius: 6px;
+  padding: 0.375rem 0.625rem;
+}
+
+.eze-menu li:hover {
+  border-radius: 6px;
+  padding: 0.375rem 0.625rem;
+  color: #fff;
+  background-color: #59a2ff;
+  border-color: white;
+}

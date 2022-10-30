@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { MouseEventHandler, useEffect } from "react";
 import { IRootState } from "../store";
 import { authActions } from "../store/authSlice";
-import MenuButton from "../components/Menu/MenuButton";
+import EzeMenuButton from "../components/Menu/EzeMenuButton";
 import MenuHeader from "../components/Menu/MenuHeader";
 import MenuClock from "../components/Menu/MenuClock";
 
@@ -48,7 +48,7 @@ const StudentMenu = () => {
               <div className="col-3 d-flex flex-column">
                 {/* <!--Faculty--> */}
                 <div className="row gx-0 flex-grow-1">
-                  <MenuButton
+                  <EzeMenuButton
                     backgroundColor="#41d696"
                     destPage="/borrow"
                     imageLoc="/img/resized_add.jpg"
@@ -58,7 +58,7 @@ const StudentMenu = () => {
                 </div>
                 {/* <!-- Inventory --> */}
                 <div className="row gx-0 gy-1 flex-grow-1 mt-1">
-                  <MenuButton
+                  <EzeMenuButton
                     backgroundColor="#f2a114"
                     destPage="/equipments"
                     imageLoc="/img/resized_inventory.jpg"
@@ -68,7 +68,7 @@ const StudentMenu = () => {
                 </div>
                 {/* <!-- Schedule --> */}
                 <div className="row gx-0 gy-1 flex-grow-1 mt-1">
-                  <MenuButton
+                  <EzeMenuButton
                     backgroundColor="#662d91"
                     destPage="/schedules"
                     imageLoc="./img/Calendar.png"
@@ -81,7 +81,7 @@ const StudentMenu = () => {
               <div className="col-3 d-flex flex-column">
                 {/* <!--Transactions--> */}
                 <div className="row gx-0 flex-grow-1">
-                  <MenuButton
+                  <EzeMenuButton
                     backgroundColor="#48ac3f"
                     destPage="/transactions"
                     imageLoc="/img/Sync Center.png"
@@ -91,7 +91,7 @@ const StudentMenu = () => {
                 </div>
                 {/* <!-- Student Database --> */}
                 <div className="row gx-0 gy-1 flex-grow-1 mt-1">
-                  <MenuButton
+                  <EzeMenuButton
                     backgroundColor="#00aeef"
                     destPage="/students"
                     imageLoc="/img/Documents Library.png"
@@ -101,7 +101,7 @@ const StudentMenu = () => {
                 </div>
                 {/* <!-- Camera --> */}
                 <div className="row gx-0 gy-1 flex-grow-1 mt-1">
-                  <MenuButton
+                  <EzeMenuButton
                     backgroundColor="#d24826"
                     destPage="/borrow"
                     imageLoc="/img/camera2.png"

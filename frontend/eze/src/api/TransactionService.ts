@@ -4,8 +4,19 @@ import { Professor } from "./ProfessorService";
 import { StudentFull } from "./StudentService";
 
 export interface Transaction {
-  txCode: number;
+  txCode: string;
   equipmentsCount: number;
+  borrower: string;
+  yearAndSection: string;
+  professor: string;
+  borrowedAt: string;
+  returnedAt: string;
+  status: string;
+}
+
+export interface TransactionFull {
+  txCode: string;
+  equipments: Equipment[];
   borrower: string;
   yearAndSection: string;
   professor: string;
@@ -39,6 +50,22 @@ const getTransactions = async (requestConfig: RequestConfig) => {
   return responseObj;
 };
 
+const getTransactionByCode = async (requestConfig: RequestConfig) => {
+  const responseObj: TransactionFull[] = await fetch(
+    `${BACKEND_URI}${requestConfig.relativeUrl}`,
+    {
+      method: requestConfig.method || "GET",
+      headers: requestConfig.headers != null ? requestConfig.headers : {},
+    }
+  ).then((response) => {
+    if (response.ok) {
+      return response.json();
+    }
+    throw new Error("Failed to fetch transaction");
+  });
+  return responseObj;
+};
+
 const createTransaction = async (requestConfig: RequestConfig) => {
   const responseObj: Transaction = await fetch(
     `${BACKEND_URI}/api/v1/transactions`,
@@ -56,4 +83,4 @@ const createTransaction = async (requestConfig: RequestConfig) => {
   return responseObj;
 };
 
-export default { getTransactions, createTransaction };
+export default { getTransactions, createTransaction, getTransactionByCode };

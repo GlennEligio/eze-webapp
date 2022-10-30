@@ -5,6 +5,7 @@ import com.eze.backend.restapi.model.Equipment;
 import com.eze.backend.restapi.model.Transaction;
 import com.eze.backend.restapi.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -13,10 +14,13 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class TransactionService implements IService<Transaction> {
 
     private final TransactionRepository txRepo;
@@ -58,6 +62,14 @@ public class TransactionService implements IService<Transaction> {
 
         // Check if any equipments is not duplicable and is already borrowed
         checkEqAlreadyBorrowed(equipments);
+
+        // Set the isBorrowed of non-duplicable equipment to true
+        equipments.forEach(e -> {
+            if(Boolean.FALSE.equals(e.getIsDuplicable())) {
+                e.setIsBorrowed(true);
+            }
+            eqService.update(e, e.getEquipmentCode());
+        });
 
         // Populate Professor and Student data of transaction
         transaction.setEquipments(equipments);
@@ -138,5 +150,45 @@ public class TransactionService implements IService<Transaction> {
         if (!eqAlreadyBorrowed.isEmpty()) {
             throw new ApiException(eqBorrowed(eqAlreadyBorrowed), HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @Transactional
+    public Transaction returnEquipments(String borrower, String professor, List<String> equipmentsBarcode) {
+        List<Equipment> eqs = new ArrayList<>();
+        for(String barcode: equipmentsBarcode) {
+            eqs.add(eqService.getByBarcode(barcode));
+        }
+        log.info("Equipments found: {}", eqs.stream().map(Equipment::toEquipmentDto).toList());
+        // Filter transactions that don't match the borrower, professor, and doesn't contain all equipments from list of barcodes
+        Transaction transactionMatch = getAll().stream()
+                .filter(t -> t.getBorrower().getStudentNumber().equalsIgnoreCase(borrower)
+                        && t.getProfessor().getName().equalsIgnoreCase(professor)
+                        && t.getReturnedAt() == null)
+                .filter(t -> t.getEquipments().containsAll(eqs))
+                .findFirst()
+                .orElseThrow(() -> new ApiException("No transaction that contains all the equipments is found", HttpStatus.NOT_FOUND));
+
+        log.info("Got the matching transaction {}", Transaction.toTransactionListDto(transactionMatch));
+        // Filter new transaction equipments so that only those that is NOT included in equipments return is left
+        List<Equipment> newEqs = new ArrayList<>(transactionMatch.getEquipments().stream()
+                .filter(e -> !eqs.contains(e)).toList());
+        log.info("Removed the returned eqs in the transaction");
+        // Also change the non-duplicable equipments isBorrowed status to false
+        eqs.forEach(e -> {
+            if(Boolean.FALSE.equals(e.getIsDuplicable())) {
+                e.setIsBorrowed(false);
+            }
+            eqService.update(e, e.getEquipmentCode());
+        });
+        log.info("Updated the equipments isBorrowed");
+
+        // Set the transaction's new equipments list
+        transactionMatch.setEquipments(newEqs);
+        log.info("Updated the transaction equipments");
+        // Change the returnedAt value if newEqs is empty
+        if(newEqs.isEmpty()) transactionMatch.setReturnedAt(LocalDateTime.now());
+        log.info("Update the transaction returnedAt value");
+        log.info("New transaction {}", Transaction.toTransactionDto(transactionMatch));
+        return txRepo.save(transactionMatch);
     }
 }

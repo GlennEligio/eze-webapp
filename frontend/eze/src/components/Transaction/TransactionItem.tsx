@@ -6,6 +6,8 @@ interface TransactionItemProps {
   key: React.Key;
   onTransactionItemClick: (transaction: Transaction) => void;
   focused: boolean;
+  "data-bs-toggle": string;
+  "data-bs-target": string;
 }
 
 const TransactionItem: React.FC<TransactionItemProps> = (props) => {
@@ -13,6 +15,8 @@ const TransactionItem: React.FC<TransactionItemProps> = (props) => {
     <tr
       onClick={() => props.onTransactionItemClick(props.transaction)}
       className={props.focused ? `table-active` : ""}
+      data-bs-toggle={props["data-bs-toggle"]}
+      data-bs-target={props["data-bs-target"]}
     >
       <td>{props.transaction.txCode}</td>
       <td>{props.transaction.borrower}</td>

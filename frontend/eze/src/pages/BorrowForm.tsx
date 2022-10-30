@@ -13,6 +13,7 @@ import { transactionAction } from "../store/transactionSlice";
 import useHttp, { RequestConfig } from "../hooks/useHttp";
 import { useDispatch } from "react-redux";
 import TransactionItem from "../components/Transaction/TransactionItem";
+import TransactionDetailsModal from "../components/UI/Modal/TransactionDetailsModal";
 
 function BorrowForm() {
   // Borrow Form input states
@@ -179,7 +180,7 @@ function BorrowForm() {
       headers: {
         Authorization: `Bearer ${auth.accessToken}`,
       },
-      relativeUrl: `/api/v1/equipments/${equipmentBarcode}`,
+      relativeUrl: `/api/v1/equipments/${equipmentBarcode}?query=barcode`,
     };
     getEquipmentByBarcode(requestConfig);
   };
@@ -209,6 +210,25 @@ function BorrowForm() {
       };
       createTransaction(requestConfig);
     }
+  };
+
+  // Transaction Item click Handler to update selectedTransaction in Redux Store
+  const transactionItemClickHandler = (selectedTransaction: Transaction) => {
+    if (
+      selectedTransaction.txCode === transaction.selectedTransaction?.txCode
+    ) {
+      dispatch(
+        transactionAction.updateSelectedTransaction({
+          selectedTransaction: null,
+        })
+      );
+      return;
+    }
+    dispatch(
+      transactionAction.updateSelectedTransaction({
+        selectedTransaction,
+      })
+    );
   };
 
   return (
@@ -387,9 +407,13 @@ function BorrowForm() {
                     return (
                       <TransactionItem
                         key={t.txCode}
+                        data-bs-toggle="modal"
+                        data-bs-target="#transactionDetailsModal"
                         transaction={t}
-                        focused={false}
-                        onTransactionItemClick={() => {}}
+                        focused={
+                          t.txCode === transaction.selectedTransaction?.txCode
+                        }
+                        onTransactionItemClick={transactionItemClickHandler}
                       />
                     );
                   })}
@@ -405,6 +429,9 @@ function BorrowForm() {
             Borrowed items: {transaction.transactions.length}
           </h3>
         </div>
+      </div>
+      <div>
+        <TransactionDetailsModal />
       </div>
     </div>
   );

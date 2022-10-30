@@ -11,6 +11,9 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
+import java.util.Date;
 import java.util.List;
 
 @Data
@@ -26,7 +29,7 @@ public class Transaction implements Serializable {
     private Long id;
     @Column(unique = true, nullable = false, name = "tx_code")
     private String txCode;
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "tx_eq",
             joinColumns = @JoinColumn(name = "tx_code_ref", referencedColumnName = "tx_code"),
@@ -71,8 +74,8 @@ public class Transaction implements Serializable {
                 transaction.getBorrower().getFullName(),
                 transaction.getBorrower().getYearAndSection().getSectionName(),
                 transaction.getProfessor().getName(),
-                transaction.getBorrowedAt(),
-                transaction.getReturnedAt(),
+                transaction.getBorrowedAt() != null ? transaction.getBorrowedAt().format(DateTimeFormatter.ofPattern("MM-dd-yy hh:mm a")) : null,
+                transaction.getReturnedAt() != null ? transaction.getReturnedAt().format(DateTimeFormatter.ofPattern("MM-dd-yy hh:mm a")) : null,
                 transaction.getStatus());
     }
 

@@ -70,4 +70,10 @@ public class EquipmentService implements IService<Equipment>{
     public String alreadyExist(Serializable code) {
         return "Equipment with code " + code + " exist";
     }
+
+    public Equipment getByBarcode(String barcode) {
+        log.info("Fetching equipment with barcode {}", barcode);
+        return repository.findByBarcode(barcode)
+                .orElseThrow(() -> new ApiException(notFound(barcode), HttpStatus.NOT_FOUND));
+    }
 }

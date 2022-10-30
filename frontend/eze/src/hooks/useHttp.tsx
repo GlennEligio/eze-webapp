@@ -99,6 +99,7 @@ function useHttp<T>(requestFunction: Function, startWithPending = false) {
       dispatch({ type: RequestActionKind.SEND });
       try {
         const responseData = await requestFunction(requestConfig);
+        console.log("Response Data: ", responseData);
         dispatch({ type: RequestActionKind.SUCCESS, responseData });
       } catch (error) {
         dispatch({

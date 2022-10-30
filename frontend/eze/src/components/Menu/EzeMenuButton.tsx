@@ -1,18 +1,19 @@
-import { FC } from "react";
+import { FC, MouseEventHandler, PropsWithChildren } from "react";
 import { useNavigate } from "react-router-dom";
 
-interface MenuButtonProps {
+interface EzeMenuButtonProps {
   backgroundColor: string;
   imageLoc: string;
   title: string;
-  destPage: string;
+  destPage?: string;
   leftSpacer?: boolean;
   imgMaxHeight?: string;
   imgMaxWidth?: string;
   key: React.Key;
+  onContextMenu?: MouseEventHandler;
 }
 
-const MenuButton: FC<MenuButtonProps> = (props) => {
+const EzeMenuButton: FC<PropsWithChildren<EzeMenuButtonProps>> = (props) => {
   const navigate = useNavigate();
 
   return (
@@ -21,7 +22,8 @@ const MenuButton: FC<MenuButtonProps> = (props) => {
         props.leftSpacer ? "me-2" : ""
       }`}
       style={{ backgroundColor: props.backgroundColor }}
-      onClick={() => navigate(props.destPage)}
+      onClick={props.destPage ? () => navigate(props.destPage!) : () => {}}
+      onContextMenu={props.onContextMenu}
     >
       <img
         style={{
@@ -31,9 +33,10 @@ const MenuButton: FC<MenuButtonProps> = (props) => {
         src={props.imageLoc}
         alt={props.title}
       />
+      {props.children}
       <span className="fs-4 text-white mt-auto text-center">{props.title}</span>
     </div>
   );
 };
 
-export default MenuButton;
+export default EzeMenuButton;
