@@ -440,7 +440,10 @@ function BorrowForm() {
         </div>
       </div>
       <div>
-        <TransactionDetailsModal />
+        <TransactionDetailsModal
+          params={new URLSearchParams({ complete: "true" }).toString()}
+          type="BORROW/RETURN"
+        />
       </div>
     </div>
   );

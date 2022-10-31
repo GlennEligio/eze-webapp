@@ -6,6 +6,7 @@ import { StudentFull } from "./StudentService";
 export interface Transaction {
   txCode: string;
   equipmentsCount: number;
+  equipmentsHistCount: number;
   borrower: string;
   yearAndSection: string;
   professor: string;
@@ -17,6 +18,7 @@ export interface Transaction {
 export interface TransactionFull {
   txCode: string;
   equipments: Equipment[];
+  equipmentsHistory: Equipment[];
   borrower: string;
   yearAndSection: string;
   professor: string;

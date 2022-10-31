@@ -6,10 +6,12 @@ import com.eze.backend.restapi.model.Transaction;
 import com.eze.backend.restapi.service.TransactionService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
@@ -25,38 +27,62 @@ public class TransactionController {
     @GetMapping("/transactions")
     public ResponseEntity<List<?>> getTransactions(@RequestParam(required = false, defaultValue = "false") Boolean complete,
                                                    @RequestParam(required = false, defaultValue = "false") Boolean historical,
-                                                   @RequestParam(required = false, defaultValue = "false") Boolean unreturned)
+                                                   @RequestParam(required = false, defaultValue = "false") Boolean returned,
+                                                   @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime toDate,
+                                                   @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fromDate)
     {
         Stream<Transaction> transactions = service.getAll().stream();
-        // check if we will filter the "returned" transaction, where equipments is 0
-        if(Boolean.TRUE.equals(unreturned)) {
-            transactions = transactions.filter(t -> !t.getEquipments().isEmpty());
+        // if unreturned is true, only get transactions with no (duplicable) equipments
+        if(Boolean.TRUE.equals(returned)) {
+            transactions = transactions.filter(t -> t.getEquipments()
+                    .stream()
+                    .filter(equipment -> !equipment.getIsDuplicable())
+                    .toList().isEmpty());
+        } else {
+            transactions = transactions.filter(t -> !t.getEquipments()
+                    .stream()
+                    .filter(equipment -> !equipment.getIsDuplicable())
+                    .toList().isEmpty());
         }
 
-        // condition statements for complete details and historical data
-        if(Boolean.TRUE.equals(complete)) {
-            if(Boolean.TRUE.equals(historical)) {
+        // if fromDate and toDate is present, filter the transactions again
+        if(fromDate != null && toDate != null) {
+            transactions = transactions.filter(t -> t.getBorrowedAt().isAfter(fromDate) && t.getBorrowedAt().isBefore(toDate));
+        }
+
+        if(Boolean.TRUE.equals(historical)) {
+            if(Boolean.TRUE.equals(complete)) {
                 return ResponseEntity.ok(transactions.map(Transaction::toTransactionHistDto).toList());
             } else {
-                return ResponseEntity.ok(transactions.map(Transaction::toTransactionDto).toList());
+                return ResponseEntity.ok(transactions.map(Transaction::toTransactionHistListDto).toList());
             }
         } else {
-            if(Boolean.TRUE.equals(historical)) {
-                return ResponseEntity.ok(transactions.map(Transaction::toTransactionHistListDto).toList());
+            if(Boolean.TRUE.equals(complete)) {
+                return ResponseEntity.ok(transactions.map(Transaction::toTransactionDto).toList());
             } else {
                 return ResponseEntity.ok(transactions.map(Transaction::toTransactionListDto).toList());
             }
         }
-
     }
 
     @GetMapping("/transactions/{code}")
     public ResponseEntity<Object> getTransaction(@PathVariable("code") String code,
-                                                 @RequestParam(required = false, defaultValue = "false") boolean complete) {
-        if (complete) {
-            return ResponseEntity.ok(Transaction.toTransactionDto(service.get(code)));
+                                                 @RequestParam(required = false, defaultValue = "false") boolean complete,
+                                                 @RequestParam(required = false, defaultValue = "false") boolean historical) {
+        // condition statements for complete details and historical data
+        if(Boolean.TRUE.equals(complete)) {
+            if(Boolean.TRUE.equals(historical)) {
+                return ResponseEntity.ok(Transaction.toTransactionHistDto(service.get(code)));
+            } else {
+                return ResponseEntity.ok(Transaction.toTransactionDto(service.get(code)));
+            }
+        } else {
+            if(Boolean.TRUE.equals(historical)) {
+                return ResponseEntity.ok(Transaction.toTransactionHistListDto(service.get(code)));
+            } else {
+                return ResponseEntity.ok(Transaction.toTransactionListDto(service.get(code)));
+            }
         }
-        return ResponseEntity.ok(Transaction.toTransactionListDto(service.get(code)));
     }
 
     // TODO: Add option to receive either TX with full equipments list or only eq count version of new Transaction

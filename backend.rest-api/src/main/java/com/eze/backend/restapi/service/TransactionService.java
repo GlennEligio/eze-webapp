@@ -70,8 +70,8 @@ public class TransactionService implements IService<Transaction> {
         });
 
         // Populate Equipment and Equipment history data of transaction
-        transaction.setEquipments(equipments);
-        transaction.setEquipmentsHist(equipments);
+        transaction.setEquipments(new ArrayList<>(equipments));
+        transaction.setEquipmentsHist(new ArrayList<>(equipments));
 
         // Populate Professor and Student data of transaction
         String profName = transaction.getProfessor().getName();

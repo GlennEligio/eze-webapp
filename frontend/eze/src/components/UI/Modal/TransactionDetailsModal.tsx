@@ -6,7 +6,14 @@ import TransactionService, {
 import { useSelector } from "react-redux";
 import { IRootState } from "../../../store";
 
-const TransactionDetailsModal = () => {
+interface TransactionDetailsModalProps {
+  params: string;
+  type: "HISTORY" | "BORROW/RETURN";
+}
+
+const TransactionDetailsModal: React.FC<TransactionDetailsModalProps> = (
+  props
+) => {
   const auth = useSelector((state: IRootState) => state.auth);
   const transaction = useSelector((state: IRootState) => state.transaction);
   const [txCode, setTxCode] = useState("");
@@ -31,7 +38,7 @@ const TransactionDetailsModal = () => {
         headers: {
           Authorization: `Bearer ${auth.accessToken}`,
         },
-        relativeUrl: `/api/v1/transactions/${transaction.selectedTransaction.txCode}?complete=true`,
+        relativeUrl: `/api/v1/transactions/${transaction.selectedTransaction.txCode}?${props.params}`,
       };
       getTransactionByCode(requestConfig);
     }
@@ -45,11 +52,20 @@ const TransactionDetailsModal = () => {
       getTransactionByCodeStatus === "completed"
     ) {
       setTxCode(transactionData.txCode || "");
-      setEquipments(
-        transactionData.equipments && transactionData.equipments.length > 0
-          ? transactionData.equipments.map((t) => t.name).join(", ")
-          : ""
-      );
+      if (props.type === "HISTORY") {
+        setEquipments(
+          transactionData.equipmentsHistory &&
+            transactionData.equipmentsHistory.length > 0
+            ? transactionData.equipmentsHistory.map((t) => t.name).join(", ")
+            : ""
+        );
+      } else {
+        setEquipments(
+          transactionData.equipments && transactionData.equipments.length > 0
+            ? transactionData.equipments.map((t) => t.name).join(", ")
+            : ""
+        );
+      }
       setBorrower(transactionData.borrower || "");
       setBorrowedAt(transactionData.borrowedAt || "");
       setProfessor(transactionData.professor || "");

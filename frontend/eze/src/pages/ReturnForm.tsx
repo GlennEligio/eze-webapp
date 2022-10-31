@@ -74,7 +74,7 @@ function ReturnForm() {
       headers: {
         Authorization: `Bearer ${auth.accessToken}`,
       },
-      relativeUrl: "/api/v1/transactions?unreturned=true",
+      relativeUrl: "/api/v1/transactions?returned=false",
     };
     getTransactions(requestConfig);
   }, [auth.accessToken]);
@@ -452,7 +452,10 @@ function ReturnForm() {
         </div>
       </div>
       <div>
-        <TransactionDetailsModal />
+        <TransactionDetailsModal
+          params={new URLSearchParams({ complete: "true" }).toString()}
+          type="BORROW/RETURN"
+        />
       </div>
     </div>
   );

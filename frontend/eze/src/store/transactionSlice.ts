@@ -16,7 +16,7 @@ const transactionSlice = createSlice({
   initialState: INITIAL_STATE,
   reducers: {
     addTransactions(state, action) {
-      state.transactions = action.payload.transactions;
+      state.transactions = [...action.payload.transactions];
     },
     updateSelectedTransaction(state, action) {
       state.selectedTransaction = action.payload.selectedTransaction;
