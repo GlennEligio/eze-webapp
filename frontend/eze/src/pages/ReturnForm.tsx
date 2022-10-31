@@ -2,10 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { MouseEventHandler, useEffect, useState } from "react";
 import StudentService, { StudentFull } from "../api/StudentService";
 import ProfessorService, { Professor } from "../api/ProfessorService";
-import TransactionService, {
-  Transaction,
-  CreateUpdateTransaction,
-} from "../api/TransactionService";
+import TransactionService, { Transaction } from "../api/TransactionService";
 import EquipmentService, { Equipment } from "../api/EquipmentService";
 import { useSelector } from "react-redux";
 import { IRootState } from "../store";
@@ -65,11 +62,11 @@ function ReturnForm() {
 
   // useHttp for creating Transaction/Borrow
   const {
-    sendRequest: createTransaction,
-    data: newTransaction,
-    error: createTransactionError,
-    status: createTransactionStatus,
-  } = useHttp<Transaction>(TransactionService.createTransaction, false);
+    sendRequest: returnEquipments,
+    data: updatedTransaction,
+    error: returnEquipmentsError,
+    status: returnEquipmentsStatus,
+  } = useHttp<Transaction>(TransactionService.returnEquipments, false);
 
   // Get transactions on component mount
   useEffect(() => {
@@ -77,7 +74,7 @@ function ReturnForm() {
       headers: {
         Authorization: `Bearer ${auth.accessToken}`,
       },
-      relativeUrl: "/api/v1/transactions",
+      relativeUrl: "/api/v1/transactions?unreturned=true",
     };
     getTransactions(requestConfig);
   }, [auth.accessToken]);
@@ -133,16 +130,29 @@ function ReturnForm() {
     }
   }, [equipmentData, getEquipmentByBarcodeError, getEquipmentByBarcodeStatus]);
 
-  // Add new Transaction in the Redux Store
+  // Update or remove the Transaction in the Redux Store
   useEffect(() => {
     if (
-      newTransaction &&
-      createTransactionError === null &&
-      createTransactionStatus === "completed"
+      updatedTransaction &&
+      returnEquipmentsError === null &&
+      returnEquipmentsStatus === "completed"
     ) {
-      dispatch(transactionAction.addTransaction({ newTransaction }));
+      if (updatedTransaction.equipmentsCount === 0) {
+        dispatch(
+          transactionAction.removeTransaction({
+            txCode: updatedTransaction.txCode,
+          })
+        );
+      } else {
+        dispatch(
+          transactionAction.updateTransaction({
+            transaction: updatedTransaction,
+          })
+        );
+      }
+      setEquipments([]);
     }
-  }, [newTransaction, createTransactionError, createTransactionStatus]);
+  }, [updatedTransaction, returnEquipmentsError, returnEquipmentsStatus]);
 
   // Back button navigation handler
   const backBtnHandler: MouseEventHandler = () => {
@@ -176,11 +186,21 @@ function ReturnForm() {
 
   // Search equipment handler
   const searchEquipmentHandler: MouseEventHandler = () => {
+    // Check if the barcode already exist in the equipments list state
+    let alreadyExist = false;
+    equipments.forEach((e) => {
+      if (e.barcode === equipmentBarcode) {
+        alreadyExist = true;
+      }
+    });
+
+    if (alreadyExist) return;
+
     const requestConfig: RequestConfig = {
       headers: {
         Authorization: `Bearer ${auth.accessToken}`,
       },
-      relativeUrl: `/api/v1/equipments/${equipmentBarcode}`,
+      relativeUrl: `/api/v1/equipments/${equipmentBarcode}?query=barcode`,
     };
     getEquipmentByBarcode(requestConfig);
   };
@@ -190,25 +210,26 @@ function ReturnForm() {
     setEquipments([]);
   };
 
-  // Borrow Equipments handler
-  const borrowEquipmentHandler = (event: React.FormEvent<HTMLFormElement>) => {
+  // Return Equipments handler
+  const returnEquipmentHandler = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (student && professor && equipments.length > 0) {
-      const newTransaction: CreateUpdateTransaction = {
-        borrower: student,
-        equipments: equipments,
-        professor: professor,
-        status: "PENDING",
+      const params = {
+        borrower: student.studentNumber,
+        professor: professor.name,
+        barcodes: Array.from(new Set<Equipment>(equipments))
+          .map((e) => e.barcode)
+          .join(","),
       };
       const requestConfig: RequestConfig = {
-        body: newTransaction,
         headers: {
           Authorization: `Bearer ${auth.accessToken}`,
-          "Content-type": "application/json",
         },
-        relativeUrl: `/api/v1/transactions?complete=true`,
+        relativeUrl: `/api/v1/transactions/return?${new URLSearchParams(
+          params
+        ).toString()}`,
       };
-      createTransaction(requestConfig);
+      returnEquipments(requestConfig);
     }
   };
 
@@ -245,7 +266,7 @@ function ReturnForm() {
                   <i className="bi bi-textarea-resize fs-1"></i>
                 </div>
                 <div className="d-flex flex-column justify-content-center ms-3">
-                  <span className="fs-3">Borrow form</span>
+                  <span className="fs-3">Return form</span>
                 </div>
               </div>
             </div>
@@ -338,7 +359,7 @@ function ReturnForm() {
               </form>
             </div>
             <div className="col-4 d-flex align-items-end">
-              <form className="w-100" onSubmit={borrowEquipmentHandler}>
+              <form className="w-100" onSubmit={returnEquipmentHandler}>
                 <p className="text-center fs-5">12:30 AM | 12 Oct 2019</p>
                 <div className="input-group mb-3">
                   <input
@@ -377,7 +398,7 @@ function ReturnForm() {
                   </div>
                   <div className="col-5">
                     <button type="submit" className="btn btn-secondary w-100">
-                      Borrow
+                      Return
                     </button>
                   </div>
                 </div>

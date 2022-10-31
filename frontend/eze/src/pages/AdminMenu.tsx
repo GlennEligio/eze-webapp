@@ -134,6 +134,9 @@ function AdminMenu() {
                       <MenuItem onClick={() => navigate("/return")}>
                         Return
                       </MenuItem>
+                      <MenuItem onClick={() => navigate("/history")}>
+                        History
+                      </MenuItem>
                     </ControlledMenu>
                   </EzeMenuButton>
                 </div>

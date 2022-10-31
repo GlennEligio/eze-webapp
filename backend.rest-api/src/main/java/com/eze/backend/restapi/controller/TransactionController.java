@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -22,17 +23,37 @@ public class TransactionController {
     private TransactionService service;
 
     @GetMapping("/transactions")
-    public ResponseEntity<List<?>> getTransactions(@RequestParam(required = false) String complete) {
-        if(complete != null && complete.equalsIgnoreCase("true")) {
-            return ResponseEntity.ok(service.getAll().stream().map(Transaction::toTransactionDto).toList());
+    public ResponseEntity<List<?>> getTransactions(@RequestParam(required = false, defaultValue = "false") Boolean complete,
+                                                   @RequestParam(required = false, defaultValue = "false") Boolean historical,
+                                                   @RequestParam(required = false, defaultValue = "false") Boolean unreturned)
+    {
+        Stream<Transaction> transactions = service.getAll().stream();
+        // check if we will filter the "returned" transaction, where equipments is 0
+        if(Boolean.TRUE.equals(unreturned)) {
+            transactions = transactions.filter(t -> !t.getEquipments().isEmpty());
         }
-        return ResponseEntity.ok(service.getAll().stream().map(Transaction::toTransactionListDto).toList());
+
+        // condition statements for complete details and historical data
+        if(Boolean.TRUE.equals(complete)) {
+            if(Boolean.TRUE.equals(historical)) {
+                return ResponseEntity.ok(transactions.map(Transaction::toTransactionHistDto).toList());
+            } else {
+                return ResponseEntity.ok(transactions.map(Transaction::toTransactionDto).toList());
+            }
+        } else {
+            if(Boolean.TRUE.equals(historical)) {
+                return ResponseEntity.ok(transactions.map(Transaction::toTransactionHistListDto).toList());
+            } else {
+                return ResponseEntity.ok(transactions.map(Transaction::toTransactionListDto).toList());
+            }
+        }
+
     }
 
     @GetMapping("/transactions/{code}")
     public ResponseEntity<Object> getTransaction(@PathVariable("code") String code,
-                                                 @RequestParam(required = false) String complete) {
-        if (complete != null && complete.equalsIgnoreCase("true")) {
+                                                 @RequestParam(required = false, defaultValue = "false") boolean complete) {
+        if (complete) {
             return ResponseEntity.ok(Transaction.toTransactionDto(service.get(code)));
         }
         return ResponseEntity.ok(Transaction.toTransactionListDto(service.get(code)));
@@ -41,8 +62,8 @@ public class TransactionController {
     // TODO: Add option to receive either TX with full equipments list or only eq count version of new Transaction
     @PostMapping("/transactions")
     public ResponseEntity<Object> createTransaction(@RequestBody Transaction transaction,
-                                                    @RequestParam(required = false) String complete) {
-        if (complete != null && complete.equalsIgnoreCase("true")) {
+                                                    @RequestParam(required = false, defaultValue = "false") Boolean complete) {
+        if (Boolean.TRUE.equals(complete)) {
             return ResponseEntity.status(HttpStatus.CREATED).body(Transaction.toTransactionDto(service.create(transaction)));
         }
         return ResponseEntity.status(HttpStatus.CREATED).body(Transaction.toTransactionListDto(service.create(transaction)));

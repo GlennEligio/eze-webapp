@@ -1,6 +1,8 @@
 package com.eze.backend.restapi.model;
 
 import com.eze.backend.restapi.dtos.TransactionDto;
+import com.eze.backend.restapi.dtos.TransactionHistDto;
+import com.eze.backend.restapi.dtos.TransactionHistListDto;
 import com.eze.backend.restapi.dtos.TransactionListDto;
 import com.eze.backend.restapi.enums.TxStatus;
 import lombok.AllArgsConstructor;
@@ -36,6 +38,13 @@ public class Transaction implements Serializable {
             inverseJoinColumns = @JoinColumn(name = "eq_code_ref", referencedColumnName = "eq_code")
     )
     private List<Equipment> equipments;
+    @ManyToMany
+    @JoinTable(
+            name = "tx_eq_hist",
+            joinColumns = @JoinColumn(name = "tx_code_ref_hist", referencedColumnName = "tx_code"),
+            inverseJoinColumns = @JoinColumn(name = "eq_code_ref_hist", referencedColumnName = "eq_code")
+    )
+    private List<Equipment> equipmentsHist;
     @ManyToOne
     @JoinColumn(name = "studentNumber", referencedColumnName = "studentNumber")
     private Student borrower;
@@ -82,6 +91,28 @@ public class Transaction implements Serializable {
     public static TransactionDto toTransactionDto(Transaction transaction) {
         return new TransactionDto(transaction.getTxCode(),
                 transaction.getEquipments().stream().map(Equipment::toEquipmentDto).toList(),
+                transaction.getBorrower().getFullName(),
+                transaction.getBorrower().getYearAndSection().getSectionName(),
+                transaction.getProfessor().getName(),
+                transaction.getBorrowedAt(),
+                transaction.getReturnedAt(),
+                transaction.getStatus());
+    }
+
+    public static TransactionHistListDto toTransactionHistListDto(Transaction transaction) {
+        return new TransactionHistListDto(transaction.getTxCode(),
+                transaction.getEquipmentsHist().size(),
+                transaction.getBorrower().getFullName(),
+                transaction.getBorrower().getYearAndSection().getSectionName(),
+                transaction.getProfessor().getName(),
+                transaction.getBorrowedAt() != null ? transaction.getBorrowedAt().format(DateTimeFormatter.ofPattern("MM-dd-yy hh:mm a")) : null,
+                transaction.getReturnedAt() != null ? transaction.getReturnedAt().format(DateTimeFormatter.ofPattern("MM-dd-yy hh:mm a")) : null,
+                transaction.getStatus());
+    }
+
+    public static TransactionHistDto toTransactionHistDto(Transaction transaction) {
+        return new TransactionHistDto(transaction.getTxCode(),
+                transaction.getEquipmentsHist().stream().map(Equipment::toEquipmentDto).toList(),
                 transaction.getBorrower().getFullName(),
                 transaction.getBorrower().getYearAndSection().getSectionName(),
                 transaction.getProfessor().getName(),

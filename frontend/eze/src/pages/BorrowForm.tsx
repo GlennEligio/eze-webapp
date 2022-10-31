@@ -77,7 +77,7 @@ function BorrowForm() {
       headers: {
         Authorization: `Bearer ${auth.accessToken}`,
       },
-      relativeUrl: "/api/v1/transactions",
+      relativeUrl: "/api/v1/transactions?unreturned=true",
     };
     getTransactions(requestConfig);
   }, [auth.accessToken]);
@@ -176,6 +176,15 @@ function BorrowForm() {
 
   // Search equipment handler
   const searchEquipmentHandler: MouseEventHandler = () => {
+    // Check if the barcode already exist in the equipments list state
+    let alreadyExist = false;
+    equipments.forEach((e) => {
+      if (e.barcode === equipmentBarcode) {
+        alreadyExist = true;
+      }
+    });
+
+    if (alreadyExist) return;
     const requestConfig: RequestConfig = {
       headers: {
         Authorization: `Bearer ${auth.accessToken}`,

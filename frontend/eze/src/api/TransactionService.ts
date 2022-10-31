@@ -34,9 +34,10 @@ export interface CreateUpdateTransaction {
 
 const BACKEND_URI = "http://localhost:8080";
 
+// TODO: Refactor api functions so it will be only one function that takes different inputs
 const getTransactions = async (requestConfig: RequestConfig) => {
   const responseObj: Transaction[] = await fetch(
-    `${BACKEND_URI}/api/v1/transactions`,
+    `${BACKEND_URI}${requestConfig.relativeUrl}`,
     {
       method: requestConfig.method || "GET",
       headers: requestConfig.headers != null ? requestConfig.headers : {},
@@ -83,4 +84,25 @@ const createTransaction = async (requestConfig: RequestConfig) => {
   return responseObj;
 };
 
-export default { getTransactions, createTransaction, getTransactionByCode };
+const returnEquipments = async (requestConfig: RequestConfig) => {
+  const responseObj: Transaction = await fetch(
+    `${BACKEND_URI}${requestConfig.relativeUrl}`,
+    {
+      method: requestConfig.method || "PUT",
+      headers: requestConfig.headers || {},
+    }
+  ).then((response) => {
+    if (response.ok) {
+      return response.json();
+    }
+    throw new Error("Failed to return equipments");
+  });
+  return responseObj;
+};
+
+export default {
+  getTransactions,
+  createTransaction,
+  getTransactionByCode,
+  returnEquipments,
+};

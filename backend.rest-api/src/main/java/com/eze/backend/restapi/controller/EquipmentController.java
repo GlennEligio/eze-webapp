@@ -26,8 +26,8 @@ public class EquipmentController {
 
     @GetMapping("/equipments/{code}")
     public ResponseEntity<EquipmentDto> getEquipment(@PathVariable("code") String code,
-                                                     @RequestParam(required = false) String query) {
-        if(query != null && query.equalsIgnoreCase("barcode")) {
+                                                     @RequestParam(required = false, defaultValue = "eqCode") String query) {
+        if(query.equalsIgnoreCase("barcode")) {
             return ResponseEntity.ok(Equipment.toEquipmentDto(equipmentService.getByBarcode(code)));
         }
         return ResponseEntity.ok(Equipment.toEquipmentDto(equipmentService.get(code)));
