@@ -2,6 +2,7 @@ import React, { useState, useEffect, FC } from "react";
 import useHttp, { RequestConfig } from "../../../hooks/useHttp";
 import StudentService, {
   CreateUpdateStudentDto,
+  isValidStudent,
   Student,
 } from "../../../api/StudentService";
 import { useSelector } from "react-redux";
@@ -136,6 +137,11 @@ const UpdateStudentModal: FC<UpdateStudentModalProps> = (props) => {
       guardian,
       guardianNumber,
     };
+
+    if (!isValidStudent(updatedStudent)) {
+      console.log("Invalid student");
+      return;
+    }
 
     const requestConf: RequestConfig = {
       body: updatedStudent,

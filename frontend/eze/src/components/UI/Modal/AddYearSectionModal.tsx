@@ -2,6 +2,7 @@ import React, { useState, useEffect, FC } from "react";
 import useHttp, { RequestConfig } from "../../../hooks/useHttp";
 import YearSectionService, {
   CreateYearSection,
+  isValidYearSection,
   YearSection,
 } from "../../../api/YearSectionService";
 import { useSelector } from "react-redux";
@@ -46,6 +47,11 @@ const AddYearSectionModal: FC<AddYearSectionModalProps> = (props) => {
         yearNumber: yearNumber,
       },
     };
+
+    if (!isValidYearSection(newYearSection)) {
+      console.log("Invalid YearSection");
+      return;
+    }
 
     const requestConf: RequestConfig = {
       body: newYearSection,

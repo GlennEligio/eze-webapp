@@ -3,6 +3,7 @@ import useHttp, { RequestConfig } from "../../../hooks/useHttp";
 import EquipmentService, {
   Equipment,
   CreateUpdateEquipmentDto,
+  isValidEquipment,
 } from "../../../api/EquipmentService";
 import { useSelector } from "react-redux";
 import { IRootState } from "../../../store";
@@ -47,7 +48,7 @@ const UpdateEquipmentModal = () => {
     }
   }, [data]);
 
-  const onUpdateEquipment = (event: React.FormEvent<HTMLFormElement>) => {
+  const updateEquipmentHandler = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const updatedEquipment: CreateUpdateEquipmentDto = {
       name: name,
@@ -56,6 +57,11 @@ const UpdateEquipmentModal = () => {
       defectiveSince: defectiveSince,
       isDuplicable: isDuplicable,
     };
+
+    if (!isValidEquipment(updatedEquipment)) {
+      console.log("Invalid equipment");
+      return;
+    }
 
     const requestConf: RequestConfig = {
       body: updatedEquipment,
@@ -91,7 +97,7 @@ const UpdateEquipmentModal = () => {
             ></button>
           </div>
           <div className="modal-body">
-            <form onSubmit={onUpdateEquipment}>
+            <form onSubmit={updateEquipmentHandler}>
               <div className="form-floating mb-3">
                 <input
                   type="text"

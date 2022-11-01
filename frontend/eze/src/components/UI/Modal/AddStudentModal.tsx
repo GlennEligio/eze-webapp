@@ -2,6 +2,7 @@ import React, { useState, useEffect, FC } from "react";
 import useHttp, { RequestConfig } from "../../../hooks/useHttp";
 import StudentService, {
   CreateUpdateStudentDto,
+  isValidStudent,
   Student,
 } from "../../../api/StudentService";
 import { useSelector } from "react-redux";
@@ -39,7 +40,7 @@ const AddStudentModal: FC<AddStudentModalProps> = (props) => {
   const [email, setEmail] = useState("");
   const [guardian, setGuardian] = useState("");
   const [guardianNumber, setGuardianNumber] = useState("");
-  const [yearNumber, setYearNumber] = useState(5);
+  const [yearNumber, setYearNumber] = useState(1);
   const [yearSections, setYearSections] = useState<YearSection[]>([]);
   const [yearLevels, setYearLevels] = useState<YearLevel[]>([]);
 
@@ -106,13 +107,18 @@ const AddStudentModal: FC<AddStudentModalProps> = (props) => {
       guardianNumber,
     };
 
+    if (!isValidStudent(newStudent)) {
+      console.log("Invalid student");
+      return;
+    }
+
     const requestConf: RequestConfig = {
       body: newStudent,
       headers: {
         Authorization: `Bearer ${auth.accessToken}`,
         "Content-type": "application/json",
       },
-      relativeUrl: "/api/v1/students",
+      relativeUrl: "/api/v1/students?complete=false",
     };
     createStudent(requestConf);
     setStudentNumber("");

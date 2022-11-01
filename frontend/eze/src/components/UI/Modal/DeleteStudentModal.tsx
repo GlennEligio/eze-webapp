@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from "react";
 import useHttp, { RequestConfig } from "../../../hooks/useHttp";
-import StudentService, {
-  CreateUpdateStudentDto,
-  Student,
-} from "../../../api/StudentService";
+import StudentService from "../../../api/StudentService";
 import { useSelector } from "react-redux";
 import { IRootState } from "../../../store";
 import { studentActions } from "../../../store/studentSlice";
 import { useDispatch } from "react-redux";
+import validator from "validator";
 
 const DeleteStudentModal = () => {
   const auth = useSelector((state: IRootState) => state.auth);
@@ -84,6 +82,8 @@ const DeleteStudentModal = () => {
   const deleteStudentHandler = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     console.log("Deleting Student");
+
+    if (validator.isEmpty(studentNumber)) return;
 
     const requestConf: RequestConfig = {
       headers: {

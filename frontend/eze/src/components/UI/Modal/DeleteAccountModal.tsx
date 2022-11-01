@@ -5,6 +5,7 @@ import { IRootState } from "../../../store";
 import { useDispatch } from "react-redux";
 import { accountActions } from "../../../store/accountSlice";
 import AccountService, { AccountType } from "../../../api/AccountService";
+import validator from "validator";
 
 const DeleteAccountModal = () => {
   const auth = useSelector((state: IRootState) => state.auth);
@@ -47,9 +48,11 @@ const DeleteAccountModal = () => {
     setActive(!!selectedAcn.active ? selectedAcn.active : true);
   }, [account.selectedAccount]);
 
-  const onDeleteEquipment = (event: React.FormEvent<HTMLFormElement>) => {
+  const deleteAccountHandler = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log("Deleting Equipment");
+    console.log("Deleting Account");
+
+    if (validator.isEmpty(account.selectedAccount?.username + "")) return;
 
     const requestConf: RequestConfig = {
       headers: {
@@ -80,7 +83,7 @@ const DeleteAccountModal = () => {
             ></button>
           </div>
           <div className="modal-body">
-            <form onSubmit={onDeleteEquipment}>
+            <form onSubmit={deleteAccountHandler}>
               <div className="form-floating mb-3">
                 <input
                   type="text"

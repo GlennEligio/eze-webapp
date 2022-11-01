@@ -1,5 +1,6 @@
 import { RequestConfig } from "../hooks/useHttp";
 import { YearSection } from "./YearSectionService";
+import validator from "validator";
 
 export interface YearLevel {
   yearName: string;
@@ -61,6 +62,15 @@ const deleteYearLevel = async (requestConfig: RequestConfig) => {
     throw new Error("Failed to fetch YearLevels");
   });
   return responseObj;
+};
+
+// for validation
+export const isValidYearLevel = (yl: CreateYearLevelDto) => {
+  if (validator.isEmpty(yl.yearNumber + "")) {
+    console.log("Empty yearNumber");
+    return false;
+  }
+  return true;
 };
 
 export default { getYearLevels, createYearLevel, deleteYearLevel };

@@ -5,6 +5,7 @@ import ProfessorService, { Professor } from "../api/ProfessorService";
 import TransactionService, {
   Transaction,
   CreateUpdateTransaction,
+  isValidTransaction,
 } from "../api/TransactionService";
 import EquipmentService, { Equipment } from "../api/EquipmentService";
 import { useSelector } from "react-redux";
@@ -202,13 +203,19 @@ function BorrowForm() {
   // Borrow Equipments handler
   const borrowEquipmentHandler = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (student && professor && equipments.length > 0) {
+    if (student !== undefined && professor !== undefined) {
       const newTransaction: CreateUpdateTransaction = {
-        borrower: student,
+        borrower: student!,
         equipments: equipments,
-        professor: professor,
+        professor: professor!,
         status: "PENDING",
       };
+
+      if (!isValidTransaction(newTransaction)) {
+        console.log("Invalid transaction");
+        return;
+      }
+
       const requestConfig: RequestConfig = {
         body: newTransaction,
         headers: {

@@ -3,6 +3,7 @@ import useHttp, { RequestConfig } from "../../../hooks/useHttp";
 import EquipmentService, {
   Equipment,
   CreateUpdateEquipmentDto,
+  isValidEquipment,
 } from "../../../api/EquipmentService";
 import { useSelector } from "react-redux";
 import { IRootState } from "../../../store";
@@ -42,6 +43,11 @@ const AddEquipmentModal = () => {
       defectiveSince: defectiveSince,
       isDuplicable: isDuplicable,
     };
+
+    if (!isValidEquipment(newEquipment)) {
+      console.log("Invalid equipment");
+      return;
+    }
 
     const requestConf: RequestConfig = {
       body: newEquipment,

@@ -4,11 +4,13 @@ import AccountService, {
   Account,
   AccountType,
   CreateUpdateAccountDto,
+  isValidAccount,
 } from "../../../api/AccountService";
 import { useSelector } from "react-redux";
 import { IRootState } from "../../../store";
 import { useDispatch } from "react-redux";
 import { accountActions } from "../../../store/accountSlice";
+import validator from "validator";
 
 const AddAccountModal = () => {
   const auth = useSelector((state: IRootState) => state.auth);
@@ -45,6 +47,11 @@ const AddAccountModal = () => {
       type,
       username,
     };
+
+    if (!isValidAccount(newAccount)) {
+      console.log("Invalid account");
+      return;
+    }
 
     const requestConf: RequestConfig = {
       body: newAccount,

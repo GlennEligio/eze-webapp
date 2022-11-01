@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import useHttp, { RequestConfig } from "../../../hooks/useHttp";
 import ProfessorService, {
   CreateUpdateProfessor,
+  isValidProfessor,
   Professor,
 } from "../../../api/ProfessorService";
 import { useSelector } from "react-redux";
@@ -44,8 +45,14 @@ const UpdateProfessorModal: React.FC<UpdateProfessorModalProps> = (props) => {
     event.preventDefault();
     console.log("Updating Professor");
     const updatedProfessor: CreateUpdateProfessor = {
+      name,
       contactNumber,
     };
+
+    if (!isValidProfessor(updatedProfessor)) {
+      console.log("Invalid professor");
+      return;
+    }
 
     const requestConf: RequestConfig = {
       body: updatedProfessor,

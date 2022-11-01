@@ -40,6 +40,10 @@ const transactionSlice = createSlice({
         (t) => t.txCode !== action.payload.txCode
       );
     },
+    resetState(state) {
+      state.transactions = [];
+      state.selectedTransaction = null;
+    },
   },
 });
 

@@ -1,3 +1,4 @@
+import validator from "validator";
 import { RequestConfig } from "../hooks/useHttp";
 
 export enum AccountType {
@@ -117,6 +118,28 @@ const deleteAccount = async (requestConfig: RequestConfig) => {
     throw new Error("Failed to update account");
   });
   return responseObj;
+};
+
+// for validation
+export const isValidAccount = (account: CreateUpdateAccountDto) => {
+  let valid = true;
+  if (validator.isEmpty(account.username)) {
+    console.log("Empty username");
+    valid = false;
+  }
+  if (validator.isEmpty(account.password)) {
+    console.log("Empty password");
+    valid = false;
+  }
+  if (validator.isEmpty(account.type)) {
+    console.log("Empty type");
+    valid = false;
+  }
+  if (validator.isEmpty(account.fullName)) {
+    console.log("Empty full name");
+    valid = false;
+  }
+  return valid;
 };
 
 export default {

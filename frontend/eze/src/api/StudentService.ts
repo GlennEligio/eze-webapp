@@ -1,6 +1,5 @@
 import { RequestConfig } from "../hooks/useHttp";
-import { YearSection } from "./YearSectionService";
-
+import validator from "validator";
 export interface Student {
   id: number;
   studentNumber: string;
@@ -135,6 +134,37 @@ const deleteStudent = async (requestConfig: RequestConfig) => {
     throw new Error("Failed to delete student");
   });
   return responseObj;
+};
+
+// for validation
+export const isValidStudent = (student: CreateUpdateStudentDto) => {
+  let valid = true;
+  if (
+    !validator.matches(
+      student.studentNumber,
+      /^\d{4}-\d{5}-[(a-z)|(A-Z)]{2}-\d{2}$/
+    )
+  ) {
+    console.log("Not a valid student number");
+    valid = false;
+  }
+  if (validator.isEmpty(student.fullName)) {
+    console.log("Empty name");
+    valid = false;
+  }
+  if (validator.isEmpty(student.yearAndSection.sectionName)) {
+    console.log("Empty sectionName");
+    valid = false;
+  }
+  if (!validator.isMobilePhone(student.contactNumber, "en-PH")) {
+    console.log("Not a valid phone number");
+    valid = false;
+  }
+  if (!validator.isNumeric(student.yearLevel.yearNumber + "")) {
+    console.log("Invalid yearNumber");
+    valid = false;
+  }
+  return valid;
 };
 
 export default {

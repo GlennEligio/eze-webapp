@@ -1,4 +1,5 @@
 import { RequestConfig } from "../hooks/useHttp";
+import validator from "validator";
 
 export interface YearSection {
   id: number;
@@ -45,6 +46,20 @@ const deleteYearSection = async (requestConfig: RequestConfig) => {
     throw new Error("Failed to fetch YearSections");
   });
   return responseObj;
+};
+
+// for validation
+export const isValidYearSection = (ys: CreateYearSection) => {
+  let valid = true;
+  if (validator.isEmpty(ys.sectionName)) {
+    console.log("Empty sectionName");
+    valid = false;
+  }
+  if (validator.isNumeric(ys.yearLevel.yearNumber + "")) {
+    console.log("Not a numeric yearNumber");
+    valid = false;
+  }
+  return valid;
 };
 
 export default { createYearSection, deleteYearSection };

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import useHttp, { RequestConfig } from "../../../hooks/useHttp";
 import ProfessorService, {
   CreateUpdateProfessor,
+  isValidProfessor,
   Professor,
 } from "../../../api/ProfessorService";
 import { useSelector } from "react-redux";
@@ -35,6 +36,11 @@ const AddProfessorModal = () => {
       name,
       contactNumber,
     };
+
+    if (!isValidProfessor(newProfessor)) {
+      console.log("Invalid professor");
+      return;
+    }
 
     const requestConf: RequestConfig = {
       body: newProfessor,

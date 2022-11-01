@@ -29,6 +29,11 @@ function TransactionHistory() {
     navigate("/");
   };
 
+  // reset transaction in the Redux Store
+  useEffect(() => {
+    dispatch(transactionAction.resetState());
+  }, []);
+
   // For setting the equipmentState based on data from useHttp
   useEffect(() => {
     if (

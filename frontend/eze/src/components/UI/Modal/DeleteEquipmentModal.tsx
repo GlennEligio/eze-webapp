@@ -5,6 +5,7 @@ import { useSelector } from "react-redux";
 import { IRootState } from "../../../store";
 import { equipmentActions } from "../../../store/equipmentSlice";
 import { useDispatch } from "react-redux";
+import validator from "validator";
 
 const DeleteEquipmentModal = () => {
   const auth = useSelector((state: IRootState) => state.auth);
@@ -44,9 +45,12 @@ const DeleteEquipmentModal = () => {
     setIsDuplicable(selectedEquipment.isDuplicable || false);
   }, [equipment.selectedEquipment]);
 
-  const ondeleteEquipment = (event: React.FormEvent<HTMLFormElement>) => {
+  const deleteEquipmentHandler = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     console.log("Deleting Equipment");
+
+    if (validator.isEmpty(equipment.selectedEquipment?.equipmentCode + ""))
+      return;
 
     const requestConf: RequestConfig = {
       headers: {
@@ -80,7 +84,7 @@ const DeleteEquipmentModal = () => {
             ></button>
           </div>
           <div className="modal-body">
-            <form onSubmit={ondeleteEquipment}>
+            <form onSubmit={deleteEquipmentHandler}>
               <div className="form-floating mb-3">
                 <input
                   type="text"

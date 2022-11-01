@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from "react";
 import useHttp, { RequestConfig } from "../../../hooks/useHttp";
-import ProfessorService, {
-  CreateUpdateProfessor,
-  Professor,
-} from "../../../api/ProfessorService";
+import ProfessorService, { Professor } from "../../../api/ProfessorService";
 import { useSelector } from "react-redux";
 import { IRootState } from "../../../store";
 import { useDispatch } from "react-redux";
+import validator from "validator";
 import { professorActions } from "../../../store/professorSlice";
 
 interface DeleteProfessorModalProps {
@@ -47,6 +45,9 @@ const DeleteProfessorModal: React.FC<DeleteProfessorModalProps> = (props) => {
   const deleteProfessorHandler = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     console.log("Deleting Professor");
+
+    if (validator.isEmpty(name)) return;
+
     const requestConf: RequestConfig = {
       headers: {
         Authorization: `Bearer ${auth.accessToken}`,

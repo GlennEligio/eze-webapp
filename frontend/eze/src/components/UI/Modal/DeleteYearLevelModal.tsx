@@ -5,6 +5,7 @@ import { useSelector } from "react-redux";
 import { IRootState } from "../../../store";
 import { useDispatch } from "react-redux";
 import { yearLevelAction } from "../../../store/yearLevelSlice";
+import validator from "validator";
 
 interface DeleteYearLevelModalProps {
   yearLevels: YearLevel[];
@@ -17,7 +18,6 @@ const DeleteYearLevelModal: FC<DeleteYearLevelModalProps> = (props) => {
   const [yearLevels, setYearLevels] = useState<YearLevel[]>([]);
   const {
     sendRequest: deleteYearLevel,
-    data,
     error,
     status,
   } = useHttp<boolean>(YearLevelService.deleteYearLevel, false);
@@ -49,6 +49,8 @@ const DeleteYearLevelModal: FC<DeleteYearLevelModalProps> = (props) => {
   const deleteYearLevelHandler = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     console.log("Deleting YearLevel");
+
+    if (validator.isNumeric(yearNumber + "")) return;
 
     const requestConf: RequestConfig = {
       headers: {

@@ -1,4 +1,5 @@
 import { RequestConfig } from "../hooks/useHttp";
+import validator from "validator";
 
 export interface Professor {
   id: number;
@@ -7,7 +8,7 @@ export interface Professor {
 }
 
 export interface CreateUpdateProfessor {
-  name?: string;
+  name: string;
   contactNumber: string;
 }
 
@@ -96,6 +97,20 @@ const deleteProfessor = async (requestConfig: RequestConfig) => {
   });
 
   return responseObj;
+};
+
+// for validation
+export const isValidProfessor = (prof: CreateUpdateProfessor) => {
+  let valid = true;
+  if (validator.isEmpty(prof.name!)) {
+    console.log("Empty name");
+    valid = false;
+  }
+  if (!validator.isMobilePhone(prof.contactNumber, "en-PH")) {
+    console.log("Not a valid phone number");
+    valid = false;
+  }
+  return valid;
 };
 
 export default {

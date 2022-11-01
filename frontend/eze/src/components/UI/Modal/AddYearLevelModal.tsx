@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import useHttp, { RequestConfig } from "../../../hooks/useHttp";
 import YearLevelService, {
   CreateYearLevelDto,
+  isValidYearLevel,
   YearLevel,
 } from "../../../api/YearLevelService";
 import { useSelector } from "react-redux";
@@ -26,12 +27,17 @@ const AddYearLevelModal = () => {
     }
   }, [data]);
 
-  const onAddAccount = (event: React.FormEvent<HTMLFormElement>) => {
+  const addYearLevelHandler = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     console.log("Adding YearLevel");
     const newYearNumber: CreateYearLevelDto = {
       yearNumber: yearNumber,
     };
+
+    if (!isValidYearLevel(newYearNumber)) {
+      console.log("Invalid YearLevel");
+      return;
+    }
 
     const requestConf: RequestConfig = {
       body: newYearNumber,
@@ -67,7 +73,7 @@ const AddYearLevelModal = () => {
             ></button>
           </div>
           <div className="modal-body">
-            <form onSubmit={onAddAccount}>
+            <form onSubmit={addYearLevelHandler}>
               <div className="form-floating mb-3">
                 <input
                   type="number"

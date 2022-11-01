@@ -4,11 +4,13 @@ import AccountService, {
   Account,
   AccountType,
   CreateUpdateAccountDto,
+  isValidAccount,
 } from "../../../api/AccountService";
 import { useSelector } from "react-redux";
 import { IRootState } from "../../../store";
 import { useDispatch } from "react-redux";
 import { accountActions } from "../../../store/accountSlice";
+import { isValidStudent } from "../../../api/StudentService";
 
 const UpdateAccountModal = () => {
   const auth = useSelector((state: IRootState) => state.auth);
@@ -47,7 +49,7 @@ const UpdateAccountModal = () => {
     setActive(selectedAcn.active);
   }, [account.selectedAccount]);
 
-  const onUpdateAccount = (event: React.FormEvent<HTMLFormElement>) => {
+  const updateAccountHandler = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     console.log("Updating Account");
     const updatedAccount: CreateUpdateAccountDto = {
@@ -58,6 +60,11 @@ const UpdateAccountModal = () => {
       type,
       username,
     };
+
+    if (!isValidAccount(updatedAccount)) {
+      console.log("Invalid Account");
+      return;
+    }
 
     const requestConf: RequestConfig = {
       body: updatedAccount,
@@ -90,7 +97,7 @@ const UpdateAccountModal = () => {
             ></button>
           </div>
           <div className="modal-body">
-            <form onSubmit={onUpdateAccount}>
+            <form onSubmit={updateAccountHandler}>
               <div className="form-floating mb-3">
                 <input
                   type="text"

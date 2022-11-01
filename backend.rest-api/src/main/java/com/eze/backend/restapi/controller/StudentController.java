@@ -25,16 +25,20 @@ public class StudentController {
 
     @GetMapping("/students/{studentNo}")
     public ResponseEntity<Object> getStudent(@PathVariable("studentNo") String studentNo,
-                                                 @RequestParam(required = false) String complete) {
-        if(complete != null && complete.equalsIgnoreCase("true")) {
+                                                 @RequestParam(required = false, defaultValue = "true") boolean complete) {
+        if(complete) {
             return ResponseEntity.ok(Student.toStudentDto(service.get(studentNo)));
         }
         return ResponseEntity.ok(Student.toStudentListDto(service.get(studentNo)));
     }
 
     @PostMapping("/students")
-    public ResponseEntity<StudentDto> createStudent(@RequestBody Student student) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(Student.toStudentDto(service.create(student)));
+    public ResponseEntity<Object> createStudent(@RequestBody Student student,
+                                                    @RequestParam(required = false, defaultValue = "true") boolean complete) {
+        if(complete){
+            return ResponseEntity.status(HttpStatus.CREATED).body(Student.toStudentDto(service.create(student)));
+        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(Student.toStudentListDto(service.create(student)));
     }
 
     @PutMapping("/students/{studentNo}")

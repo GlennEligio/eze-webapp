@@ -8,6 +8,7 @@ import { IRootState } from "../../../store";
 import { useDispatch } from "react-redux";
 import { yearLevelAction } from "../../../store/yearLevelSlice";
 import { YearLevel } from "../../../api/YearLevelService";
+import validator from "validator";
 
 interface DeleteYearSectionModalProps {
   yearLevels: YearLevel[];
@@ -57,6 +58,8 @@ const DeleteYearSectionModal: FC<DeleteYearSectionModalProps> = (props) => {
   ) => {
     event.preventDefault();
     console.log("Deleting YearSection");
+
+    if (validator.isEmpty(sectionName)) return;
 
     const requestConf: RequestConfig = {
       headers: {

@@ -1,4 +1,5 @@
 import { RequestConfig } from "../hooks/useHttp";
+import validator from "validator";
 
 export interface Equipment {
   id: number;
@@ -12,7 +13,6 @@ export interface Equipment {
 }
 
 export interface CreateUpdateEquipmentDto {
-  equipmentCode?: string;
   name: string;
   barcode: string;
   status: string;
@@ -109,6 +109,28 @@ const deleteEquipment = async (requestConfig: RequestConfig) => {
     throw new Error("Failed to update equipment");
   });
   return responseObj;
+};
+
+// for validation
+export const isValidEquipment = (eq: CreateUpdateEquipmentDto) => {
+  let valid = true;
+  if (validator.isEmpty(eq.name)) {
+    console.log("Empty name");
+    valid = false;
+  }
+  if (validator.isEmpty(eq.barcode)) {
+    console.log("Empty barcode");
+    valid = false;
+  }
+  if (validator.isEmpty(eq.status)) {
+    console.log("Empty status");
+    valid = false;
+  }
+  if (eq.isDuplicable === undefined) {
+    console.log("Empty isDuplicable");
+    valid = false;
+  }
+  return valid;
 };
 
 export default {
