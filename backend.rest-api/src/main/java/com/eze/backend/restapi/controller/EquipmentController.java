@@ -1,5 +1,6 @@
 package com.eze.backend.restapi.controller;
 
+import com.eze.backend.restapi.dtos.CreateUpdateEquipmentDto;
 import com.eze.backend.restapi.dtos.EquipmentDto;
 import com.eze.backend.restapi.model.Equipment;
 import com.eze.backend.restapi.service.EquipmentService;
@@ -9,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.net.URI;
 import java.util.List;
 
@@ -34,8 +36,8 @@ public class EquipmentController {
     }
 
     @PostMapping("/equipments")
-    public ResponseEntity<EquipmentDto> createEquipment(@RequestBody Equipment equipment) {
-        Equipment newEq = equipmentService.create(equipment);
+    public ResponseEntity<EquipmentDto> createEquipment(@Valid @RequestBody CreateUpdateEquipmentDto equipmentDto) {
+        Equipment newEq = equipmentService.create(Equipment.toEquipment(equipmentDto));
         return ResponseEntity.created(URI.create("/equipments/" + newEq.getId())).body(Equipment.toEquipmentDto(newEq));
     }
 
