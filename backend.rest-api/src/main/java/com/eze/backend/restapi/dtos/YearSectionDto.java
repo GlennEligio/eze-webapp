@@ -1,4 +1,14 @@
 package com.eze.backend.restapi.dtos;
 
-public record YearSectionDto(Long id, String sectionName) {
+import lombok.AllArgsConstructor;
+import lombok.Data;
+
+import javax.validation.constraints.NotBlank;
+
+@Data
+@AllArgsConstructor
+public class YearSectionDto {
+    private Long id;
+    @NotBlank(message = "Section name can't be blank")
+    private String sectionName;
 }

@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -33,18 +34,18 @@ public class StudentController {
     }
 
     @PostMapping("/students")
-    public ResponseEntity<Object> createStudent(@RequestBody Student student,
+    public ResponseEntity<Object> createStudent(@Valid @RequestBody StudentDto dto,
                                                     @RequestParam(required = false, defaultValue = "true") boolean complete) {
         if(complete){
-            return ResponseEntity.status(HttpStatus.CREATED).body(Student.toStudentDto(service.create(student)));
+            return ResponseEntity.status(HttpStatus.CREATED).body(Student.toStudentDto(service.create(Student.toStudent(dto))));
         }
-        return ResponseEntity.status(HttpStatus.CREATED).body(Student.toStudentListDto(service.create(student)));
+        return ResponseEntity.status(HttpStatus.CREATED).body(Student.toStudentListDto(service.create(Student.toStudent(dto))));
     }
 
     @PutMapping("/students/{studentNo}")
-    public ResponseEntity<StudentDto> updateStudent(@RequestBody Student student,
+    public ResponseEntity<StudentDto> updateStudent(@Valid @RequestBody StudentDto dto,
                                                  @PathVariable("studentNo") String studentNo) {
-        return ResponseEntity.ok(Student.toStudentDto(service.update(student, studentNo)));
+        return ResponseEntity.ok(Student.toStudentDto(service.update(Student.toStudent(dto), studentNo)));
     }
 
     @DeleteMapping("/students/{studentNo}")

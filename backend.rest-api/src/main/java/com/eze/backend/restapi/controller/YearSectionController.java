@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -28,14 +29,14 @@ public class YearSectionController {
     }
 
     @PostMapping("/yearSections")
-    public ResponseEntity<YearSectionWithYearLevelDto> createYearSection(@RequestBody YearSection yearSection) {
-        return ResponseEntity.ok(YearSection.toYearSectionWithYearLevelDto(service.create(yearSection)));
+    public ResponseEntity<YearSectionWithYearLevelDto> createYearSection(@Valid @RequestBody YearSectionWithYearLevelDto dto) {
+        return ResponseEntity.ok(YearSection.toYearSectionWithYearLevelDto(service.create(YearSection.toYearSection(dto))));
     }
 
     @PutMapping("/yearSections/{sectionName}")
-    public ResponseEntity<YearSectionWithYearLevelDto> updateYearSection(@RequestBody YearSection yearSection,
+    public ResponseEntity<YearSectionWithYearLevelDto> updateYearSection(@Valid @RequestBody YearSectionWithYearLevelDto dto,
                                                          @PathVariable("sectionName") String sectionName) {
-        return ResponseEntity.ok(YearSection.toYearSectionWithYearLevelDto(service.update(yearSection, sectionName)));
+        return ResponseEntity.ok(YearSection.toYearSectionWithYearLevelDto(service.update(YearSection.toYearSection(dto), sectionName)));
     }
 
     @DeleteMapping("/yearSections/{sectionName}")

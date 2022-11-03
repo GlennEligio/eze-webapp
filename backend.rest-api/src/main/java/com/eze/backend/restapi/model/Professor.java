@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.security.core.parameters.P;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -34,5 +35,12 @@ public class Professor implements Serializable {
 
     public static ProfessorDto toProfessorDto(Professor professor) {
         return new ProfessorDto(professor.getId(), professor.getName(), professor.getContactNumber());
+    }
+
+    public static Professor toProfessor(ProfessorDto dto) {
+        Professor professor = new Professor();
+        professor.setName(dto.getName());
+        professor.setContactNumber(dto.getContactNumber());
+        return professor;
     }
 }

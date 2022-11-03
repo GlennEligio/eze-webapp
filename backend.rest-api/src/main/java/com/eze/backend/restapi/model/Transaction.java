@@ -1,9 +1,6 @@
 package com.eze.backend.restapi.model;
 
-import com.eze.backend.restapi.dtos.TransactionDto;
-import com.eze.backend.restapi.dtos.TransactionHistDto;
-import com.eze.backend.restapi.dtos.TransactionHistListDto;
-import com.eze.backend.restapi.dtos.TransactionListDto;
+import com.eze.backend.restapi.dtos.*;
 import com.eze.backend.restapi.enums.TxStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,6 +12,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -119,5 +117,14 @@ public class Transaction implements Serializable {
                 transaction.getBorrowedAt(),
                 transaction.getReturnedAt(),
                 transaction.getStatus());
+    }
+
+    public static Transaction toTransaction (CreateUpdateTransactionDto dto) {
+        Transaction transaction = new Transaction();
+        transaction.setEquipments(new ArrayList<>(dto.getEquipments().stream().map(Equipment::toEquipment).toList()));
+        transaction.setBorrower(Student.toStudent(dto.getBorrower()));
+        transaction.setProfessor(Professor.toProfessor(dto.getProfessor()));
+        transaction.setStatus(TxStatus.valueOf(dto.getStatus()));
+        return transaction;
     }
 }

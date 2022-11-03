@@ -103,13 +103,6 @@ const returnEquipments = async (requestConfig: RequestConfig) => {
   return responseObj;
 };
 
-export interface CreateUpdateTransaction {
-  equipments: Equipment[];
-  borrower: StudentFull;
-  professor: Professor;
-  status: "PENDING" | "ACCEPTED" | "DENIED";
-}
-
 // for validation
 export const isValidTransaction = (t: CreateUpdateTransaction) => {
   let valid = true;

@@ -37,7 +37,7 @@ public class AccountController {
     }
 
     @PostMapping("/accounts/login")
-    public ResponseEntity<LoginResponseDto> login(@RequestBody LoginRequestDto loginRequestDto) {
+    public ResponseEntity<LoginResponseDto> login(@Valid @RequestBody LoginRequestDto loginRequestDto) {
         log.info("Account with username {} is trying to log in", loginRequestDto.getUsername());
         EzeUserDetails userDetails = (EzeUserDetails) service.loadUserByUsername(loginRequestDto.getUsername());
         if(!passwordEncoder.matches(loginRequestDto.getPassword(), userDetails.getPassword())) {

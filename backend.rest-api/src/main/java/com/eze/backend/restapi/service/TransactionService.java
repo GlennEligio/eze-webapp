@@ -36,23 +36,27 @@ public class TransactionService implements IService<Transaction> {
 
     @Override
     public List<Transaction> getAll() {
+        log.info("Fetching all transactions");
         return txRepo.findAll();
     }
 
     @Override
     public Transaction get(Serializable code) {
+        log.info("Fetching transaction with code {}", code);
         return txRepo.findByTxCode(code.toString()).orElseThrow(() -> new ApiException(notFound(code), HttpStatus.NOT_FOUND));
     }
 
     @Transactional
     @Override
     public Transaction create(Transaction transaction) {
+        log.info("Creating transcation {}", transaction);
         if (transaction.getTxCode() != null) {
             Optional<Transaction> opTx = txRepo.findByTxCode(transaction.getTxCode());
             if (opTx.isPresent()) {
                 throw new ApiException(alreadyExist(transaction.getTxCode()), HttpStatus.BAD_REQUEST);
             }
         }
+
         // Populate transaction's equipments
         List<Equipment> equipments = transaction.getEquipments().parallelStream()
                 .map(eq -> eqService.get(eq.getEquipmentCode()))
@@ -90,6 +94,7 @@ public class TransactionService implements IService<Transaction> {
     @Transactional
     @Override
     public Transaction update(Transaction transaction, Serializable code) {
+        log.info("Updating transaction with code {} using {}", code, transaction);
         Transaction tx = txRepo.findByTxCode(code.toString()).orElseThrow(() -> new ApiException(notFound(code), HttpStatus.NOT_FOUND));
 
         if (transaction.getEquipments() != null) {
@@ -118,6 +123,7 @@ public class TransactionService implements IService<Transaction> {
 
     @Override
     public void delete(Serializable code) {
+        log.info("Deleting transaction with {}", code);
         Transaction transaction = txRepo.findByTxCode(code.toString()).orElseThrow(() -> new ApiException(notFound(code), HttpStatus.NOT_FOUND));
         txRepo.delete(transaction);
     }

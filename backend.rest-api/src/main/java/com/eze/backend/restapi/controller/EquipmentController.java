@@ -1,12 +1,9 @@
 package com.eze.backend.restapi.controller;
 
-import com.eze.backend.restapi.dtos.CreateUpdateEquipmentDto;
 import com.eze.backend.restapi.dtos.EquipmentDto;
 import com.eze.backend.restapi.model.Equipment;
 import com.eze.backend.restapi.service.EquipmentService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,14 +33,15 @@ public class EquipmentController {
     }
 
     @PostMapping("/equipments")
-    public ResponseEntity<EquipmentDto> createEquipment(@Valid @RequestBody CreateUpdateEquipmentDto equipmentDto) {
+    public ResponseEntity<EquipmentDto> createEquipment(@Valid @RequestBody EquipmentDto equipmentDto) {
         Equipment newEq = equipmentService.create(Equipment.toEquipment(equipmentDto));
         return ResponseEntity.created(URI.create("/equipments/" + newEq.getId())).body(Equipment.toEquipmentDto(newEq));
     }
 
     @PutMapping("/equipments/{code}")
-    public ResponseEntity<EquipmentDto> updateEquipment(@PathVariable("code") String code, @RequestBody Equipment equipment) {
-        Equipment newEq = equipmentService.update(equipment, code);
+    public ResponseEntity<EquipmentDto> updateEquipment(@PathVariable("code") String code,
+                                                        @Valid @RequestBody EquipmentDto dto) {
+        Equipment newEq = equipmentService.update(Equipment.toEquipment(dto), code);
         return ResponseEntity.ok(Equipment.toEquipmentDto(newEq));
     }
 

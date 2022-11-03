@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -28,14 +29,14 @@ public class ProfessorController {
     }
 
     @PostMapping("/professors")
-    public ResponseEntity<ProfessorDto> createProfessor(@RequestBody Professor professor) {
-        return ResponseEntity.status(201).body(Professor.toProfessorDto(service.create(professor)));
+    public ResponseEntity<ProfessorDto> createProfessor(@Valid @RequestBody ProfessorDto dto) {
+        return ResponseEntity.status(201).body(Professor.toProfessorDto(service.create(Professor.toProfessor(dto))));
     }
 
     @PutMapping("/professors/{name}")
-    public ResponseEntity<ProfessorDto> updateProfessor(@RequestBody Professor professor,
+    public ResponseEntity<ProfessorDto> updateProfessor(@Valid @RequestBody ProfessorDto dto,
                                                      @PathVariable("name") String name) {
-        return ResponseEntity.ok(Professor.toProfessorDto(service.update(professor, name)));
+        return ResponseEntity.ok(Professor.toProfessorDto(service.update(Professor.toProfessor(dto), name)));
     }
 
     @DeleteMapping("/professors/{name}")

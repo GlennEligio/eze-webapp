@@ -7,18 +7,17 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
 
-// TODO: Add validation constraints to the DTO properties
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class RegisterRequestDto {
-    @NotBlank
+    @NotBlank(message = "Username cant be blank")
     private String username;
-    @NotBlank
+    @NotBlank(message = "Password can't be blank")
     private String password;
-    @NotBlank
+    @NotBlank(message = "Full name can't be blank")
     private String fullName;
-    @NotBlank
+    @NotBlank(message = "Email can't be blank")
     private String email;
 
     public Account createAccount() {

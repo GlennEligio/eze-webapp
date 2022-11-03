@@ -1,5 +1,6 @@
 package com.eze.backend.restapi.controller;
 
+import com.eze.backend.restapi.dtos.CreateUpdateTransactionDto;
 import com.eze.backend.restapi.dtos.TransactionDto;
 import com.eze.backend.restapi.dtos.TransactionListDto;
 import com.eze.backend.restapi.model.Transaction;
@@ -11,6 +12,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -32,7 +36,7 @@ public class TransactionController {
                                                    @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fromDate)
     {
         Stream<Transaction> transactions = service.getAll().stream();
-        // if unreturned is true, only get transactions with no (duplicable) equipments
+        // if returned is false, only get transactions with no (duplicable) equipments
         if(Boolean.TRUE.equals(returned)) {
             transactions = transactions.filter(t -> t.getEquipments()
                     .stream()
@@ -85,20 +89,19 @@ public class TransactionController {
         }
     }
 
-    // TODO: Add option to receive either TX with full equipments list or only eq count version of new Transaction
     @PostMapping("/transactions")
-    public ResponseEntity<Object> createTransaction(@RequestBody Transaction transaction,
+    public ResponseEntity<Object> createTransaction(@Valid @RequestBody CreateUpdateTransactionDto dto,
                                                     @RequestParam(required = false, defaultValue = "false") Boolean complete) {
         if (Boolean.TRUE.equals(complete)) {
-            return ResponseEntity.status(HttpStatus.CREATED).body(Transaction.toTransactionDto(service.create(transaction)));
+            return ResponseEntity.status(HttpStatus.CREATED).body(Transaction.toTransactionDto(service.create(Transaction.toTransaction(dto))));
         }
-        return ResponseEntity.status(HttpStatus.CREATED).body(Transaction.toTransactionListDto(service.create(transaction)));
+        return ResponseEntity.status(HttpStatus.CREATED).body(Transaction.toTransactionListDto(service.create(Transaction.toTransaction(dto))));
     }
 
     @PutMapping("/transactions")
-    public ResponseEntity<TransactionDto> updateTransaction(@RequestBody Transaction transaction,
+    public ResponseEntity<TransactionDto> updateTransaction(@Valid @RequestBody CreateUpdateTransactionDto dto,
                                                             @RequestParam String code) {
-        return ResponseEntity.ok(Transaction.toTransactionDto(service.update(transaction, code)));
+        return ResponseEntity.ok(Transaction.toTransactionDto(service.update(Transaction.toTransaction(dto), code)));
     }
 
     @DeleteMapping("/transactions/{code}")
@@ -110,7 +113,7 @@ public class TransactionController {
     @PutMapping("/transactions/return")
     public ResponseEntity<TransactionListDto> returnEquipments(@RequestParam String borrower,
                                                                @RequestParam String professor,
-                                                               @RequestParam String[] barcodes) {
+                                                               @NotEmpty(message = "Barcodes can't be empty") @RequestParam String[] barcodes) {
         return ResponseEntity.ok(Transaction.toTransactionListDto(service.returnEquipments(borrower, professor, Arrays.stream(barcodes).toList())));
     }
 }

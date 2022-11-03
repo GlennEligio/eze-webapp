@@ -33,4 +33,17 @@ public class YearSection implements Serializable {
     public static YearSectionWithYearLevelDto toYearSectionWithYearLevelDto (YearSection ys) {
         return new YearSectionWithYearLevelDto(ys.getId(), ys.getSectionName(), YearLevel.toYearLevelDto(ys.getYearLevel()));
     }
+
+    public static YearSection toYearSection(YearSectionWithYearLevelDto dto) {
+        YearSection ys = new YearSection();
+        ys.setSectionName(dto.getSectionName());
+        ys.setYearLevel(YearLevel.toYearLevel(dto.getYearLevel()));
+        return ys;
+    }
+
+    public static YearSection toYearSection(YearSectionDto dto) {
+        YearSection ys = new YearSection();
+        ys.setSectionName(dto.getSectionName());
+        return ys;
+    }
 }

@@ -102,4 +102,19 @@ public class Student implements Serializable {
                 student.getGuardianNumber(),
                 YearLevel.toYearLevelDto(student.getYearLevel()));
     }
+
+    public static Student toStudent(StudentDto dto) {
+        Student student = new Student();
+        student.setStudentNumber(dto.getStudentNumber());
+        student.setFullName(dto.getFullName());
+        student.setYearAndSection(YearSection.toYearSection(dto.getYearAndSection()));
+        student.setContactNumber(dto.getContactNumber());
+        student.setBirthday(dto.getBirthday());
+        student.setAddress(dto.getAddress());
+        student.setEmail(dto.getEmail());
+        student.setGuardian(dto.getGuardian());
+        student.setGuardianNumber(dto.getGuardianNumber());
+        student.setYearLevel(YearLevel.toYearLevel(dto.getYearLevel()));
+        return student;
+    }
 }
