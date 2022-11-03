@@ -1,11 +1,15 @@
 package com.eze.backend.restapi.service;
 
 import com.eze.backend.restapi.dtos.EzeUserDetails;
-import com.eze.backend.restapi.exception.ApiException;
+import com.eze.backend.restapi.repository.exception.ApiException;
 import com.eze.backend.restapi.model.Account;
 import com.eze.backend.restapi.repository.AccountRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.bson.types.ObjectId;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,15 +17,20 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 @Slf4j
-public class AccountService implements IService<Account>, UserDetailsService {
+public class AccountService implements IService<Account>, IExcelService<Account>, UserDetailsService {
 
     private final AccountRepository repository;
     private final PasswordEncoder passwordEncoder;
@@ -92,5 +101,49 @@ public class AccountService implements IService<Account>, UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("No account found with username " + username));
         log.info("Account found: {}", account);
         return new EzeUserDetails(account);
+    }
+
+    @Override
+    public ByteArrayInputStream listToExcel(List<Account> accounts) {
+        List<String> columns = List.of("ID", "Full name", "Username", "Email", "Type", "Created At", "Is Active");
+        try (Workbook workbook = new XSSFWorkbook()){
+            Sheet sheet = workbook.createSheet("Accounts");
+
+            // Creating header row
+            Row headerRow = sheet.createRow(0);
+            for (int i = 0; i < columns.size(); i++) {
+                Cell cell = headerRow.createCell(i);
+                cell.setCellValue(columns.get(i));
+            }
+
+            // Populating the excel file
+            for(int i = 0; i < accounts.size(); i++) {
+                Row dataRow = sheet.createRow(i+1);
+                dataRow.createCell(0).setCellValue(accounts.get(i).getId());
+                dataRow.createCell(1).setCellValue(accounts.get(i).getFullName());
+                dataRow.createCell(2).setCellValue(accounts.get(i).getUsername());
+                dataRow.createCell(3).setCellValue(accounts.get(i).getEmail());
+                dataRow.createCell(4).setCellValue(accounts.get(i).getType().getName());
+                dataRow.createCell(5).setCellValue(accounts.get(i).getCreatedAt());
+                dataRow.createCell(6).setCellValue(accounts.get(i).getActive());
+            }
+
+            // Making size of the columns auto resize to fit data
+            for(int i=0; i < columns.size(); i++) {
+                sheet.autoSizeColumn(i);
+            }
+
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            workbook.write(outputStream);
+            return new ByteArrayInputStream(outputStream.toByteArray());
+        } catch (IOException ex) {
+            throw new ApiException("Something went wrong with creating excel file", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return null;
+    }
+
+    @Override
+    public List<Account> excelToList(MultipartFile file) {
+        return null;
     }
 }

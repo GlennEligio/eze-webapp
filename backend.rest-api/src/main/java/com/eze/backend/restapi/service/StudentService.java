@@ -1,13 +1,11 @@
 package com.eze.backend.restapi.service;
 
-import com.eze.backend.restapi.exception.ApiException;
+import com.eze.backend.restapi.repository.exception.ApiException;
 import com.eze.backend.restapi.model.Student;
 import com.eze.backend.restapi.model.YearLevel;
 import com.eze.backend.restapi.model.YearSection;
 import com.eze.backend.restapi.repository.StudentRepository;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 

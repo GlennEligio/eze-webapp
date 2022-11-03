@@ -1,4 +1,4 @@
-package com.eze.backend.restapi.exception;
+package com.eze.backend.restapi.repository.exception;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;

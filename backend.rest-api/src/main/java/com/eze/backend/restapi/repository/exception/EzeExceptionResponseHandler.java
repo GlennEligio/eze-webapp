@@ -1,4 +1,4 @@
-package com.eze.backend.restapi.exception;
+package com.eze.backend.restapi.repository.exception;
 
 import com.eze.backend.restapi.dtos.ExceptionResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -24,13 +24,13 @@ import java.util.List;
 public class EzeExceptionResponseHandler extends ResponseEntityExceptionHandler {
 
     // General Exception handler
-//    @ExceptionHandler(value = Exception.class)
-//    public ResponseEntity<ExceptionResponse> handleAllException (Exception ex, WebRequest request){
-//        ExceptionResponse response = new ExceptionResponse(ex.getMessage(),
-//                LocalDateTime.now(),
-//                request.getDescription(false));
-//        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-//    }
+    @ExceptionHandler(value = Exception.class)
+    public ResponseEntity<ExceptionResponse> handleAllException (Exception ex, WebRequest request){
+        ExceptionResponse response = new ExceptionResponse(ex.getMessage(),
+                LocalDateTime.now(),
+                request.getDescription(false));
+        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 
     // Handles SQL Exceptions, mostly Unique Constraint
     @ExceptionHandler(value = DataIntegrityViolationException.class)

@@ -1,6 +1,6 @@
 package com.eze.backend.restapi.service;
 
-import com.eze.backend.restapi.exception.ApiException;
+import com.eze.backend.restapi.repository.exception.ApiException;
 import com.eze.backend.restapi.model.Equipment;
 import com.eze.backend.restapi.model.Transaction;
 import com.eze.backend.restapi.repository.TransactionRepository;

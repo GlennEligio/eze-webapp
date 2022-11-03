@@ -1,9 +1,8 @@
 package com.eze.backend.restapi.service;
 
-import com.eze.backend.restapi.exception.ApiException;
+import com.eze.backend.restapi.repository.exception.ApiException;
 import com.eze.backend.restapi.model.Equipment;
 import com.eze.backend.restapi.repository.EquipmentRepository;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
