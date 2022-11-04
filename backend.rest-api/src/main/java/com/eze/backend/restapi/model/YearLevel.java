@@ -11,6 +11,7 @@ import javax.persistence.*;
 import javax.validation.constraints.Min;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
 
 @Data
 @NoArgsConstructor
@@ -27,6 +28,19 @@ public class YearLevel implements Serializable {
     private String yearName;
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "yearLevel", targetEntity = YearSection.class)
     private List<YearSection> yearSections;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        YearLevel yearLevel = (YearLevel) o;
+        return Objects.equals(id, yearLevel.id) && Objects.equals(yearNumber, yearLevel.yearNumber) && Objects.equals(yearName, yearLevel.yearName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, yearNumber, yearName);
+    }
 
     public static YearLevelDto toYearLevelDto(YearLevel yl) {
         YearLevelDto dto = new YearLevelDto();

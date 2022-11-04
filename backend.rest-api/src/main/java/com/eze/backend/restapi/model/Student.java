@@ -2,7 +2,6 @@ package com.eze.backend.restapi.model;
 
 import com.eze.backend.restapi.dtos.StudentDto;
 import com.eze.backend.restapi.dtos.StudentListDto;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

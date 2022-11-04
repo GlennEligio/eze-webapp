@@ -77,4 +77,9 @@ public class YearLevelService implements IService<YearLevel>{
     public String alreadyExist(Serializable yearNumber) {
         return "YearLevel with year number " + yearNumber + " already exist";
     }
+
+    @Override
+    public int addOrUpdate(List<YearLevel> entities, boolean overwrite) {
+        return 0;
+    }
 }

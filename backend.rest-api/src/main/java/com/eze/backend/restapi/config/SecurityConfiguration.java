@@ -52,7 +52,8 @@ public class SecurityConfiguration {
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         http.authorizeRequests()
                 // TODO: Configure route guarding for other account types
-                .antMatchers("/api/v1/accounts/login", "/api/v1/accounts/register").permitAll()
+                // TODO: Secure the download and upload routes after implementing and testing the feature
+                .antMatchers("/api/v1/accounts/login", "/api/v1/accounts/register", "/api/v1/*/download", "/api/v1/*/upload").permitAll()
                 .antMatchers(HttpMethod.GET, "/**").authenticated()
                 .antMatchers(HttpMethod.POST, "/**").hasAnyAuthority("SADMIN", "ADMIN", "STUDENT_ASSISTANT")
                 .antMatchers(HttpMethod.PUT, "/**").hasAnyAuthority("SADMIN", "ADMIN", "STUDENT_ASSISTANT")

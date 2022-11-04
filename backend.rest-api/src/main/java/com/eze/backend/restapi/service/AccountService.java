@@ -1,6 +1,7 @@
 package com.eze.backend.restapi.service;
 
 import com.eze.backend.restapi.dtos.EzeUserDetails;
+import com.eze.backend.restapi.enums.AccountType;
 import com.eze.backend.restapi.repository.exception.ApiException;
 import com.eze.backend.restapi.model.Account;
 import com.eze.backend.restapi.repository.AccountRepository;
@@ -95,6 +96,28 @@ public class AccountService implements IService<Account>, IExcelService<Account>
     }
 
     @Override
+    public int addOrUpdate(List<Account> accounts, boolean overwrite) {
+        int itemsAffected = 0;
+        for (Account account: accounts) {
+            Optional<Account> accOp = repository.findByUsername(account.getUsername());
+            if(accOp.isEmpty()){
+                repository.save(account);
+                itemsAffected++;
+            }else{
+                if(overwrite){
+                    Account oldAcc = accOp.get();
+                    if(!oldAcc.equals(account)) {
+                        oldAcc.update(account);
+                        repository.save(oldAcc);
+                        itemsAffected++;
+                    }
+                }
+            }
+        }
+        return itemsAffected;
+    }
+
+    @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         log.info("Loading account with username {}", username);
         Account account = repository.findByUsername(username)
@@ -124,7 +147,7 @@ public class AccountService implements IService<Account>, IExcelService<Account>
                 dataRow.createCell(2).setCellValue(accounts.get(i).getUsername());
                 dataRow.createCell(3).setCellValue(accounts.get(i).getEmail());
                 dataRow.createCell(4).setCellValue(accounts.get(i).getType().getName());
-                dataRow.createCell(5).setCellValue(accounts.get(i).getCreatedAt());
+                dataRow.createCell(5).setCellValue(accounts.get(i).getCreatedAt().toString());
                 dataRow.createCell(6).setCellValue(accounts.get(i).getActive());
             }
 
@@ -139,11 +162,29 @@ public class AccountService implements IService<Account>, IExcelService<Account>
         } catch (IOException ex) {
             throw new ApiException("Something went wrong with creating excel file", HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return null;
     }
 
     @Override
     public List<Account> excelToList(MultipartFile file) {
-        return null;
+        try(Workbook workbook = new XSSFWorkbook(file.getInputStream());){
+            List<Account> accounts = new ArrayList<>();
+            Sheet sheet = workbook.getSheetAt(0);
+            for (int i = 1; i < sheet.getPhysicalNumberOfRows(); i++) {
+                Account account = new Account();
+                Row row = sheet.getRow(i);
+
+                account.setId((long) row.getCell(0, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK).getNumericCellValue());
+                account.setFullName(row.getCell(1).getStringCellValue());
+                account.setUsername(row.getCell(2).getStringCellValue());
+                account.setEmail(row.getCell(3).getStringCellValue());
+                account.setType(AccountType.of(row.getCell(4).getStringCellValue()));
+                account.setCreatedAt(LocalDateTime.parse(row.getCell(5).getStringCellValue()));
+                account.setActive(row.getCell(6).getBooleanCellValue());
+                accounts.add(account);
+            }
+            return accounts;
+        }catch (IOException ex){
+            throw new ApiException("Something went wrong when importing accounts", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

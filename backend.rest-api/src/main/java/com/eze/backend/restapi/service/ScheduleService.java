@@ -72,6 +72,11 @@ public class ScheduleService implements IService<RoomSchedule> {
         return "Schedule with same code " + code + " already exist";
     }
 
+    @Override
+    public int addOrUpdate(List<RoomSchedule> entities, boolean overwrite) {
+        return 0;
+    }
+
     // TODO: Create Custom Generator for the Schedule entity schedule code with Day, Time, and Room
     public String createScheduleCode(RoomSchedule roomSchedule) {
         return "RM-" + roomSchedule.getDay() + "-" + roomSchedule.getTime() + "-" + roomSchedule.getRoom();

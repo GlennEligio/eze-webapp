@@ -10,6 +10,7 @@ import org.springframework.security.core.parameters.P;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
 
 @Data
 @NoArgsConstructor
@@ -42,5 +43,18 @@ public class Professor implements Serializable {
         professor.setName(dto.getName());
         professor.setContactNumber(dto.getContactNumber());
         return professor;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Professor professor = (Professor) o;
+        return id.equals(professor.id) && name.equals(professor.name) && contactNumber.equals(professor.contactNumber);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, contactNumber);
     }
 }

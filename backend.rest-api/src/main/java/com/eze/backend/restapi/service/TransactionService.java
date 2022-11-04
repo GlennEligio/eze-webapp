@@ -138,6 +138,11 @@ public class TransactionService implements IService<Transaction> {
         return "Transaction with code " + code + " already exist";
     }
 
+    @Override
+    public int addOrUpdate(List<Transaction> entities, boolean overwrite) {
+        return 0;
+    }
+
     private String eqBorrowed(List<Equipment> equipments) {
         String equipmentIds = equipments.stream()
                 .map(Equipment::getEquipmentCode)

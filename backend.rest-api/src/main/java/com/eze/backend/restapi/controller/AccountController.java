@@ -6,10 +6,14 @@ import com.eze.backend.restapi.dtos.LoginResponseDto;
 import com.eze.backend.restapi.dtos.RegisterRequestDto;
 import com.eze.backend.restapi.enums.AccountType;
 import com.eze.backend.restapi.model.Account;
+import com.eze.backend.restapi.repository.exception.ApiException;
 import com.eze.backend.restapi.service.AccountService;
 import com.eze.backend.restapi.util.JwtUtil;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.compress.utils.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,9 +21,15 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.lang.runtime.ObjectMethods;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -60,6 +70,35 @@ public class AccountController {
         String refreshToken = jwtUtil.generateRefreshToken(userDetails);
         log.info("Generated access token {}, and refresh token {}", accessToken, refreshToken);
         return ResponseEntity.ok(new LoginResponseDto(userDetails.getUsername(), userDetails.getAuthorities().stream().findFirst().get().toString(), userDetails.getFullName(), accessToken, refreshToken));
+    }
+
+    @PostMapping("/accounts/upload")
+    public ResponseEntity<Object> upload(@RequestParam(required = false, defaultValue = "false") Boolean overwrite,
+                                         @RequestParam MultipartFile file) {
+        log.info("Preparing Excel for Item Database update");
+        if(!Objects.equals(file.getContentType(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")){
+            throw new ApiException("Can only upload .xlsx files", HttpStatus.BAD_REQUEST);
+        }
+        List<Account> accounts = service.excelToList(file);
+        int itemsAffected = service.addOrUpdate(accounts, overwrite);
+        if(itemsAffected > 0){
+            log.info("Successfully updated item database using the excel file");
+            ObjectMapper mapper = new ObjectMapper();
+            ObjectNode objectNode = mapper.createObjectNode();
+            objectNode.put("Items Affected", itemsAffected);
+            return ResponseEntity.ok(objectNode);
+        }
+        log.info("No changes done in database");
+        return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/accounts/download")
+    public void download(HttpServletResponse response) throws IOException {
+        log.info("Preparing Item list for Download");
+        response.setContentType("application/octet-stream");
+        response.setHeader("Content-Disposition", "attachment; filename=accounts.xlsx");
+        ByteArrayInputStream stream = service.listToExcel(service.getAll().stream().filter(a -> !a.getType().equals(AccountType.SADMIN)).toList());
+        IOUtils.copy(stream, response.getOutputStream());
     }
 
     @GetMapping("/accounts")

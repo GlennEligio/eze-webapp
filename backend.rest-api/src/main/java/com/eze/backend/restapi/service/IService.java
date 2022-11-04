@@ -12,4 +12,5 @@ public interface IService<T> {
     void delete(Serializable id);
     String notFound(Serializable id);
     String alreadyExist(Serializable id);
+    int addOrUpdate(List<T> entities, boolean overwrite);
 }

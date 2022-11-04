@@ -1,17 +1,31 @@
 package com.eze.backend.restapi.controller;
 
 import com.eze.backend.restapi.dtos.EquipmentDto;
+import com.eze.backend.restapi.enums.AccountType;
+import com.eze.backend.restapi.model.Account;
 import com.eze.backend.restapi.model.Equipment;
+import com.eze.backend.restapi.repository.exception.ApiException;
 import com.eze.backend.restapi.service.EquipmentService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.compress.utils.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.net.URI;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
+@Slf4j
 @RequestMapping("/api/v1")
 public class EquipmentController {
 
@@ -30,6 +44,36 @@ public class EquipmentController {
             return ResponseEntity.ok(Equipment.toEquipmentDto(equipmentService.getByBarcode(code)));
         }
         return ResponseEntity.ok(Equipment.toEquipmentDto(equipmentService.get(code)));
+    }
+
+    @GetMapping("/equipments/download")
+    public void download(HttpServletResponse response) throws IOException {
+        log.info("Preparing Item list for Download");
+        response.setContentType("application/octet-stream");
+        response.setHeader("Content-Disposition", "attachment; filename=equipments.xlsx");
+        ByteArrayInputStream stream = equipmentService.listToExcel(equipmentService.getAll());
+        IOUtils.copy(stream, response.getOutputStream());
+    }
+
+    @PostMapping("/equipments/upload")
+    public ResponseEntity<Object> upload(@RequestParam(required = false, defaultValue = "false") Boolean overwrite,
+                                         @RequestParam MultipartFile file) {
+        log.info("Preparing Excel for Equipment Database update");
+        if(!Objects.equals(file.getContentType(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")){
+            throw new ApiException("Can only upload .xlsx files", HttpStatus.BAD_REQUEST);
+        }
+        List<Equipment> equipments = equipmentService.excelToList(file);
+        log.info("Got the equipments from excel");
+        int itemsAffected = equipmentService.addOrUpdate(equipments, overwrite);
+        if(itemsAffected > 0){
+            log.info("Successfully updated equipments database using the excel file");
+            ObjectMapper mapper = new ObjectMapper();
+            ObjectNode objectNode = mapper.createObjectNode();
+            objectNode.put("Equipments Affected", itemsAffected);
+            return ResponseEntity.ok(objectNode);
+        }
+        log.info("No changes done in database");
+        return ResponseEntity.notFound().build();
     }
 
     @PostMapping("/equipments")

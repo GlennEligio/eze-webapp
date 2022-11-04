@@ -2,17 +2,24 @@ package com.eze.backend.restapi.controller;
 
 import com.eze.backend.restapi.dtos.StudentDto;
 import com.eze.backend.restapi.dtos.StudentListDto;
+import com.eze.backend.restapi.enums.AccountType;
 import com.eze.backend.restapi.model.Student;
 import com.eze.backend.restapi.service.StudentService;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.compress.utils.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.List;
 
 @RestController
+@Slf4j
 @RequestMapping("/api/v1")
 public class StudentController {
 
@@ -22,6 +29,15 @@ public class StudentController {
     @GetMapping("/students")
     public ResponseEntity<List<StudentListDto>> getStudents() {
         return ResponseEntity.ok(service.getAll().stream().map(Student::toStudentListDto).toList());
+    }
+
+    @GetMapping("/students/download")
+    public void download(HttpServletResponse response) throws IOException {
+        log.info("Preparing Student list for Download");
+        response.setContentType("application/octet-stream");
+        response.setHeader("Content-Disposition", "attachment; filename=students.xlsx");
+        ByteArrayInputStream stream = service.listToExcel(service.getAll());
+        IOUtils.copy(stream, response.getOutputStream());
     }
 
     @GetMapping("/students/{studentNo}")

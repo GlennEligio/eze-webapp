@@ -12,6 +12,7 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @Data
 @NoArgsConstructor
@@ -37,6 +38,19 @@ public class Equipment implements Serializable {
     // TODO: Temp fix for stackoverflow error, create DTO for this class that doesnt include this field
     @JsonIgnore
     private List<Transaction> transactions;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Equipment equipment = (Equipment) o;
+        return Objects.equals(id, equipment.id) && Objects.equals(equipmentCode, equipment.equipmentCode) && Objects.equals(name, equipment.name) && Objects.equals(barcode, equipment.barcode) && status == equipment.status && Objects.equals(defectiveSince, equipment.defectiveSince) && Objects.equals(isDuplicable, equipment.isDuplicable) && Objects.equals(isBorrowed, equipment.isBorrowed);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, equipmentCode, name, barcode, status, defectiveSince, isDuplicable, isBorrowed);
+    }
 
     public void update(Equipment newEquipment) {
         if(newEquipment.getEquipmentCode() != null) {
@@ -79,6 +93,7 @@ public class Equipment implements Serializable {
         equipment.setBarcode(dto.getBarcode());
         equipment.setStatus(EqStatus.of(dto.getStatus()));
         equipment.setIsDuplicable(dto.getIsDuplicable());
+        equipment.setIsBorrowed(dto.getIsBorrowed());
         return equipment;
     }
 }

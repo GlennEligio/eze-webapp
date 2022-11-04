@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
+import java.util.Objects;
 
 @Data
 @NoArgsConstructor
@@ -25,6 +26,19 @@ public class YearSection implements Serializable {
     @ManyToOne(optional = false)
     @JoinColumn(name = "yearLevel", referencedColumnName = "yearNumber")
     private YearLevel yearLevel;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        YearSection that = (YearSection) o;
+        return Objects.equals(id, that.id) && Objects.equals(sectionName, that.sectionName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, sectionName);
+    }
 
     public static YearSectionDto toYearSectionDto(YearSection ys) {
         return new YearSectionDto(ys.getId(), ys.getSectionName());

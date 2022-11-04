@@ -1,18 +1,34 @@
 package com.eze.backend.restapi.service;
 
+import com.eze.backend.restapi.enums.EqStatus;
+import com.eze.backend.restapi.model.Equipment;
 import com.eze.backend.restapi.repository.exception.ApiException;
 import com.eze.backend.restapi.model.Professor;
 import com.eze.backend.restapi.repository.ProfessorRepository;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.Serializable;
+import java.time.DateTimeException;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
-public class ProfessorService implements IService<Professor>{
+@Slf4j
+public class ProfessorService implements IService<Professor>, IExcelService<Professor>{
 
     @Autowired
     private ProfessorRepository repository;
@@ -59,5 +75,82 @@ public class ProfessorService implements IService<Professor>{
     @Override
     public String alreadyExist(Serializable name) {
         return "Professor with name " + name + " already exist";
+    }
+
+    @Override
+    public int addOrUpdate(List<Professor> professors, boolean overwrite) {
+        int itemsAffected = 0;
+        for (Professor professor: professors) {
+            Optional<Professor> professorOptional = repository.findByName(professor.getName());
+            if(professorOptional.isEmpty()){
+                repository.save(professor);
+                itemsAffected++;
+            }else{
+                if(overwrite){
+                    Professor oldProf = professorOptional.get();
+                    if(!oldProf.equals(professor)) {
+                        oldProf.update(professor);
+                        repository.save(oldProf);
+                        itemsAffected++;
+                    }
+                }
+            }
+        }
+        return itemsAffected;
+    }
+
+    @Override
+    public ByteArrayInputStream listToExcel(List<Professor> professors) {
+        List<String> columnName = List.of("ID", "Name", "Contact Number");
+        try (Workbook workbook = new XSSFWorkbook()) {
+            Sheet sheet = workbook.createSheet("Professor");
+
+            // Creating header row
+            Row row = sheet.createRow(0);
+            for (int i=0; i < columnName.size(); i++) {
+                row.createCell(i).setCellValue(columnName.get(i));
+            }
+
+            // Populating the Excel file with data
+            for(int i=0; i < professors.size(); i++) {
+                Row dataRow = sheet.createRow(i+1);
+                Professor prof = professors.get(i);
+                dataRow.createCell(0).setCellValue(prof.getId());
+                dataRow.createCell(1).setCellValue(prof.getName());
+                dataRow.createCell(2).setCellValue(prof.getContactNumber());
+            }
+
+            // Making size of the columns auto resize to fit data
+            for(int i=0; i < columnName.size(); i++) {
+                sheet.autoSizeColumn(i);
+            }
+
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            workbook.write(outputStream);
+            return new ByteArrayInputStream(outputStream.toByteArray());
+        } catch (Exception ex) {
+            throw new ApiException("Something went wrong when converting professors to excel file", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Override
+    public List<Professor> excelToList(MultipartFile file) {
+        try (Workbook workbook = new XSSFWorkbook(file.getInputStream())){
+            List<Professor> professors = new ArrayList<>();
+            Sheet sheet = workbook.getSheetAt(0);
+            for (int i = 1; i < sheet.getPhysicalNumberOfRows(); i++) {
+                Professor professor = new Professor();
+                Row row = sheet.getRow(i);
+
+                professor.setId((long) row.getCell(0, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK).getNumericCellValue());
+                professor.setName(row.getCell(1).getStringCellValue());
+                professor.setContactNumber(row.getCell(2).getStringCellValue());
+                professors.add(professor);
+            }
+            return professors;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            throw new ApiException("Something went wrong when converting Excel file to Professors", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

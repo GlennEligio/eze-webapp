@@ -1,21 +1,32 @@
 package com.eze.backend.restapi.service;
 
+import com.eze.backend.restapi.dtos.StudentDto;
+import com.eze.backend.restapi.dtos.StudentListDto;
+import com.eze.backend.restapi.model.Equipment;
 import com.eze.backend.restapi.repository.exception.ApiException;
 import com.eze.backend.restapi.model.Student;
 import com.eze.backend.restapi.model.YearLevel;
 import com.eze.backend.restapi.model.YearSection;
 import com.eze.backend.restapi.repository.StudentRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 @Slf4j
-public class StudentService implements IService<Student>{
+public class StudentService implements IService<Student>, IExcelService<Student>{
 
     private final StudentRepository repository;
     private final YearLevelService ylService;
@@ -83,5 +94,76 @@ public class StudentService implements IService<Student>{
     @Override
     public String alreadyExist(Serializable studentNo) {
         return "Student with student number " + studentNo + " already exist";
+    }
+
+    @Override
+    public int addOrUpdate(List<Student> students, boolean overwrite) {
+        int itemsAffected = 0;
+        for (Student student: students) {
+            Optional<Student> studentOptional = repository.findByStudentNumber(student.getStudentNumber());
+            if(studentOptional.isEmpty()){
+                repository.save(student);
+                itemsAffected++;
+            }else{
+                if(overwrite){
+                    Student oldStudent = studentOptional.get();
+                    StudentListDto oldStudentDto = Student.toStudentListDto(oldStudent);
+                    StudentListDto newStudentDto = Student.toStudentListDto(student);
+                    if(!oldStudentDto.equals(newStudentDto)){
+                        oldStudent.update(student);
+                        repository.save(oldStudent);
+                        itemsAffected++;
+                    }
+                }
+            }
+        }
+        return itemsAffected;
+    }
+
+    @Override
+    public ByteArrayInputStream listToExcel(List<Student> students) {
+        List<String> columnName = List.of("ID", "Student number", "Full name", "Year and section", "Contact number", "Birthday", "Address", "Email", "Guardian", "Guardian number", "Year level");
+        try (Workbook workbook = new XSSFWorkbook()) {
+            Sheet sheet = workbook.createSheet("Students");
+
+            // Creating header row
+            Row row = sheet.createRow(0);
+            for (int i=0; i < columnName.size(); i++) {
+                row.createCell(i).setCellValue(columnName.get(i));
+            }
+
+            // Populating the Excel file with data
+            for(int i=0; i < students.size(); i++) {
+                Row dataRow = sheet.createRow(i+1);
+                StudentListDto student = Student.toStudentListDto(students.get(i));
+                dataRow.createCell(0).setCellValue(student.getId());
+                dataRow.createCell(1).setCellValue(student.getStudentNumber());
+                dataRow.createCell(2).setCellValue(student.getFullName());
+                dataRow.createCell(3).setCellValue(student.getYearAndSection());
+                dataRow.createCell(4).setCellValue(student.getContactNumber());
+                if(student.getBirthday() != null) dataRow.createCell(5).setCellValue(student.getBirthday());
+                if(student.getAddress() != null) dataRow.createCell(6).setCellValue(student.getAddress());
+                if(student.getEmail() != null) dataRow.createCell(7).setCellValue(student.getEmail());
+                if(student.getGuardian() != null) dataRow.createCell(8).setCellValue(student.getGuardian());
+                if(student.getGuardianNumber() != null) dataRow.createCell(9).setCellValue(student.getGuardianNumber());
+                if(student.getYearLevel() != null) dataRow.createCell(10).setCellValue(student.getYearLevel());
+            }
+
+            // Making size of the columns auto resize to fit data
+            for(int i=0; i < columnName.size(); i++) {
+                sheet.autoSizeColumn(i);
+            }
+
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            workbook.write(outputStream);
+            return new ByteArrayInputStream(outputStream.toByteArray());
+        } catch (IOException ex) {
+            throw new ApiException("Something went wrong when converting students to excel file", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @Override
+    public List<Student> excelToList(MultipartFile file) {
+        return null;
     }
 }

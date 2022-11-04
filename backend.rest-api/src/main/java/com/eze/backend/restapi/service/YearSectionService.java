@@ -73,4 +73,9 @@ public class YearSectionService implements IService<YearSection>{
     public String alreadyExist(Serializable sectionName) {
         return "YearSection with sectionName " + sectionName + " already exist";
     }
+
+    @Override
+    public int addOrUpdate(List<YearSection> entities, boolean overwrite) {
+        return 0;
+    }
 }

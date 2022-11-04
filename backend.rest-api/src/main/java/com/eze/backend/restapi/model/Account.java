@@ -10,6 +10,8 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.Objects;
 
 @Entity
 @Data
@@ -31,6 +33,22 @@ public class Account implements Serializable {
     private Boolean active;
 //    @OneToOne(mappedBy = "account")
 //    private AccountFingerprint accountFingerprint;
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Account account = (Account) o;
+        return Objects.equals(id, account.id) && Objects.equals(fullName, account.fullName) && Objects.equals(username, account.username) && Objects.equals(email, account.email) && type == account.type && Arrays.equals(profile, account.profile) && Objects.equals(createdAt, account.createdAt) && Objects.equals(active, account.active);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(id, fullName, username, email, password, type, createdAt, active);
+        result = 31 * result + Arrays.hashCode(profile);
+        return result;
+    }
 
     public void update(Account newAccount) {
         if(newAccount.getEmail() != null) {
