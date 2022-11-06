@@ -1,13 +1,11 @@
 package com.eze.backend.restapi.controller;
 
 import com.eze.backend.restapi.dtos.ProfessorDto;
-import com.eze.backend.restapi.model.Equipment;
 import com.eze.backend.restapi.model.Professor;
-import com.eze.backend.restapi.repository.exception.ApiException;
+import com.eze.backend.restapi.exception.ApiException;
 import com.eze.backend.restapi.service.ProfessorService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,15 +53,11 @@ public class ProfessorController {
         List<Professor> professors = service.excelToList(file);
         log.info("Got the professors from excel");
         int itemsAffected = service.addOrUpdate(professors, overwrite);
-        if(itemsAffected > 0){
-            log.info("Successfully updated professors database using the excel file");
-            ObjectMapper mapper = new ObjectMapper();
-            ObjectNode objectNode = mapper.createObjectNode();
-            objectNode.put("Professors Affected", itemsAffected);
-            return ResponseEntity.ok(objectNode);
-        }
-        log.info("No changes done in database");
-        return ResponseEntity.notFound().build();
+        log.info("Successfully updated {} professors database using the excel file", itemsAffected);
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode objectNode = mapper.createObjectNode();
+        objectNode.put("Professors Affected", itemsAffected);
+        return ResponseEntity.ok(objectNode);
     }
 
     @GetMapping("/professors/{name}")

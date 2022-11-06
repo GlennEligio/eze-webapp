@@ -2,7 +2,7 @@ package com.eze.backend.restapi.service;
 
 import com.eze.backend.restapi.dtos.EzeUserDetails;
 import com.eze.backend.restapi.enums.AccountType;
-import com.eze.backend.restapi.repository.exception.ApiException;
+import com.eze.backend.restapi.exception.ApiException;
 import com.eze.backend.restapi.model.Account;
 import com.eze.backend.restapi.repository.AccountRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +20,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.transaction.Transactional;
+import javax.validation.Valid;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -96,7 +98,8 @@ public class AccountService implements IService<Account>, IExcelService<Account>
     }
 
     @Override
-    public int addOrUpdate(List<Account> accounts, boolean overwrite) {
+    @Transactional
+    public int addOrUpdate(@Valid List<Account> accounts, boolean overwrite) {
         int itemsAffected = 0;
         for (Account account: accounts) {
             Optional<Account> accOp = repository.findByUsername(account.getUsername());

@@ -1,10 +1,8 @@
 package com.eze.backend.restapi.controller;
 
 import com.eze.backend.restapi.dtos.EquipmentDto;
-import com.eze.backend.restapi.enums.AccountType;
-import com.eze.backend.restapi.model.Account;
 import com.eze.backend.restapi.model.Equipment;
-import com.eze.backend.restapi.repository.exception.ApiException;
+import com.eze.backend.restapi.exception.ApiException;
 import com.eze.backend.restapi.service.EquipmentService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -65,15 +63,11 @@ public class EquipmentController {
         List<Equipment> equipments = equipmentService.excelToList(file);
         log.info("Got the equipments from excel");
         int itemsAffected = equipmentService.addOrUpdate(equipments, overwrite);
-        if(itemsAffected > 0){
-            log.info("Successfully updated equipments database using the excel file");
-            ObjectMapper mapper = new ObjectMapper();
-            ObjectNode objectNode = mapper.createObjectNode();
-            objectNode.put("Equipments Affected", itemsAffected);
-            return ResponseEntity.ok(objectNode);
-        }
-        log.info("No changes done in database");
-        return ResponseEntity.notFound().build();
+        log.info("Successfully updated {} equipments database using the excel file", itemsAffected);
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode objectNode = mapper.createObjectNode();
+        objectNode.put("Equipments Affected", itemsAffected);
+        return ResponseEntity.ok(objectNode);
     }
 
     @PostMapping("/equipments")

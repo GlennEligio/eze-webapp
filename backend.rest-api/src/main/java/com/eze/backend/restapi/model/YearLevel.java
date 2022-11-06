@@ -9,6 +9,9 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
@@ -23,8 +26,11 @@ public class YearLevel implements Serializable {
     private Long id;
     @Min(1)
     @Column(unique = true, nullable = false)
+    @Positive(message = "Year number must be greater than 0")
+    @NotNull(message = "Year number must be present")
     private Integer yearNumber;
     @Column(unique = true, nullable = false)
+    @NotBlank(message = "Year name must be present")
     private String yearName;
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "yearLevel", targetEntity = YearSection.class)
     private List<YearSection> yearSections;

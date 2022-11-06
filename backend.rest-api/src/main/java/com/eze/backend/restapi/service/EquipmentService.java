@@ -1,9 +1,7 @@
 package com.eze.backend.restapi.service;
 
-import com.eze.backend.restapi.enums.AccountType;
 import com.eze.backend.restapi.enums.EqStatus;
-import com.eze.backend.restapi.model.Account;
-import com.eze.backend.restapi.repository.exception.ApiException;
+import com.eze.backend.restapi.exception.ApiException;
 import com.eze.backend.restapi.model.Equipment;
 import com.eze.backend.restapi.repository.EquipmentRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +15,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.transaction.Transactional;
+import javax.validation.Valid;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -84,7 +84,8 @@ public class EquipmentService implements IService<Equipment>, IExcelService<Equi
     }
 
     @Override
-    public int addOrUpdate(List<Equipment> equipments, boolean overwrite) {
+    @Transactional
+    public int addOrUpdate(@Valid List<Equipment> equipments, boolean overwrite) {
         int itemsAffected = 0;
         for (Equipment equipment: equipments) {
             Optional<Equipment> eqOp = repository.findByEquipmentCode(equipment.getEquipmentCode());

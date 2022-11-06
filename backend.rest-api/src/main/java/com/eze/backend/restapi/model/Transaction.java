@@ -2,20 +2,27 @@ package com.eze.backend.restapi.model;
 
 import com.eze.backend.restapi.dtos.*;
 import com.eze.backend.restapi.enums.TxStatus;
+import com.eze.backend.restapi.validation.EnumNamePattern;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.*;
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
+@Slf4j
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -23,40 +30,129 @@ import java.util.List;
 @Entity
 @Table(name = "transaction_table")
 public class Transaction implements Serializable {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "tx_id")
     private Long id;
+
     @Column(unique = true, nullable = false, name = "tx_code")
     private String txCode;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "tx_eq",
             joinColumns = @JoinColumn(name = "tx_code_ref", referencedColumnName = "tx_code"),
             inverseJoinColumns = @JoinColumn(name = "eq_code_ref", referencedColumnName = "eq_code")
     )
+    @Valid
+    @NotNull(message = "Equipments must be present")
     private List<Equipment> equipments;
+
     @ManyToMany
     @JoinTable(
             name = "tx_eq_hist",
             joinColumns = @JoinColumn(name = "tx_code_ref_hist", referencedColumnName = "tx_code"),
             inverseJoinColumns = @JoinColumn(name = "eq_code_ref_hist", referencedColumnName = "eq_code")
     )
+    @Valid
+    @NotEmpty(message = "Equipments cant be empty")
+    @NotNull(message = "Equipments must be present")
     private List<Equipment> equipmentsHist;
+
     @ManyToOne
     @JoinColumn(name = "studentNumber", referencedColumnName = "studentNumber")
+    @NotNull(message = "Borrower must be present")
+    @Valid
     private Student borrower;
+
     @ManyToOne
     @JoinColumn(name = "professor_name", referencedColumnName = "name")
+    @NotNull(message = "Professor must be present")
+    @Valid
     private Professor professor;
     private LocalDateTime borrowedAt;
     private LocalDateTime returnedAt;
+
     @Enumerated(EnumType.ORDINAL)
+    @EnumNamePattern(regexp = "^(PENDING|ACCEPTED|DENIED)", message = "Transaction's status can only either be 'PENDING', 'ACCEPTED', or 'DENIED'")
     private TxStatus status;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Transaction that = (Transaction) o;
+        return Objects.equals(id, that.id) && Objects.equals(txCode, that.txCode) && Objects.equals(equipments, that.equipments) && Objects.equals(equipmentsHist, that.equipmentsHist) && Objects.equals(borrower, that.borrower) && Objects.equals(professor, that.professor) && Objects.equals(borrowedAt, that.borrowedAt) && Objects.equals(returnedAt, that.returnedAt) && status == that.status;
+    }
+
+    public boolean customEquals(Transaction t) {
+        boolean equals = true;
+        if(!txCode.equals(t.getTxCode())) {
+            log.info("TxCodes are not equals");
+            equals = false;
+        }
+
+        if(!equipments.isEmpty() || !t.getEquipments().isEmpty()) {
+            List<Equipment> sortedOldEq = equipments.stream().sorted(Comparator.comparing(Equipment::getEquipmentCode)).toList();
+            List<Equipment> sortedNewEq = t.getEquipments().stream().sorted(Comparator.comparing(Equipment::getEquipmentCode)).toList();
+            if(!sortedOldEq.equals(sortedNewEq)) {
+                log.info("Equipments are not equal");
+                equals = false;
+            }
+        }
+
+        if(!equipmentsHist.isEmpty() || !t.getEquipmentsHist().isEmpty()) {
+            List<Equipment> sortedOldEq = equipmentsHist.stream().sorted(Comparator.comparing(Equipment::getEquipmentCode)).toList();
+            List<Equipment> sortedNewEq = t.getEquipmentsHist().stream().sorted(Comparator.comparing(Equipment::getEquipmentCode)).toList();
+            if(!sortedOldEq.equals(sortedNewEq)) {
+                log.info("Equipments hist are not equal");
+                equals = false;
+            }
+        }
+
+        if(!borrower.equals(t.getBorrower())) {
+            log.info("Borrowers are not equal");
+            equals = false;
+        }
+        if(!professor.equals(t.getProfessor())) {
+            log.info("Professors are not equal");
+            equals = false;
+        }
+        if(!borrowedAt.equals(t.getBorrowedAt())) {
+            log.info("Borrowed at are not equals");
+            equals = false;
+        }
+        if(returnedAt != null && t.getReturnedAt() != null && !returnedAt.equals(t.getReturnedAt())) {
+            log.info("Returned at are not equals");
+            equals = false;
+        }
+        if(returnedAt != null && !returnedAt.equals(t.getReturnedAt())) {
+            log.info("Returned at are not equals");
+            equals = false;
+        }
+        if(t.getReturnedAt() != null && !t.getReturnedAt().equals(returnedAt)) {
+            log.info("Returned at are not equals");
+            equals = false;
+        }
+        if(!status.getName().equals(t.getStatus().getName())) {
+            log.info("Status is not equal");
+            equals = false;
+        }
+        return equals;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, txCode, equipments, equipmentsHist, borrower, professor, borrowedAt, returnedAt, status);
+    }
 
     public void update(Transaction newTransaction) {
         if(newTransaction.getEquipments() != null) {
             this.equipments = newTransaction.getEquipments();
+        }
+        if(newTransaction.getEquipmentsHist() != null) {
+            this.equipmentsHist = newTransaction.getEquipmentsHist();
         }
         if(newTransaction.getBorrower() != null) {
             this.borrower = newTransaction.getBorrower();

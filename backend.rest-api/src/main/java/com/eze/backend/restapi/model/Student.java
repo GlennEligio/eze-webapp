@@ -8,38 +8,73 @@ import lombok.NoArgsConstructor;
 import org.springframework.lang.NonNull;
 
 import javax.persistence.*;
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Objects;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
 public class Student implements Serializable {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "student_id")
     private Long id;
+
     @Column(unique = true, nullable = false)
+    @Pattern(regexp = "^\\d{4}-\\d{5}-[(a-z)|(A-Z)]{2}-\\d{2}$", message = "Invalid PUP Student Number")
+    @NotBlank(message = "Student number can't be blank")
     private String studentNumber;
+
+    @NotBlank(message = "Full name cant be blank")
     private String fullName;
+
     @ManyToOne
     @JoinColumn(name = "yearAndSection", referencedColumnName = "sectionName")
+    @NotNull(message = "YearSection must be present")
+    @Valid
     private YearSection yearAndSection;
+
+    @NotBlank(message = "Contact number can't be blank")
+    @Pattern(regexp = "^(09|\\+639)\\d{9}$", message = "Contact number must be a valid PH mobile number")
     private String contactNumber;
     private String birthday;
     private String address;
     private String email;
     private String guardian;
     private String guardianNumber;
+
     @ManyToOne
     @JoinColumn(name = "yearLevel", referencedColumnName = "yearName")
+    @NotNull(message="Year level must be present")
+    @Valid
     private YearLevel yearLevel;
     private byte[] image;
+
     @OneToMany(mappedBy = "borrower")
     private List<Transaction> transactions;
 //    @OneToOne(mappedBy = "student")
 //    private StudentFingerprint studentFingerprint;
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Student student = (Student) o;
+        return Objects.equals(id, student.id) && Objects.equals(studentNumber, student.studentNumber) && Objects.equals(fullName, student.fullName) && Objects.equals(yearAndSection, student.yearAndSection) && Objects.equals(contactNumber, student.contactNumber) && Objects.equals(birthday, student.birthday) && Objects.equals(address, student.address) && Objects.equals(email, student.email) && Objects.equals(guardian, student.guardian) && Objects.equals(guardianNumber, student.guardianNumber) && Objects.equals(yearLevel, student.yearLevel);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, studentNumber, fullName, yearAndSection, contactNumber, birthday, address, email, guardian, guardianNumber, yearLevel);
+    }
 
     public void update(@NonNull Student newStudent) {
         if(newStudent.getAddress() != null) {

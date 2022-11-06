@@ -1,4 +1,4 @@
-package com.eze.backend.restapi.repository.exception;
+package com.eze.backend.restapi.exception;
 
 import com.eze.backend.restapi.dtos.ExceptionResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -23,14 +25,14 @@ import java.util.List;
 @Slf4j
 public class EzeExceptionResponseHandler extends ResponseEntityExceptionHandler {
 
-    // General Exception handler
-    @ExceptionHandler(value = Exception.class)
-    public ResponseEntity<ExceptionResponse> handleAllException (Exception ex, WebRequest request){
-        ExceptionResponse response = new ExceptionResponse(ex.getMessage(),
-                LocalDateTime.now(),
-                request.getDescription(false));
-        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+//    // General Exception handler
+//    @ExceptionHandler(value = Exception.class)
+//    public ResponseEntity<ExceptionResponse> handleAllException (Exception ex, WebRequest request){
+//        ExceptionResponse response = new ExceptionResponse(ex.getMessage(),
+//                LocalDateTime.now(),
+//                request.getDescription(false));
+//        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+//    }
 
     // Handles SQL Exceptions, mostly Unique Constraint
     @ExceptionHandler(value = DataIntegrityViolationException.class)
@@ -54,6 +56,20 @@ public class EzeExceptionResponseHandler extends ResponseEntityExceptionHandler 
                 LocalDateTime.now(),
                 request.getDescription(false));
         return new ResponseEntity<>(response, ex.getStatus());
+    }
+
+
+    // Handles ConstraintViolationException cases
+    @ExceptionHandler(value = ConstraintViolationException.class)
+    public ResponseEntity<ExceptionResponse> handleConstraintViolationException (ConstraintViolationException ex, WebRequest request){
+        List<String> errors = new ArrayList<>();
+        for (ConstraintViolation cv : ex.getConstraintViolations()) {
+            errors.add(cv.getPropertyPath() + ": " + cv.getConstraintDescriptor().getMessageTemplate());
+        }
+        ExceptionResponse response = new ExceptionResponse(errors.toString(),
+                LocalDateTime.now(),
+                request.getDescription(false));
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
     // Handle exceptions for Validation Constraints in DTOs

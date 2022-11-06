@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -21,10 +22,14 @@ public class Account implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @NotBlank(message = "Email can't be blank")
     private String fullName;
     @Column(unique = true, nullable = false)
+    @NotBlank(message = "Username cant be blank")
     private String username;
+    @NotBlank(message = "Email can't be blank")
     private String email;
+    @NotBlank(message = "Password can't be blank")
     private String password;
     @Enumerated(EnumType.ORDINAL)
     private AccountType type;

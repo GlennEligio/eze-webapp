@@ -1,8 +1,6 @@
 package com.eze.backend.restapi.service;
 
-import com.eze.backend.restapi.enums.EqStatus;
-import com.eze.backend.restapi.model.Equipment;
-import com.eze.backend.restapi.repository.exception.ApiException;
+import com.eze.backend.restapi.exception.ApiException;
 import com.eze.backend.restapi.model.Professor;
 import com.eze.backend.restapi.repository.ProfessorRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -12,16 +10,14 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.transaction.Transactional;
+import javax.validation.Valid;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.Serializable;
-import java.time.DateTimeException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -78,7 +74,8 @@ public class ProfessorService implements IService<Professor>, IExcelService<Prof
     }
 
     @Override
-    public int addOrUpdate(List<Professor> professors, boolean overwrite) {
+    @Transactional
+    public int addOrUpdate(@Valid List<Professor> professors, boolean overwrite) {
         int itemsAffected = 0;
         for (Professor professor: professors) {
             Optional<Professor> professorOptional = repository.findByName(professor.getName());

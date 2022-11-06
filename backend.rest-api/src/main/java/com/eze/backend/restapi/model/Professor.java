@@ -8,6 +8,8 @@ import lombok.NoArgsConstructor;
 import org.springframework.security.core.parameters.P;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
@@ -18,13 +20,20 @@ import java.util.Objects;
 @Builder
 @Entity
 public class Professor implements Serializable {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "professor_id")
     private Long id;
+
     @Column(unique = true, nullable = false)
+    @NotBlank(message = "Professor name can't be blank")
     private String name;
+
+    @NotBlank(message = "Professor contact number can't be blank")
+    @Pattern(regexp = "^(09|\\+639)\\d{9}$", message = "Professor contact number must be a valid PH mobile number")
     private String contactNumber;
+
     @OneToMany(mappedBy = "professor")
     private List<Transaction> transactions;
 

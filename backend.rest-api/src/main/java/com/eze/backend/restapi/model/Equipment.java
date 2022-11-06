@@ -2,6 +2,7 @@ package com.eze.backend.restapi.model;
 
 import com.eze.backend.restapi.dtos.EquipmentDto;
 import com.eze.backend.restapi.enums.EqStatus;
+import com.eze.backend.restapi.validation.EnumNamePattern;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,6 +10,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -20,18 +24,29 @@ import java.util.Objects;
 @Builder
 @Entity
 public class Equipment implements Serializable {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "equipment_id")
     private Long id;
+
     @Column(unique = true, name = "eq_code", nullable = false)
     private String equipmentCode;
+
+    @Column(unique = true, nullable = false)
+    @NotBlank(message = "Equipment's name can't be blank")
     private String name;
+
     @Column(unique = true)
+    @NotBlank(message = "Equipment's barcode can't be blank")
     private String barcode;
+
     @Enumerated(EnumType.ORDINAL)
+    @EnumNamePattern(regexp = "^(DEFECTIVE|GOOD)", message = "Equipment's status can only either be 'DEFECTIVE' or 'GOOD'")
     private EqStatus status;
     private LocalDateTime defectiveSince;
+
+    @NotNull(message = "Equipment must be defined to be either duplicable or not")
     private Boolean isDuplicable;
     private Boolean isBorrowed;
     @ManyToMany(mappedBy = "equipments")
@@ -44,7 +59,7 @@ public class Equipment implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Equipment equipment = (Equipment) o;
-        return Objects.equals(id, equipment.id) && Objects.equals(equipmentCode, equipment.equipmentCode) && Objects.equals(name, equipment.name) && Objects.equals(barcode, equipment.barcode) && status == equipment.status && Objects.equals(defectiveSince, equipment.defectiveSince) && Objects.equals(isDuplicable, equipment.isDuplicable) && Objects.equals(isBorrowed, equipment.isBorrowed);
+        return Objects.equals(id, equipment.id) && Objects.equals(equipmentCode, equipment.equipmentCode) && Objects.equals(name, equipment.name) && Objects.equals(barcode, equipment.barcode) && Objects.equals(status.getName(), equipment.status.getName()) && Objects.equals(defectiveSince, equipment.defectiveSince) && Objects.equals(isDuplicable, equipment.isDuplicable) && Objects.equals(isBorrowed, equipment.isBorrowed);
     }
 
     @Override

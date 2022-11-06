@@ -1,9 +1,7 @@
 package com.eze.backend.restapi.service;
 
-import com.eze.backend.restapi.dtos.StudentDto;
 import com.eze.backend.restapi.dtos.StudentListDto;
-import com.eze.backend.restapi.model.Equipment;
-import com.eze.backend.restapi.repository.exception.ApiException;
+import com.eze.backend.restapi.exception.ApiException;
 import com.eze.backend.restapi.model.Student;
 import com.eze.backend.restapi.model.YearLevel;
 import com.eze.backend.restapi.model.YearSection;
@@ -17,10 +15,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.transaction.Transactional;
+import javax.validation.Valid;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -96,8 +97,9 @@ public class StudentService implements IService<Student>, IExcelService<Student>
         return "Student with student number " + studentNo + " already exist";
     }
 
+    @Transactional
     @Override
-    public int addOrUpdate(List<Student> students, boolean overwrite) {
+    public int addOrUpdate(@Valid List<Student> students, boolean overwrite) {
         int itemsAffected = 0;
         for (Student student: students) {
             Optional<Student> studentOptional = repository.findByStudentNumber(student.getStudentNumber());
@@ -141,6 +143,8 @@ public class StudentService implements IService<Student>, IExcelService<Student>
                 dataRow.createCell(2).setCellValue(student.getFullName());
                 dataRow.createCell(3).setCellValue(student.getYearAndSection());
                 dataRow.createCell(4).setCellValue(student.getContactNumber());
+
+                // Nullable properties check
                 if(student.getBirthday() != null) dataRow.createCell(5).setCellValue(student.getBirthday());
                 if(student.getAddress() != null) dataRow.createCell(6).setCellValue(student.getAddress());
                 if(student.getEmail() != null) dataRow.createCell(7).setCellValue(student.getEmail());
@@ -149,7 +153,7 @@ public class StudentService implements IService<Student>, IExcelService<Student>
                 if(student.getYearLevel() != null) dataRow.createCell(10).setCellValue(student.getYearLevel());
             }
 
-            // Making size of the columns auto resize to fit data
+            // Making size of the column auto resize to fit data
             for(int i=0; i < columnName.size(); i++) {
                 sheet.autoSizeColumn(i);
             }
@@ -164,6 +168,35 @@ public class StudentService implements IService<Student>, IExcelService<Student>
 
     @Override
     public List<Student> excelToList(MultipartFile file) {
-        return null;
+        try (Workbook workbook = new XSSFWorkbook(file.getInputStream())){
+            List<Student> students = new ArrayList<>();
+            Sheet sheet = workbook.getSheetAt(0);
+            for (int i = 1; i < sheet.getPhysicalNumberOfRows(); i++) {
+                Student student = new Student();
+                Row row = sheet.getRow(i);
+
+                student.setId((long) row.getCell(0, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK).getNumericCellValue());
+                student.setStudentNumber(row.getCell(1).getStringCellValue());
+                student.setFullName(row.getCell(2).getStringCellValue());
+
+                YearSection ys = ysService.get(row.getCell(3).getStringCellValue());
+                student.setYearAndSection(ys);
+
+                student.setContactNumber(row.getCell(4).getStringCellValue());
+                student.setBirthday(row.getCell(5).getStringCellValue());
+                student.setAddress(row.getCell(6).getStringCellValue());
+                student.setEmail(row.getCell(7).getStringCellValue());
+                student.setGuardian(row.getCell(8).getStringCellValue());
+                student.setGuardianNumber(row.getCell(9).getStringCellValue());
+
+                YearLevel yl = ylService.get((int) row.getCell(10).getNumericCellValue());
+                student.setYearLevel(yl);
+                students.add(student);
+            }
+            return students;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            throw new ApiException("Something went wrong when converting Excel file to Equipments", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

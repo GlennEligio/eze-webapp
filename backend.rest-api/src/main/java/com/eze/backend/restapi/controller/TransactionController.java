@@ -3,21 +3,31 @@ package com.eze.backend.restapi.controller;
 import com.eze.backend.restapi.dtos.CreateUpdateTransactionDto;
 import com.eze.backend.restapi.dtos.TransactionDto;
 import com.eze.backend.restapi.dtos.TransactionListDto;
+import com.eze.backend.restapi.exception.ApiException;
 import com.eze.backend.restapi.model.Transaction;
+import com.eze.backend.restapi.model.YearLevel;
 import com.eze.backend.restapi.service.TransactionService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.compress.utils.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 @RestController
@@ -31,22 +41,24 @@ public class TransactionController {
     @GetMapping("/transactions")
     public ResponseEntity<List<?>> getTransactions(@RequestParam(required = false, defaultValue = "false") Boolean complete,
                                                    @RequestParam(required = false, defaultValue = "false") Boolean historical,
-                                                   @RequestParam(required = false, defaultValue = "false") Boolean returned,
+                                                   @RequestParam(required = false) Boolean returned,
                                                    @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime toDate,
                                                    @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fromDate)
     {
         Stream<Transaction> transactions = service.getAll().stream();
         // if returned is false, only get transactions with no (duplicable) equipments
-        if(Boolean.TRUE.equals(returned)) {
-            transactions = transactions.filter(t -> t.getEquipments()
-                    .stream()
-                    .filter(equipment -> !equipment.getIsDuplicable())
-                    .toList().isEmpty());
-        } else {
-            transactions = transactions.filter(t -> !t.getEquipments()
-                    .stream()
-                    .filter(equipment -> !equipment.getIsDuplicable())
-                    .toList().isEmpty());
+        if(returned != null) {
+            if(Boolean.TRUE.equals(returned)) {
+                transactions = transactions.filter(t -> t.getEquipments()
+                        .stream()
+                        .filter(equipment -> !equipment.getIsDuplicable())
+                        .toList().isEmpty());
+            } else {
+                transactions = transactions.filter(t -> !t.getEquipments()
+                        .stream()
+                        .filter(equipment -> !equipment.getIsDuplicable())
+                        .toList().isEmpty());
+            }
         }
 
         // if fromDate and toDate is present, filter the transactions again
@@ -67,6 +79,32 @@ public class TransactionController {
                 return ResponseEntity.ok(transactions.map(Transaction::toTransactionListDto).toList());
             }
         }
+    }
+
+    @GetMapping("/transactions/download")
+    public void download(HttpServletResponse response) throws IOException {
+        log.info("Preparing Transactions list for Download");
+        response.setContentType("application/octet-stream");
+        response.setHeader("Content-Disposition", "attachment; filename=transactions.xlsx");
+        ByteArrayInputStream stream = service.listToExcel(service.getAll());
+        IOUtils.copy(stream, response.getOutputStream());
+    }
+
+    @PostMapping("/transactions/upload")
+    public ResponseEntity<Object> upload(@RequestParam(required = false, defaultValue = "false") Boolean overwrite,
+                                         @RequestParam MultipartFile file) {
+        log.info("Preparing Excel for Transaction Database update");
+        if(!Objects.equals(file.getContentType(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")){
+            throw new ApiException("Can only upload .xlsx files", HttpStatus.BAD_REQUEST);
+        }
+        List<Transaction> transactions = service.excelToList(file);
+        log.info("Got the transactions from excel");
+        int itemsAffected = service.addOrUpdate(transactions, overwrite);
+        log.info("Successfully updated {} transactions database using the excel file", itemsAffected);
+        ObjectMapper mapper = new ObjectMapper();
+        ObjectNode objectNode = mapper.createObjectNode();
+        objectNode.put("Transactions Affected", itemsAffected);
+        return ResponseEntity.ok(objectNode);
     }
 
     @GetMapping("/transactions/{code}")

@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 import java.util.Objects;
@@ -22,9 +23,11 @@ public class YearSection implements Serializable {
     private Long id;
     @NotBlank
     @Column(unique = true, nullable = false)
+    @NotBlank(message = "Section name can't be blank")
     private String sectionName;
     @ManyToOne(optional = false)
     @JoinColumn(name = "yearLevel", referencedColumnName = "yearNumber")
+    @Valid
     private YearLevel yearLevel;
 
     @Override
