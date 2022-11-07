@@ -9,6 +9,7 @@ import TransactionItem from "../components/Transaction/TransactionItem";
 import TransactionDetailsModal from "../components/UI/Modal/TransactionDetailsModal";
 import { transactionAction } from "../store/transactionSlice";
 import { useDispatch } from "react-redux";
+import fileDownload from "js-file-download";
 
 function TransactionHistory() {
   const transaction = useSelector((state: IRootState) => state.transaction);
@@ -66,6 +67,19 @@ function TransactionHistory() {
     e.preventDefault();
     setFromDate("");
     setToDate("");
+  };
+
+  // download click handler
+  const downloadBtnHandler = async () => {
+    let params = "";
+    if (!!toDate && !!fromDate) {
+      params = `?${new URLSearchParams({ toDate, fromDate }).toString()}`;
+    }
+
+    TransactionService.download(auth.accessToken, params)
+      .then((resp) => resp.blob())
+      .then((blob) => fileDownload(blob, "Transactions.xlsx"))
+      .catch((error) => console.log(error));
   };
 
   // search for the transactions history list
@@ -146,14 +160,20 @@ function TransactionHistory() {
                     </div>
                     <div className="d-flex align-items-center">
                       <button type={"submit"} className="btn btn-dark me-2">
-                        Search
+                        <i className="bi bi-search"></i> Search
+                      </button>
+                      <button
+                        className="btn btn-dark me-2"
+                        onClick={downloadBtnHandler}
+                      >
+                        <i className="bi bi-download"></i> Download
                       </button>
                       <button
                         type={"button"}
                         onClick={resetClickHandler}
                         className="btn btn-dark"
                       >
-                        Reset
+                        <i className="bi bi-arrow-repeat"></i> Reset
                       </button>
                     </div>
                   </div>

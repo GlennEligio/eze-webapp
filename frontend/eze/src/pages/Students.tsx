@@ -298,6 +298,15 @@ const Students = () => {
                         Delete
                       </a>
                     </li>
+                    <li>
+                      <a
+                        className="dropdown-item"
+                        href="#importExportYearSectionModal"
+                        data-bs-toggle="modal"
+                      >
+                        Download/Upload
+                      </a>
+                    </li>
                   </ul>
                 </div>
               </div>
@@ -394,6 +403,13 @@ const Students = () => {
           uploadFunction={YearLevelService.upload}
           jwt={auth.accessToken}
           key="YearLevel"
+        />
+        <ImportExportModal
+          itemName="YearSection"
+          downloadFunction={YearSectionService.download}
+          uploadFunction={YearSectionService.upload}
+          jwt={auth.accessToken}
+          key="YearSection"
         />
       </div>
     </div>

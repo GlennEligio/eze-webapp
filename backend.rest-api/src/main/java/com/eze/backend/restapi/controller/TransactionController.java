@@ -28,6 +28,7 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @RestController
@@ -82,11 +83,21 @@ public class TransactionController {
     }
 
     @GetMapping("/transactions/download")
-    public void download(HttpServletResponse response) throws IOException {
+    public void download(HttpServletResponse response,
+                         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime toDate,
+                         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fromDate) throws IOException {
+
         log.info("Preparing Transactions list for Download");
         response.setContentType("application/octet-stream");
         response.setHeader("Content-Disposition", "attachment; filename=transactions.xlsx");
-        ByteArrayInputStream stream = service.listToExcel(service.getAll());
+        Stream<Transaction> transactions = service.getAll().stream();
+
+        // if fromDate and toDate is present, filter the transactions again
+        if(fromDate != null && toDate != null) {
+            transactions = transactions.filter(t -> t.getBorrowedAt().isAfter(fromDate) && t.getBorrowedAt().isBefore(toDate));
+        }
+
+        ByteArrayInputStream stream = service.listToExcel(transactions.collect(Collectors.toList()));
         IOUtils.copy(stream, response.getOutputStream());
     }
 

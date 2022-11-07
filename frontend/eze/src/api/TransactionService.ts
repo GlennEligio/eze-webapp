@@ -113,8 +113,8 @@ const upload = async (jwt: string, formData: FormData) => {
   });
 };
 
-const download = async (jwt: string) => {
-  return await fetch(`${BACKEND_URI}/api/v1/transactions/download`, {
+const download = async (jwt: string, params: string) => {
+  return await fetch(`${BACKEND_URI}/api/v1/transactions/download${params}`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${jwt}`,
