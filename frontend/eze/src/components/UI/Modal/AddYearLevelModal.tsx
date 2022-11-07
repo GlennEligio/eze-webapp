@@ -25,7 +25,7 @@ const AddYearLevelModal = () => {
     if (requestStatus == "completed" && error === null) {
       dispatch(yearLevelAction.addYearLevel({ newYearLevel: data }));
     }
-  }, [data]);
+  }, [data, requestStatus, error]);
 
   const addYearLevelHandler = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();

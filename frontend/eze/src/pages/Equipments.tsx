@@ -11,6 +11,7 @@ import AddEquipmentForm from "../components/UI/Modal/AddEquipmentModal";
 import UpdateEquipmentForm from "../components/UI/Modal/UpdateEquipmentModal";
 import DeleteEquipmentModal from "../components/UI/Modal/DeleteEquipmentModal";
 import MiniClock from "../components/UI/Other/MiniClock";
+import ImportExportModal from "../components/UI/Modal/ImportExportModal";
 
 function Equipments() {
   const equipment = useSelector((state: IRootState) => state.equipment);
@@ -81,7 +82,13 @@ function Equipments() {
                       onClick={backBtnHandler}
                     ></i>
                   </span>
-                  <i className="bi bi-gear fs-1"></i>
+                  <a
+                    href="#importExportModal"
+                    data-bs-toggle="modal"
+                    className="text-dark"
+                  >
+                    <i className="bi bi-gear fs-1"></i>
+                  </a>
                 </div>
                 <div className="d-flex justify-content-end">
                   <div className="d-flex align-items-center">
@@ -187,6 +194,12 @@ function Equipments() {
         <AddEquipmentForm />
         <UpdateEquipmentForm />
         <DeleteEquipmentModal />
+        <ImportExportModal
+          itemName="Equipment"
+          downloadFunction={() => {}}
+          uploadFunction={() => {}}
+          jwt={auth.accessToken}
+        />
       </div>
     </>
   );

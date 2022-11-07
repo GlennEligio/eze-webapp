@@ -19,6 +19,7 @@ const DeleteYearLevelModal: FC<DeleteYearLevelModalProps> = (props) => {
   const {
     sendRequest: deleteYearLevel,
     error,
+    data,
     status,
   } = useHttp<boolean>(YearLevelService.deleteYearLevel, false);
 
@@ -31,7 +32,7 @@ const DeleteYearLevelModal: FC<DeleteYearLevelModalProps> = (props) => {
         })
       );
     }
-  }, [status]);
+  }, [status, data, error]);
 
   // prepopulate yearNumber and yearLevel state
   useEffect(() => {
@@ -50,7 +51,7 @@ const DeleteYearLevelModal: FC<DeleteYearLevelModalProps> = (props) => {
     event.preventDefault();
     console.log("Deleting YearLevel");
 
-    if (validator.isNumeric(yearNumber + "")) return;
+    if (!validator.isNumeric(yearNumber + "")) return;
 
     const requestConf: RequestConfig = {
       headers: {
