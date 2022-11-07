@@ -12,6 +12,7 @@ import ProfessorItem from "../components/Professor/ProfessorItem";
 import AddProfessorModal from "../components/UI/Modal/AddProfessorModal";
 import DeleteProfessorModal from "../components/UI/Modal/DeleteProfessorModal";
 import UpdateProfessorModal from "../components/UI/Modal/UpdateProfessorModal";
+import ImportExportModal from "../components/UI/Modal/ImportExportModal";
 
 const Professors = () => {
   const professor = useSelector((state: IRootState) => state.professor);
@@ -74,6 +75,13 @@ const Professors = () => {
                   className="bi bi-arrow-left-circle fs-1"
                   onClick={backBtnHandler}
                 ></i>
+                <a
+                  href="#importExportProfessorModal"
+                  data-bs-toggle="modal"
+                  className="text-dark ms-3"
+                >
+                  <i className="bi bi-gear fs-1"></i>
+                </a>
               </div>
               <div className="d-flex justify-content-end">
                 <div className="d-flex align-items-center">
@@ -186,6 +194,13 @@ const Professors = () => {
           selectedProfessor={
             professor.selectedProfessor ? professor.selectedProfessor : null
           }
+        />
+        <ImportExportModal
+          downloadFunction={ProfessorService.download}
+          uploadFunction={ProfessorService.upload}
+          itemName="Professor"
+          jwt={auth.accessToken}
+          key="Professor"
         />
       </div>
     </div>

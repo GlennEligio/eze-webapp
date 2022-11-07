@@ -95,6 +95,9 @@ public class EquipmentService implements IService<Equipment>, IExcelService<Equi
             }else{
                 if(overwrite){
                     Equipment oldEq = eqOp.get();
+                    equipment.setId(oldEq.getId());
+                    log.info(Equipment.toEquipmentDto(oldEq).toString());
+                    log.info(Equipment.toEquipmentDto(equipment).toString());
                     if(!oldEq.equals(equipment)){
                         oldEq.update(equipment);
                         repository.save(oldEq);
@@ -114,6 +117,7 @@ public class EquipmentService implements IService<Equipment>, IExcelService<Equi
 
     @Override
     public ByteArrayInputStream listToExcel(List<Equipment> equipments) {
+        log.info("Converting the equipments list into excel");
         List<String> columnName = List.of("ID", "Equipment code", "Name", "Barcode", "Status", "Defective since", "Is Duplicable?", "Is Borrowed?");
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("Equipments");
@@ -155,6 +159,7 @@ public class EquipmentService implements IService<Equipment>, IExcelService<Equi
 
     @Override
     public List<Equipment> excelToList(MultipartFile file) {
+        log.info("Converting excel into equipments");
         try (Workbook workbook = new XSSFWorkbook(file.getInputStream())){
             List<Equipment> equipments = new ArrayList<>();
             Sheet sheet = workbook.getSheetAt(0);

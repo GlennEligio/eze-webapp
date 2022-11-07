@@ -73,4 +73,29 @@ export const isValidYearLevel = (yl: CreateYearLevelDto) => {
   return true;
 };
 
-export default { getYearLevels, createYearLevel, deleteYearLevel };
+const upload = async (jwt: string, formData: FormData) => {
+  return await fetch(`${BACKEND_URI}/api/v1/yearLevels/upload`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${jwt}`,
+    },
+    body: formData,
+  });
+};
+
+const download = async (jwt: string) => {
+  return await fetch(`${BACKEND_URI}/api/v1/yearLevels/download`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${jwt}`,
+    },
+  });
+};
+
+export default {
+  getYearLevels,
+  createYearLevel,
+  deleteYearLevel,
+  download,
+  upload,
+};

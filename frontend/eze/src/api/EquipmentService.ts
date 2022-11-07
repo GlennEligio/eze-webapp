@@ -111,22 +111,23 @@ const deleteEquipment = async (requestConfig: RequestConfig) => {
   return responseObj;
 };
 
-const download = async (requestConfig: RequestConfig) => {
-  const responseBlob: Blob = await fetch(
-    !!requestConfig.relativeUrl
-      ? `${BACKEND_URI}${requestConfig.relativeUrl}`
-      : `${BACKEND_URI}/api/v1/equipments/download`,
-    {
-      method: requestConfig.method || "GET",
-      headers: requestConfig.headers !== null ? requestConfig.headers : {},
-    }
-  ).then((response) => {
-    if (response.ok) {
-      return response.blob();
-    }
-    throw new Error("Failed to download equipment");
+const upload = async (jwt: string, formData: FormData) => {
+  return await fetch(`${BACKEND_URI}/api/v1/equipments/upload`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${jwt}`,
+    },
+    body: formData,
   });
-  return responseBlob;
+};
+
+const download = async (jwt: string) => {
+  return await fetch(`${BACKEND_URI}/api/v1/equipments/download`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${jwt}`,
+    },
+  });
 };
 
 // for validation
@@ -157,4 +158,6 @@ export default {
   createEquipment,
   updateEquipment,
   deleteEquipment,
+  download,
+  upload,
 };

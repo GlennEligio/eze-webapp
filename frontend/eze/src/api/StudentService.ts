@@ -136,6 +136,25 @@ const deleteStudent = async (requestConfig: RequestConfig) => {
   return responseObj;
 };
 
+const upload = async (jwt: string, formData: FormData) => {
+  return await fetch(`${BACKEND_URI}/api/v1/students/upload`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${jwt}`,
+    },
+    body: formData,
+  });
+};
+
+const download = async (jwt: string) => {
+  return await fetch(`${BACKEND_URI}/api/v1/students/download`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${jwt}`,
+    },
+  });
+};
+
 // for validation
 export const isValidStudent = (student: CreateUpdateStudentDto) => {
   let valid = true;
@@ -173,4 +192,6 @@ export default {
   createStudent,
   updateStudent,
   deleteStudent,
+  download,
+  upload,
 };

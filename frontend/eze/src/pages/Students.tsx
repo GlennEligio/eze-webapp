@@ -17,6 +17,8 @@ import { yearLevelAction } from "../store/yearLevelSlice";
 import DeleteYearLevelModal from "../components/UI/Modal/DeleteYearLevelModal";
 import AddYearSectionModal from "../components/UI/Modal/AddYearSectionModal";
 import DeleteYearSectionModal from "../components/UI/Modal/DeleteYearSectionModal";
+import ImportExportModal from "../components/UI/Modal/ImportExportModal";
+import YearSectionService from "../api/YearSectionService";
 
 const Students = () => {
   const navigate = useNavigate();
@@ -121,6 +123,13 @@ const Students = () => {
                   className="bi bi-arrow-left-circle fs-1"
                   onClick={backBtnHandler}
                 ></i>
+                <a
+                  href="#importExportStudentModal"
+                  data-bs-toggle="modal"
+                  className="text-dark ms-3"
+                >
+                  <i className="bi bi-gear fs-1"></i>
+                </a>
               </div>
               <div className="d-flex justify-content-end">
                 <div className="d-flex align-items-center">
@@ -249,6 +258,15 @@ const Students = () => {
                         Delete
                       </a>
                     </li>
+                    <li>
+                      <a
+                        className="dropdown-item"
+                        href="#importExportYearLevelModal"
+                        data-bs-toggle="modal"
+                      >
+                        Download/Upload
+                      </a>
+                    </li>
                   </ul>
                 </div>
                 <div className="btn-group dropdown-center me-1">
@@ -363,6 +381,20 @@ const Students = () => {
         <DeleteYearLevelModal yearLevels={yearLevel.yearLevels} />
         <AddYearSectionModal yearLevels={yearLevel.yearLevels} />
         <DeleteYearSectionModal yearLevels={yearLevel.yearLevels} />
+        <ImportExportModal
+          itemName="Student"
+          downloadFunction={StudentService.download}
+          uploadFunction={StudentService.upload}
+          jwt={auth.accessToken}
+          key="Student"
+        />
+        <ImportExportModal
+          itemName="YearLevel"
+          downloadFunction={YearLevelService.download}
+          uploadFunction={YearLevelService.upload}
+          jwt={auth.accessToken}
+          key="YearLevel"
+        />
       </div>
     </div>
   );

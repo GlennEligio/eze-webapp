@@ -85,6 +85,7 @@ public class ProfessorService implements IService<Professor>, IExcelService<Prof
             }else{
                 if(overwrite){
                     Professor oldProf = professorOptional.get();
+                    professor.setId(oldProf.getId());
                     if(!oldProf.equals(professor)) {
                         oldProf.update(professor);
                         repository.save(oldProf);

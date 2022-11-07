@@ -111,6 +111,7 @@ public class StudentService implements IService<Student>, IExcelService<Student>
                     Student oldStudent = studentOptional.get();
                     StudentListDto oldStudentDto = Student.toStudentListDto(oldStudent);
                     StudentListDto newStudentDto = Student.toStudentListDto(student);
+                    newStudentDto.setId(oldStudentDto.getId());
                     if(!oldStudentDto.equals(newStudentDto)){
                         oldStudent.update(student);
                         repository.save(oldStudent);

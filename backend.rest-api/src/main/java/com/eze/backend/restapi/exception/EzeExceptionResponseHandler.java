@@ -25,14 +25,14 @@ import java.util.List;
 @Slf4j
 public class EzeExceptionResponseHandler extends ResponseEntityExceptionHandler {
 
-//    // General Exception handler
-//    @ExceptionHandler(value = Exception.class)
-//    public ResponseEntity<ExceptionResponse> handleAllException (Exception ex, WebRequest request){
-//        ExceptionResponse response = new ExceptionResponse(ex.getMessage(),
-//                LocalDateTime.now(),
-//                request.getDescription(false));
-//        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-//    }
+    // General Exception handler
+    @ExceptionHandler(value = Exception.class)
+    public ResponseEntity<ExceptionResponse> handleAllException (Exception ex, WebRequest request){
+        ExceptionResponse response = new ExceptionResponse(ex.getMessage(),
+                LocalDateTime.now(),
+                request.getDescription(false));
+        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
 
     // Handles SQL Exceptions, mostly Unique Constraint
     @ExceptionHandler(value = DataIntegrityViolationException.class)

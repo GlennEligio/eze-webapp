@@ -109,6 +109,7 @@ public class AccountService implements IService<Account>, IExcelService<Account>
             }else{
                 if(overwrite){
                     Account oldAcc = accOp.get();
+                    account.setId(oldAcc.getId());
                     if(!oldAcc.equals(account)) {
                         oldAcc.update(account);
                         repository.save(oldAcc);

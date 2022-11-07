@@ -83,7 +83,7 @@ function Equipments() {
                     ></i>
                   </span>
                   <a
-                    href="#importExportModal"
+                    href="#importExportEquipmentModal"
                     data-bs-toggle="modal"
                     className="text-dark"
                   >
@@ -196,9 +196,10 @@ function Equipments() {
         <DeleteEquipmentModal />
         <ImportExportModal
           itemName="Equipment"
-          downloadFunction={() => {}}
-          uploadFunction={() => {}}
+          downloadFunction={EquipmentService.download}
+          uploadFunction={EquipmentService.upload}
           jwt={auth.accessToken}
+          key={"Equipment"}
         />
       </div>
     </>

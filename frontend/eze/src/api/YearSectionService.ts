@@ -48,6 +48,25 @@ const deleteYearSection = async (requestConfig: RequestConfig) => {
   return responseObj;
 };
 
+const upload = async (jwt: string, formData: FormData) => {
+  return await fetch(`${BACKEND_URI}/api/v1/yearSections/upload`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${jwt}`,
+    },
+    body: formData,
+  });
+};
+
+const download = async (jwt: string) => {
+  return await fetch(`${BACKEND_URI}/api/v1/yearSections/download`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${jwt}`,
+    },
+  });
+};
+
 // for validation
 export const isValidYearSection = (ys: CreateYearSection) => {
   let valid = true;
@@ -62,4 +81,4 @@ export const isValidYearSection = (ys: CreateYearSection) => {
   return valid;
 };
 
-export default { createYearSection, deleteYearSection };
+export default { createYearSection, deleteYearSection, upload, download };

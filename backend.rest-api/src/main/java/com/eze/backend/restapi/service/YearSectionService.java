@@ -96,6 +96,7 @@ public class YearSectionService implements IService<YearSection>, IExcelService<
             }else{
                 if(overwrite){
                     YearSection yearSection1 = yearSectionOptional.get();
+                    yearSection.setId(yearSection1.getId());
                     if(!yearSection1.equals(yearSection)) {
                         update(yearSection, yearSection1.getSectionName());
                     }

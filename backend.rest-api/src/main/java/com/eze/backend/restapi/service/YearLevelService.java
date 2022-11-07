@@ -107,6 +107,7 @@ public class YearLevelService implements IService<YearLevel>, IExcelService<Year
             }else{
                 if(overwrite){
                     YearLevel oldYl = yearLevelOptional.get();
+                    yl.setId(oldYl.getId());
                     if(!oldYl.equals(yl)) {
                         update(yl, yl.getYearNumber());
                     }

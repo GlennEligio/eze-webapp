@@ -116,7 +116,7 @@ const UpdateStudentModal: FC<UpdateStudentModalProps> = (props) => {
         setYearSections([]);
       }
     }
-  }, [yearLevels]);
+  }, [yearLevels, yearNumber]);
 
   const updateStudentHandler = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
