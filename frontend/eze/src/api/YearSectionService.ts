@@ -74,7 +74,7 @@ export const isValidYearSection = (ys: CreateYearSection) => {
     console.log("Empty sectionName");
     valid = false;
   }
-  if (validator.isNumeric(ys.yearLevel.yearNumber + "")) {
+  if (!validator.isNumeric(ys.yearLevel.yearNumber + "")) {
     console.log("Not a numeric yearNumber");
     valid = false;
   }

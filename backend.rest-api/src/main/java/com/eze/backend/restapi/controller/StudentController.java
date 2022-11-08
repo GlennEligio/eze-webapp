@@ -32,7 +32,7 @@ public class StudentController {
 
     @GetMapping("/students")
     public ResponseEntity<List<StudentListDto>> getStudents() {
-        return ResponseEntity.ok(service.getAll().stream().map(Student::toStudentListDto).toList());
+        return ResponseEntity.ok(service.getAllNotDeleted().stream().map(Student::toStudentListDto).toList());
     }
 
     @GetMapping("/students/download")
@@ -87,7 +87,7 @@ public class StudentController {
 
     @DeleteMapping("/students/{studentNo}")
     public ResponseEntity<Object> deleteStudent(@PathVariable("studentNo") String studentNo) {
-        service.delete(studentNo);
+        service.softDelete(studentNo);
         return ResponseEntity.ok().build();
     }
 }

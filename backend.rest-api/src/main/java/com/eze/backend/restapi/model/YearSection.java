@@ -25,6 +25,7 @@ public class YearSection implements Serializable {
     @Column(unique = true, nullable = false)
     @NotBlank(message = "Section name can't be blank")
     private String sectionName;
+    private Boolean deleteFlag;
     @ManyToOne(optional = false)
     @JoinColumn(name = "yearLevel", referencedColumnName = "yearNumber")
     @Valid
@@ -35,12 +36,12 @@ public class YearSection implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         YearSection that = (YearSection) o;
-        return Objects.equals(id, that.id) && Objects.equals(sectionName, that.sectionName);
+        return Objects.equals(id, that.id) && Objects.equals(sectionName, that.sectionName) && Objects.equals(deleteFlag, that.deleteFlag);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, sectionName);
+        return Objects.hash(id, sectionName, deleteFlag);
     }
 
     public static YearSectionDto toYearSectionDto(YearSection ys) {

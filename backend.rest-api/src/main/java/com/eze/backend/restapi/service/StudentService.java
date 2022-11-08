@@ -46,6 +46,12 @@ public class StudentService implements IService<Student>, IExcelService<Student>
     }
 
     @Override
+    public List<Student> getAllNotDeleted() {
+        log.info("Fetching all non deleted students");
+        return repository.findAllNotDeleted();
+    }
+
+    @Override
     public Student get(Serializable studentNo) {
         log.info("Fetching student with student number {}", studentNo);
         return repository.findByStudentNumber(studentNo.toString()).orElseThrow(() -> new ApiException(notFound(studentNo), HttpStatus.NOT_FOUND));
@@ -62,6 +68,7 @@ public class StudentService implements IService<Student>, IExcelService<Student>
         YearSection yearSection = ysService.get(student.getYearAndSection().getSectionName());
         student.setYearLevel(yearLevel);
         student.setYearAndSection(yearSection);
+        student.setDeleteFlag(false);
 
         return repository.save(student);
     }
@@ -85,6 +92,15 @@ public class StudentService implements IService<Student>, IExcelService<Student>
         Student student = repository.findByStudentNumber(studentNo.toString())
                 .orElseThrow(() -> new ApiException(notFound(studentNo), HttpStatus.NOT_FOUND));
         repository.delete(student);
+    }
+
+    @Override
+    @Transactional
+    public void softDelete(Serializable studentNo) {
+        log.info("Soft deleting student with student number {}", studentNo);
+        Student student = repository.findByStudentNumber(studentNo.toString())
+                .orElseThrow(() -> new ApiException(notFound(studentNo), HttpStatus.NOT_FOUND));
+        repository.softDelete(student.getStudentNumber());
     }
 
     @Override

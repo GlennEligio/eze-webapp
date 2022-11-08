@@ -35,6 +35,12 @@ public class ProfessorService implements IService<Professor>, IExcelService<Prof
     }
 
     @Override
+    public List<Professor> getAllNotDeleted() {
+        log.info("Fetching all non deleted professors");
+        return repository.findAllNotDeleted();
+    }
+
+    @Override
     public Professor get(Serializable name) {
         return repository.findByName(name.toString()).orElseThrow(() -> new ApiException(notFound(name), HttpStatus.NOT_FOUND));
     }
@@ -47,6 +53,7 @@ public class ProfessorService implements IService<Professor>, IExcelService<Prof
                 throw new ApiException(alreadyExist(professor.getName()), HttpStatus.BAD_REQUEST);
             }
         }
+        professor.setDeleteFlag(false);
         return repository.save(professor);
     }
 
@@ -61,6 +68,14 @@ public class ProfessorService implements IService<Professor>, IExcelService<Prof
     public void delete(Serializable name) {
         Professor professor1 = repository.findByName(name.toString()).orElseThrow(() -> new ApiException(notFound(name), HttpStatus.NOT_FOUND));
         repository.delete(professor1);
+    }
+
+    @Override
+    @Transactional
+    public void softDelete(Serializable name) {
+        log.info("Soft deleting professor");
+        Professor professor1 = repository.findByName(name.toString()).orElseThrow(() -> new ApiException(notFound(name), HttpStatus.NOT_FOUND));
+        repository.softDelete(professor1.getName());
     }
 
     @Override

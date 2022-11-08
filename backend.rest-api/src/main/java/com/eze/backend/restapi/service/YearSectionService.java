@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.transaction.Transactional;
 import javax.validation.Valid;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -39,6 +40,12 @@ public class YearSectionService implements IService<YearSection>, IExcelService<
     }
 
     @Override
+    public List<YearSection> getAllNotDeleted() {
+        log.info("Fetching all non deleted YearSections");
+        return repository.findAllNotDeleted();
+    }
+
+    @Override
     public YearSection get(Serializable sectionName) {
         log.info("Fetching YearSection with sectionName {}", sectionName);
         return repository.findBySectionName(sectionName.toString())
@@ -53,6 +60,7 @@ public class YearSectionService implements IService<YearSection>, IExcelService<
         }
         YearLevel yearLevel = ylService.get(yearSection.getYearLevel().getYearNumber());
         yearSection.setYearLevel(yearLevel);
+        yearSection.setDeleteFlag(false);
         return repository.save(yearSection);
     }
 
@@ -73,6 +81,15 @@ public class YearSectionService implements IService<YearSection>, IExcelService<
         YearSection yearSection = repository.findBySectionName(sectionName.toString())
                 .orElseThrow(() -> new ApiException(notFound(sectionName), HttpStatus.NOT_FOUND));
         repository.delete(yearSection);
+    }
+
+    @Override
+    @Transactional
+    public void softDelete(Serializable sectionName) {
+        log.info("Soft deleting YearSection with sectionName {}", sectionName);
+        YearSection yearSection = repository.findBySectionName(sectionName.toString())
+                .orElseThrow(() -> new ApiException(notFound(sectionName), HttpStatus.NOT_FOUND));
+        repository.softDelete(yearSection.getSectionName());
     }
 
     @Override

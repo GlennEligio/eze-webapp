@@ -31,7 +31,7 @@ public class ProfessorController {
 
     @GetMapping("/professors")
     public ResponseEntity<List<ProfessorDto>> getProfessors() {
-        return ResponseEntity.ok(service.getAll().stream().map(Professor::toProfessorDto).toList());
+        return ResponseEntity.ok(service.getAllNotDeleted().stream().map(Professor::toProfessorDto).toList());
     }
 
     @GetMapping("/professors/download")
@@ -78,7 +78,7 @@ public class ProfessorController {
 
     @DeleteMapping("/professors/{name}")
     public ResponseEntity<Professor> deleteProfessor(@PathVariable("name") String name) {
-        service.delete(name);
+        service.softDelete(name);
         return ResponseEntity.ok().build();
     }
 }

@@ -32,7 +32,7 @@ public class EquipmentController {
 
     @GetMapping("/equipments")
     public ResponseEntity<List<EquipmentDto>> getEquipments() {
-        return ResponseEntity.ok(equipmentService.getAll().stream().map(Equipment::toEquipmentDto).toList());
+        return ResponseEntity.ok(equipmentService.getAllNotDeleted().stream().map(Equipment::toEquipmentDto).toList());
     }
 
     @GetMapping("/equipments/{code}")
@@ -85,7 +85,7 @@ public class EquipmentController {
 
     @DeleteMapping("/equipments/{code}")
     public ResponseEntity<Object> deleteEquipment(@PathVariable("code") String code) {
-        equipmentService.delete(code);
+        equipmentService.softDelete(code);
         return ResponseEntity.ok().build();
     }
 }

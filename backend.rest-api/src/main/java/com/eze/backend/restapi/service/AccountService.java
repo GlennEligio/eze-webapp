@@ -50,6 +50,12 @@ public class AccountService implements IService<Account>, IExcelService<Account>
     }
 
     @Override
+    public List<Account> getAllNotDeleted() {
+        log.info("Fetching all not deleted accounts");
+        return repository.findAllNotDeleted();
+    }
+
+    @Override
     public Account get(Serializable username) {
         return repository.findByUsername(username.toString())
                 .orElseThrow(() -> new ApiException(notFound(username), HttpStatus.NOT_FOUND));
@@ -66,6 +72,7 @@ public class AccountService implements IService<Account>, IExcelService<Account>
             account.setPassword(passwordEncoder.encode(account.getPassword()));
             account.setCreatedAt(LocalDateTime.now());
             account.setActive(true);
+            account.setDeleteFlag(false);
             return repository.save(account);
         }
         throw new ApiException("No username found in Account to create", HttpStatus.BAD_REQUEST);
@@ -85,6 +92,15 @@ public class AccountService implements IService<Account>, IExcelService<Account>
         Account account = repository.findByUsername(username.toString())
                 .orElseThrow(() -> new ApiException(notFound(username), HttpStatus.NOT_FOUND));
         repository.delete(account);
+    }
+
+    @Override
+    @Transactional
+    public void softDelete(Serializable username) {
+        log.info("Soft deleting account: {}", username);
+        Account account = repository.findByUsername(username.toString())
+                .orElseThrow(() -> new ApiException(notFound(username), HttpStatus.NOT_FOUND));
+        repository.softDelete(account.getUsername());
     }
 
     @Override

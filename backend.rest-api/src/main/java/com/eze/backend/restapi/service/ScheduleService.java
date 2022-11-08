@@ -23,6 +23,11 @@ public class ScheduleService implements IService<RoomSchedule> {
     }
 
     @Override
+    public List<RoomSchedule> getAllNotDeleted() {
+        return null;
+    }
+
+    @Override
     public RoomSchedule get(Serializable code) {
         return repository.findByScheduleCode(code.toString()).orElseThrow(() -> new ApiException(notFound(code), HttpStatus.NOT_FOUND));
     }
@@ -60,6 +65,11 @@ public class ScheduleService implements IService<RoomSchedule> {
         RoomSchedule roomSchedule1 = repository.findByScheduleCode(code.toString())
                 .orElseThrow(() -> new ApiException(notFound(code), HttpStatus.NOT_FOUND));
         repository.delete(roomSchedule1);
+    }
+
+    @Override
+    public void softDelete(Serializable id) {
+
     }
 
     @Override

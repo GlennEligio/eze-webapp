@@ -17,7 +17,7 @@ interface DeleteYearSectionModalProps {
 const DeleteYearSectionModal: FC<DeleteYearSectionModalProps> = (props) => {
   const auth = useSelector((state: IRootState) => state.auth);
   const dispatch = useDispatch();
-  const [yearNumber, setYearNumber] = useState(1);
+  const [yearNumber, setYearNumber] = useState("");
   const [sectionName, setSectionName] = useState("");
   const [yearSections, setYearSections] = useState<YearSection[]>([]);
   const {
@@ -37,13 +37,30 @@ const DeleteYearSectionModal: FC<DeleteYearSectionModalProps> = (props) => {
         })
       );
     }
-  }, [status, error]);
+  }, [status, error, data]);
 
-  // Update YearSections state when yearNumber updates
+  // Prepopulate the yearLevel state when props.yearLevel updates
+  useEffect(() => {
+    if (props.yearLevels && props.yearLevels.length > 0) {
+      setYearNumber(props.yearLevels[0].yearNumber.toString());
+      if (
+        props.yearLevels[0].yearSections &&
+        props.yearLevels[0].yearSections.length > 0
+      ) {
+        setSectionName(props.yearLevels[0].yearSections[0].sectionName);
+      } else {
+        setSectionName("");
+      }
+    } else {
+      setYearNumber("");
+    }
+  }, [props.yearLevels]);
+
+  // Update YearSections when props.yearNumber updates
   useEffect(() => {
     const yearLevels = [...props.yearLevels];
     const currentYearLevel = yearLevels.find(
-      (yl) => yl.yearNumber === yearNumber
+      (yl) => yl.yearNumber === Number.parseInt(yearNumber)
     );
     if (currentYearLevel && currentYearLevel.yearSections) {
       setYearSections(currentYearLevel.yearSections);
@@ -95,13 +112,7 @@ const DeleteYearSectionModal: FC<DeleteYearSectionModalProps> = (props) => {
                 <select
                   className="form-select"
                   id="deleteYearSectionYearLevel"
-                  onChange={(e) =>
-                    setYearNumber(
-                      e.currentTarget.value
-                        ? Number.parseInt(e.currentTarget.value)
-                        : 1
-                    )
-                  }
+                  onChange={(e) => setYearNumber(e.currentTarget.value)}
                   value={yearNumber}
                 >
                   {props.yearLevels &&

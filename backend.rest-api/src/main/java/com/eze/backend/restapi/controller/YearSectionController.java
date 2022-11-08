@@ -33,7 +33,7 @@ public class YearSectionController {
 
     @GetMapping("/yearSections")
     public ResponseEntity<List<YearSectionDto>> getYearSections() {
-        return ResponseEntity.ok(service.getAll().stream().map(YearSection::toYearSectionDto).toList());
+        return ResponseEntity.ok(service.getAllNotDeleted().stream().map(YearSection::toYearSectionDto).toList());
     }
 
     @GetMapping("/yearSections/download")
@@ -80,7 +80,7 @@ public class YearSectionController {
 
     @DeleteMapping("/yearSections/{sectionName}")
     public ResponseEntity<YearSection> deleteYearSection(@PathVariable("sectionName") String sectionName) {
-        service.delete(sectionName);
+        service.softDelete(sectionName);
         return ResponseEntity.ok().build();
     }
 }

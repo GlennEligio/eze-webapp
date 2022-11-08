@@ -33,7 +33,7 @@ public class YearLevelController {
 
     @GetMapping("/yearLevels")
     public ResponseEntity<List<YearLevelWithSectionsDto>> getYearLevels() {
-        return ResponseEntity.ok(service.getAll().stream().map(YearLevel::toYearLevelWithSectionsDto).toList());
+        return ResponseEntity.ok(service.getAllNotDeleted().stream().map(YearLevel::toYearLevelWithSectionsDto).toList());
     }
 
     @GetMapping("/yearLevels/download")
@@ -80,7 +80,7 @@ public class YearLevelController {
 
     @DeleteMapping("/yearLevels/{yearNumber}")
     public ResponseEntity<Object> deleteYearLevel(@PathVariable("yearNumber") String yearNumber) {
-        service.delete(yearNumber);
+        service.softDelete(yearNumber);
         return ResponseEntity.ok().build();
     }
 }

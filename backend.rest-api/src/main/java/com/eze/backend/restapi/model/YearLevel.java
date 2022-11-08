@@ -32,6 +32,7 @@ public class YearLevel implements Serializable {
     @Column(unique = true, nullable = false)
     @NotBlank(message = "Year name must be present")
     private String yearName;
+    private Boolean deleteFlag;
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "yearLevel", targetEntity = YearSection.class)
     private List<YearSection> yearSections;
 
@@ -40,12 +41,12 @@ public class YearLevel implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         YearLevel yearLevel = (YearLevel) o;
-        return Objects.equals(id, yearLevel.id) && Objects.equals(yearNumber, yearLevel.yearNumber) && Objects.equals(yearName, yearLevel.yearName);
+        return Objects.equals(id, yearLevel.id) && Objects.equals(yearNumber, yearLevel.yearNumber) && Objects.equals(yearName, yearLevel.yearName) && Objects.equals(deleteFlag, yearLevel.deleteFlag);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, yearNumber, yearName);
+        return Objects.hash(id, yearNumber, yearName, deleteFlag);
     }
 
     public static YearLevelDto toYearLevelDto(YearLevel yl) {

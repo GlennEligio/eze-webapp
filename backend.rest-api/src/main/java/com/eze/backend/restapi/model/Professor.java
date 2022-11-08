@@ -34,6 +34,8 @@ public class Professor implements Serializable {
     @Pattern(regexp = "^(09|\\+639)\\d{9}$", message = "Professor contact number must be a valid PH mobile number")
     private String contactNumber;
 
+    private Boolean deleteFlag;
+
     @OneToMany(mappedBy = "professor")
     private List<Transaction> transactions;
 

@@ -36,6 +36,7 @@ public class Account implements Serializable {
     private byte[] profile;
     private LocalDateTime createdAt;
     private Boolean active;
+    private Boolean deleteFlag;
 //    @OneToOne(mappedBy = "account")
 //    private AccountFingerprint accountFingerprint;
 
@@ -45,12 +46,12 @@ public class Account implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Account account = (Account) o;
-        return Objects.equals(id, account.id) && Objects.equals(fullName, account.fullName) && Objects.equals(username, account.username) && Objects.equals(email, account.email) && type == account.type && Arrays.equals(profile, account.profile) && Objects.equals(createdAt, account.createdAt) && Objects.equals(active, account.active);
+        return Objects.equals(id, account.id) && Objects.equals(fullName, account.fullName) && Objects.equals(username, account.username) && Objects.equals(email, account.email) && Objects.equals(password, account.password) && type == account.type && Arrays.equals(profile, account.profile) && Objects.equals(createdAt, account.createdAt) && Objects.equals(active, account.active) && Objects.equals(deleteFlag, account.deleteFlag);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(id, fullName, username, email, password, type, createdAt, active);
+        int result = Objects.hash(id, fullName, username, email, password, type, createdAt, active, deleteFlag);
         result = 31 * result + Arrays.hashCode(profile);
         return result;
     }
@@ -76,6 +77,9 @@ public class Account implements Serializable {
         }
         if(newAccount.getActive() != null) {
             this.setActive(newAccount.getActive());
+        }
+        if(newAccount.getDeleteFlag() != null) {
+            this.setDeleteFlag(newAccount.getDeleteFlag());
         }
     }
 }

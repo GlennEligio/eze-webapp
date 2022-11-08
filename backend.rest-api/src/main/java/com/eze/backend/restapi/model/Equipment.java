@@ -49,6 +49,7 @@ public class Equipment implements Serializable {
     @NotNull(message = "Equipment must be defined to be either duplicable or not")
     private Boolean isDuplicable;
     private Boolean isBorrowed;
+    private Boolean deleteFlag;
     @ManyToMany(mappedBy = "equipments")
     // TODO: Temp fix for stackoverflow error, create DTO for this class that doesnt include this field
     @JsonIgnore
@@ -59,12 +60,12 @@ public class Equipment implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Equipment equipment = (Equipment) o;
-        return Objects.equals(id, equipment.id) && Objects.equals(equipmentCode, equipment.equipmentCode) && Objects.equals(name, equipment.name) && Objects.equals(barcode, equipment.barcode) && Objects.equals(status.getName(), equipment.status.getName()) && Objects.equals(defectiveSince, equipment.defectiveSince) && Objects.equals(isDuplicable, equipment.isDuplicable) && Objects.equals(isBorrowed, equipment.isBorrowed);
+        return Objects.equals(id, equipment.id) && Objects.equals(equipmentCode, equipment.equipmentCode) && Objects.equals(name, equipment.name) && Objects.equals(barcode, equipment.barcode) && status == equipment.status && Objects.equals(defectiveSince, equipment.defectiveSince) && Objects.equals(isDuplicable, equipment.isDuplicable) && Objects.equals(isBorrowed, equipment.isBorrowed) && Objects.equals(deleteFlag, equipment.deleteFlag);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, equipmentCode, name, barcode, status, defectiveSince, isDuplicable, isBorrowed);
+        return Objects.hash(id, equipmentCode, name, barcode, status, defectiveSince, isDuplicable, isBorrowed, deleteFlag);
     }
 
     public void update(Equipment newEquipment) {

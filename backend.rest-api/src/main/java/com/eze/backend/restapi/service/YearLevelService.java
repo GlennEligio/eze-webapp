@@ -45,6 +45,12 @@ public class YearLevelService implements IService<YearLevel>, IExcelService<Year
     }
 
     @Override
+    public List<YearLevel> getAllNotDeleted() {
+        log.info("Fetching all non deleted YearLevel");
+        return repository.findAllNotDeleted();
+    }
+
+    @Override
     public YearLevel get(Serializable yearNumber) {
         log.info("Fetching YearLevel with yearNumber {}", yearNumber);
         return repository.findByYearNumber(Integer.parseInt(yearNumber.toString()))
@@ -62,6 +68,7 @@ public class YearLevelService implements IService<YearLevel>, IExcelService<Year
         String remainingLetters = yearName.substring(1,yearName.length());
         yearLevel.setYearName(firstLetter + remainingLetters);
         yearLevel.setYearSections(new ArrayList<>());
+        yearLevel.setDeleteFlag(false);
         return repository.save(yearLevel);
     }
 
@@ -83,6 +90,15 @@ public class YearLevelService implements IService<YearLevel>, IExcelService<Year
         YearLevel yearLevel = repository.findByYearNumber(Integer.parseInt(yearNumber.toString()))
                 .orElseThrow(() -> new ApiException(notFound(yearNumber), HttpStatus.NOT_FOUND));
         repository.delete(yearLevel);
+    }
+
+    @Override
+    @Transactional
+    public void softDelete(Serializable yearNumber) {
+        log.info("Soft deleting YearLevel with yearNumber {}", yearNumber);
+        YearLevel yearLevel = repository.findByYearNumber(Integer.parseInt(yearNumber.toString()))
+                .orElseThrow(() -> new ApiException(notFound(yearNumber), HttpStatus.NOT_FOUND));
+        repository.softDelete(yearLevel.getYearNumber());
     }
 
     @Override

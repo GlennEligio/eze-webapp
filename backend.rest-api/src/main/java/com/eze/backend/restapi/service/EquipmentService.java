@@ -39,6 +39,12 @@ public class EquipmentService implements IService<Equipment>, IExcelService<Equi
     }
 
     @Override
+    public List<Equipment> getAllNotDeleted() {
+        log.info("Fetching all non deleted equipments");
+        return repository.findAllNotDeleted();
+    }
+
+    @Override
     public Equipment get(Serializable code) {
         log.info("Fetching equipments with equipment code: {}", code);
         return repository.findByEquipmentCode(code.toString()).orElseThrow(() -> new ApiException(notFound(code), HttpStatus.NOT_FOUND));
@@ -55,6 +61,7 @@ public class EquipmentService implements IService<Equipment>, IExcelService<Equi
         }
         equipment.setEquipmentCode(new ObjectId().toHexString());
         equipment.setIsBorrowed(false);
+        equipment.setDeleteFlag(false);
         return repository.save(equipment);
     }
 
@@ -71,6 +78,14 @@ public class EquipmentService implements IService<Equipment>, IExcelService<Equi
         log.info("Deleting equipment with code {}", code);
         Equipment equipment = repository.findByEquipmentCode(code.toString()).orElseThrow(() -> new ApiException(notFound(code), HttpStatus.NOT_FOUND));
         repository.delete(equipment);
+    }
+
+    @Override
+    @Transactional
+    public void softDelete(Serializable code) {
+        log.info("Soft deleting equipment with code {}", code);
+        Equipment equipment = repository.findByEquipmentCode(code.toString()).orElseThrow(() -> new ApiException(notFound(code), HttpStatus.NOT_FOUND));
+        repository.softDelete(equipment.getEquipmentCode());
     }
 
     @Override

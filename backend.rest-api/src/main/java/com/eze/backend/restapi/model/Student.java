@@ -13,6 +13,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -56,6 +57,7 @@ public class Student implements Serializable {
     @Valid
     private YearLevel yearLevel;
     private byte[] image;
+    private Boolean deleteFlag;
 
     @OneToMany(mappedBy = "borrower")
     private List<Transaction> transactions;
@@ -68,12 +70,14 @@ public class Student implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Student student = (Student) o;
-        return Objects.equals(id, student.id) && Objects.equals(studentNumber, student.studentNumber) && Objects.equals(fullName, student.fullName) && Objects.equals(yearAndSection, student.yearAndSection) && Objects.equals(contactNumber, student.contactNumber) && Objects.equals(birthday, student.birthday) && Objects.equals(address, student.address) && Objects.equals(email, student.email) && Objects.equals(guardian, student.guardian) && Objects.equals(guardianNumber, student.guardianNumber) && Objects.equals(yearLevel, student.yearLevel);
+        return Objects.equals(id, student.id) && Objects.equals(studentNumber, student.studentNumber) && Objects.equals(fullName, student.fullName) && Objects.equals(yearAndSection, student.yearAndSection) && Objects.equals(contactNumber, student.contactNumber) && Objects.equals(birthday, student.birthday) && Objects.equals(address, student.address) && Objects.equals(email, student.email) && Objects.equals(guardian, student.guardian) && Objects.equals(guardianNumber, student.guardianNumber) && Objects.equals(yearLevel, student.yearLevel) && Arrays.equals(image, student.image) && Objects.equals(deleteFlag, student.deleteFlag);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, studentNumber, fullName, yearAndSection, contactNumber, birthday, address, email, guardian, guardianNumber, yearLevel);
+        int result = Objects.hash(id, studentNumber, fullName, yearAndSection, contactNumber, birthday, address, email, guardian, guardianNumber, yearLevel, deleteFlag);
+        result = 31 * result + Arrays.hashCode(image);
+        return result;
     }
 
     public void update(@NonNull Student newStudent) {
@@ -106,6 +110,9 @@ public class Student implements Serializable {
         }
         if(newStudent.getYearLevel() != null) {
             this.setYearLevel(newStudent.getYearLevel());
+        }
+        if(newStudent.getDeleteFlag() != null) {
+            this.setDeleteFlag(newStudent.getDeleteFlag());
         }
     }
 

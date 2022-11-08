@@ -52,6 +52,11 @@ public class TransactionService implements IService<Transaction>, IExcelService<
     }
 
     @Override
+    public List<Transaction> getAllNotDeleted() {
+        return null;
+    }
+
+    @Override
     public Transaction get(Serializable code) {
         log.info("Fetching transaction with code {}", code);
         return txRepo.findByTxCode(code.toString()).orElseThrow(() -> new ApiException(notFound(code), HttpStatus.NOT_FOUND));
@@ -139,6 +144,11 @@ public class TransactionService implements IService<Transaction>, IExcelService<
         log.info("Deleting transaction with {}", code);
         Transaction transaction = txRepo.findByTxCode(code.toString()).orElseThrow(() -> new ApiException(notFound(code), HttpStatus.NOT_FOUND));
         txRepo.delete(transaction);
+    }
+
+    @Override
+    public void softDelete(Serializable id) {
+
     }
 
     @Override

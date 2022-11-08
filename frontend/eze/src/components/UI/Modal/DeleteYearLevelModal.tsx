@@ -36,7 +36,7 @@ const DeleteYearLevelModal: FC<DeleteYearLevelModalProps> = (props) => {
 
   // prepopulate yearNumber and yearLevel state
   useEffect(() => {
-    if (props.yearLevels) {
+    if (props.yearLevels && props.yearLevels.length > 0) {
       const sortedYearLevel = [...props.yearLevels].sort(
         (yl1, yl2) => yl1.yearNumber - yl2.yearNumber
       );
@@ -44,6 +44,9 @@ const DeleteYearLevelModal: FC<DeleteYearLevelModalProps> = (props) => {
       setYearNumber(
         sortedYearLevel[0] && sortedYearLevel[0].yearNumber.toString()
       );
+    } else {
+      setYearLevels([]);
+      setYearNumber("");
     }
   }, [props.yearLevels]);
 

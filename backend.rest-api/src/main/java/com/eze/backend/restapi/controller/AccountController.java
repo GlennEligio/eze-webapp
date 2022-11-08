@@ -95,7 +95,7 @@ public class AccountController {
 
     @GetMapping("/accounts")
     public ResponseEntity<List<Account>> getAccounts() {
-        return ResponseEntity.ok(service.getAll().stream().filter(account -> account.getType() != AccountType.SADMIN).toList());
+        return ResponseEntity.ok(service.getAllNotDeleted().stream().filter(account -> account.getType() != AccountType.SADMIN).toList());
     }
 
     @GetMapping("/accounts/{username}")
@@ -116,7 +116,7 @@ public class AccountController {
 
     @DeleteMapping("/accounts/{username}")
     public ResponseEntity<Object> deleteAccount(@PathVariable("username") String username) {
-        service.delete(username);
+        service.softDelete(username);
         return ResponseEntity.ok().build();
     }
 

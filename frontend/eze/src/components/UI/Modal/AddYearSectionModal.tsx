@@ -18,7 +18,7 @@ interface AddYearSectionModalProps {
 const AddYearSectionModal: FC<AddYearSectionModalProps> = (props) => {
   const auth = useSelector((state: IRootState) => state.auth);
   const dispatch = useDispatch();
-  const [yearNumber, setYearNumber] = useState(1);
+  const [yearNumber, setYearNumber] = useState("");
   const [sectionName, setSectionName] = useState("");
   const {
     sendRequest: createYearSection,
@@ -28,15 +28,24 @@ const AddYearSectionModal: FC<AddYearSectionModalProps> = (props) => {
   } = useHttp<YearSection>(YearSectionService.createYearSection, false);
 
   useEffect(() => {
-    if (status == "completed" && error === null) {
+    if (status === "completed" && error === null) {
+      console.log("Adding yearSection in the Redux", yearNumber, data);
       dispatch(
         yearLevelAction.addYearLevelSection({
-          yearNumber: yearNumber,
+          yearNumber: Number.parseInt(yearNumber),
           yearSection: data,
         })
       );
     }
-  }, [data]);
+  }, [data, status, error]);
+
+  useEffect(() => {
+    if (props.yearLevels && props.yearLevels.length > 0) {
+      setYearNumber(props.yearLevels[0].yearNumber.toString());
+    } else {
+      setYearNumber("");
+    }
+  }, [props.yearLevels]);
 
   const addYearSectionHandler = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -44,7 +53,7 @@ const AddYearSectionModal: FC<AddYearSectionModalProps> = (props) => {
     const newYearSection: CreateYearSection = {
       sectionName: sectionName,
       yearLevel: {
-        yearNumber: yearNumber,
+        yearNumber: Number.parseInt(yearNumber),
       },
     };
 
@@ -62,8 +71,6 @@ const AddYearSectionModal: FC<AddYearSectionModalProps> = (props) => {
       relativeUrl: "/api/v1/yearSections",
     };
     createYearSection(requestConf);
-    setSectionName("");
-    setYearNumber(1);
   };
 
   return (
@@ -94,13 +101,7 @@ const AddYearSectionModal: FC<AddYearSectionModalProps> = (props) => {
                   className="form-select"
                   id="newYearSectionYearLevel"
                   aria-label="IsDuplicable"
-                  onChange={(e) =>
-                    setYearNumber(
-                      e.currentTarget.value
-                        ? Number.parseInt(e.currentTarget.value)
-                        : 1
-                    )
-                  }
+                  onChange={(e) => setYearNumber(e.currentTarget.value)}
                   value={yearNumber}
                 >
                   {props.yearLevels &&
