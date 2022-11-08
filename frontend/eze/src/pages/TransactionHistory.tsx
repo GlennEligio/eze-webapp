@@ -43,7 +43,7 @@ function TransactionHistory() {
       getTransactionsError === null
     ) {
       let transactionModified = [...transactionHistListData].map((t) => {
-        return { ...t, equipmentCount: t.equipmentsHistCount };
+        return { ...t, equipmentsCount: t.equipmentsHistCount };
       });
       dispatch(
         transactionAction.addTransactions({

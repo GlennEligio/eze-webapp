@@ -30,6 +30,8 @@ public class DataLoader implements ApplicationRunner {
         account1.setPassword("password");
         account1.setActive(true);
         account1.setType(AccountType.SADMIN);
+        account1.setEmail("sadmin@gmail.com");
+        account1.setFullName("SADMIN");
         log.info("Adding an SADMIN type account");
         accountService.create(account1);
     }

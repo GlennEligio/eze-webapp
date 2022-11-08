@@ -32,7 +32,7 @@ const DeleteYearSectionModal: FC<DeleteYearSectionModalProps> = (props) => {
     if (status === "completed" && error === null) {
       dispatch(
         yearLevelAction.removeYearLevelSection({
-          yearNumber: yearNumber,
+          yearNumber: Number.parseInt(yearNumber),
           sectionName: sectionName,
         })
       );

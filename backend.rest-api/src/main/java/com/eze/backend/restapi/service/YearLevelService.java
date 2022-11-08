@@ -6,6 +6,7 @@ import com.eze.backend.restapi.exception.ApiException;
 import com.eze.backend.restapi.model.Account;
 import com.eze.backend.restapi.model.Equipment;
 import com.eze.backend.restapi.model.YearLevel;
+import com.eze.backend.restapi.model.YearSection;
 import com.eze.backend.restapi.repository.YearLevelRepository;
 import com.ibm.icu.text.RuleBasedNumberFormat;
 import lombok.extern.slf4j.Slf4j;
@@ -47,7 +48,10 @@ public class YearLevelService implements IService<YearLevel>, IExcelService<Year
     @Override
     public List<YearLevel> getAllNotDeleted() {
         log.info("Fetching all non deleted YearLevel");
-        return repository.findAllNotDeleted();
+        return repository.findAllNotDeleted().stream().peek(yl -> {
+            List<YearSection> ysList = yl.getYearSections().stream().filter(ys -> !ys.getDeleteFlag()).toList();
+            yl.setYearSections(ysList);
+        }).toList();
     }
 
     @Override

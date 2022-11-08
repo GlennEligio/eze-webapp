@@ -65,7 +65,7 @@ const authSlice = createSlice({
       localStorage.setItem("username", action.payload.username);
 
       state.fullName = action.payload.fullName;
-      localStorage.setItem("fullName", action.payload.name);
+      localStorage.setItem("fullName", action.payload.fullName);
     },
     removeAuth(state) {
       state.accessToken = "";

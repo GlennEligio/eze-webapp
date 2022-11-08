@@ -14,7 +14,10 @@ const yearLevelSlice = createSlice({
   initialState: INITIAL_STATE,
   reducers: {
     addYearLevels(state, action) {
-      state.yearLevels = action.payload.yearLevels;
+      state.yearLevels =
+        action.payload.yearLevels && action.payload.yearLevels.length > 0
+          ? action.payload.yearLevels
+          : [];
     },
     addYearLevel(state, action) {
       state.yearLevels = [...state.yearLevels, action.payload.newYearLevel];
@@ -27,8 +30,11 @@ const yearLevelSlice = createSlice({
     addYearLevelSection(state, action) {
       state.yearLevels = state.yearLevels.map((yl) => {
         if (yl.yearNumber === action.payload.yearNumber) {
-          yl.yearSections = [...yl.yearSections, action.payload.yearSection];
-          return yl;
+          if (yl.yearSections && yl.yearSections.length > 0) {
+            yl.yearSections = [...yl.yearSections, action.payload.yearSection];
+          } else {
+            yl.yearSections = [action.payload.yearSection];
+          }
         }
         return yl;
       });

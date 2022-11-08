@@ -90,7 +90,7 @@ public class TransactionController {
         log.info("Preparing Transactions list for Download");
         response.setContentType("application/octet-stream");
         response.setHeader("Content-Disposition", "attachment; filename=transactions.xlsx");
-        Stream<Transaction> transactions = service.getAll().stream();
+        Stream<Transaction> transactions = service.getAllNotDeleted().stream();
 
         // if fromDate and toDate is present, filter the transactions again
         if(fromDate != null && toDate != null) {
@@ -155,7 +155,7 @@ public class TransactionController {
 
     @DeleteMapping("/transactions/{code}")
     public ResponseEntity<Object> deleteTransaction(@PathVariable("code") String code) {
-        service.delete(code);
+        service.softDelete(code);
         return ResponseEntity.ok().build();
     }
 

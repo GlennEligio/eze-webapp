@@ -52,6 +52,7 @@ public class AccountController {
         final String accessToken = jwtUtil.generateToken(userDetails);
         final String refreshToken = jwtUtil.generateRefreshToken(userDetails);
         log.info("Authentication success with jwt: " + accessToken);
+        log.info("Full name {}", userDetails.getFullName());
         return ResponseEntity.ok(new LoginResponseDto(userDetails.getUsername(), userDetails.getAuthorities().stream().findFirst().get().toString(), userDetails.getFullName(), accessToken, refreshToken));
     }
 

@@ -77,13 +77,14 @@ public class Transaction implements Serializable {
     @Enumerated(EnumType.ORDINAL)
     @EnumNamePattern(regexp = "^(PENDING|ACCEPTED|DENIED)", message = "Transaction's status can only either be 'PENDING', 'ACCEPTED', or 'DENIED'")
     private TxStatus status;
+    private Boolean deleteFlag;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Transaction that = (Transaction) o;
-        return Objects.equals(id, that.id) && Objects.equals(txCode, that.txCode) && Objects.equals(equipments, that.equipments) && Objects.equals(equipmentsHist, that.equipmentsHist) && Objects.equals(borrower, that.borrower) && Objects.equals(professor, that.professor) && Objects.equals(borrowedAt, that.borrowedAt) && Objects.equals(returnedAt, that.returnedAt) && status == that.status;
+        return Objects.equals(id, that.id) && Objects.equals(txCode, that.txCode) && Objects.equals(equipments, that.equipments) && Objects.equals(equipmentsHist, that.equipmentsHist) && Objects.equals(borrower, that.borrower) && Objects.equals(professor, that.professor) && Objects.equals(borrowedAt, that.borrowedAt) && Objects.equals(returnedAt, that.returnedAt) && status == that.status && Objects.equals(deleteFlag, that.deleteFlag);
     }
 
     public boolean customEquals(Transaction t) {

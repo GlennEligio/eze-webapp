@@ -53,7 +53,8 @@ public class TransactionService implements IService<Transaction>, IExcelService<
 
     @Override
     public List<Transaction> getAllNotDeleted() {
-        return null;
+        log.info("Fetching all non deleted transactions");
+        return txRepo.findAllNotDeleted();
     }
 
     @Override
@@ -103,6 +104,9 @@ public class TransactionService implements IService<Transaction>, IExcelService<
         // Set the transaction code
         transaction.setTxCode(new ObjectId().toHexString());
 
+        // Set deleteFlag to false
+        transaction.setDeleteFlag(false);
+
         // Add borrowed at in case its null
         if (transaction.getBorrowedAt() == null) transaction.setBorrowedAt(LocalDateTime.now());
 
@@ -143,12 +147,14 @@ public class TransactionService implements IService<Transaction>, IExcelService<
     public void delete(Serializable code) {
         log.info("Deleting transaction with {}", code);
         Transaction transaction = txRepo.findByTxCode(code.toString()).orElseThrow(() -> new ApiException(notFound(code), HttpStatus.NOT_FOUND));
-        txRepo.delete(transaction);
+        txRepo.softDelete(transaction.getTxCode());
     }
 
     @Override
-    public void softDelete(Serializable id) {
-
+    public void softDelete(Serializable code) {
+        log.info("Soft deleting transaction with {}", code);
+        Transaction transaction = txRepo.findByTxCode(code.toString()).orElseThrow(() -> new ApiException(notFound(code), HttpStatus.NOT_FOUND));
+        txRepo.softDelete(transaction.getTxCode());
     }
 
     @Override
