@@ -120,6 +120,25 @@ const deleteAccount = async (requestConfig: RequestConfig) => {
   return responseObj;
 };
 
+const upload = async (jwt: string, formData: FormData) => {
+  return await fetch(`${BACKEND_URI}/api/v1/accounts/upload`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${jwt}`,
+    },
+    body: formData,
+  });
+};
+
+const download = async (jwt: string) => {
+  return await fetch(`${BACKEND_URI}/api/v1/accounts/download`, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${jwt}`,
+    },
+  });
+};
+
 // for validation
 export const isValidAccount = (account: CreateUpdateAccountDto) => {
   let valid = true;
@@ -148,4 +167,6 @@ export default {
   createAccount,
   updateAccount,
   deleteAccount,
+  download,
+  upload,
 };

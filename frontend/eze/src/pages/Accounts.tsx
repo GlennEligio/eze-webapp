@@ -12,6 +12,7 @@ import AddAccountModal from "../components/UI/Modal/AddAccountModal";
 import UpdateAccountModal from "../components/UI/Modal/UpdateAccountModal";
 import DeleteAccountModal from "../components/UI/Modal/DeleteAccountModal";
 import MiniClock from "../components/UI/Other/MiniClock";
+import ImportExportModal from "../components/UI/Modal/ImportExportModal";
 
 const Accounts: FC = () => {
   const auth = useSelector((state: IRootState) => state.auth);
@@ -70,10 +71,19 @@ const Accounts: FC = () => {
           <div className="pt-5 pb-2">
             <div className="d-flex justify-content-between">
               <div className="my-auto">
-                <i
-                  className="bi bi-arrow-left-circle fs-1"
-                  onClick={backBtnHandler}
-                ></i>
+                <span className="me-3">
+                  <i
+                    className="bi bi-arrow-left-circle fs-1"
+                    onClick={backBtnHandler}
+                  ></i>
+                </span>
+                <a
+                  href="#importExportAccountModal"
+                  data-bs-toggle="modal"
+                  className="text-dark"
+                >
+                  <i className="bi bi-gear fs-1"></i>
+                </a>
               </div>
               <div className="d-flex justify-content-end">
                 <div className="d-flex align-items-center">
@@ -184,6 +194,13 @@ const Accounts: FC = () => {
         <AddAccountModal />
         <UpdateAccountModal />
         <DeleteAccountModal />
+        <ImportExportModal
+          itemName="Account"
+          downloadFunction={AccountService.download}
+          uploadFunction={AccountService.upload}
+          jwt={auth.accessToken}
+          key="Account"
+        />
       </div>
     </div>
   );
