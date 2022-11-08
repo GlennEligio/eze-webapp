@@ -11,13 +11,15 @@ import { IRootState } from "../../../store";
 import { useDispatch } from "react-redux";
 import { accountActions } from "../../../store/accountSlice";
 import validator from "validator";
+import { validateNotEmpty } from "../../../validation/validations";
+import useInput from "../../../hooks/useInput";
 
 const AddAccountModal = () => {
   const auth = useSelector((state: IRootState) => state.auth);
   const dispatch = useDispatch();
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [fullName, setFullName] = useState("");
+  // const [username, setUsername] = useState("");
+  // const [password, setPassword] = useState("");
+  // const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [type, setType] = useState(AccountType.STUDENT_ASSISTANT);
   const [active, setActive] = useState(true);
@@ -27,6 +29,44 @@ const AddAccountModal = () => {
     error,
     status: requestStatus,
   } = useHttp<Account>(AccountService.createAccount, false);
+
+  // useInput for the controlled input and validation
+  const {
+    value: fullName,
+    hasError: fullNameInputHasError,
+    isValid: fullNameIsValid,
+    valueChangeHandler: fullNameChangeHandler,
+    inputBlurHandler: fullNameBlurHandler,
+    reset: resetFullNameInput,
+    errorMessage: fullNameErrorMessage,
+  } = useInput(validateNotEmpty("Full name"), "");
+  const {
+    value: username,
+    hasError: usernameInputHasError,
+    isValid: usernameIsValid,
+    valueChangeHandler: usernameChangeHandler,
+    inputBlurHandler: usernameBlurHandler,
+    reset: resetUsernameInput,
+    errorMessage: usernameErrorMessage,
+  } = useInput(validateNotEmpty("Username"), "");
+  const {
+    value: password,
+    hasError: passwordInputHasError,
+    isValid: passwordIsValid,
+    valueChangeHandler: passwordChangeHandler,
+    inputBlurHandler: passwordBlurHandler,
+    reset: resetPasswordInput,
+    errorMessage: passwordErrorMessage,
+  } = useInput(validateNotEmpty("Password"), "");
+  // const {
+  //   value: type,
+  //   hasError: typeInputHasError,
+  //   isValid: typeIsValid,
+  //   valueChangeHandler: typeChangeHandler,
+  //   inputBlurHandler: typeBlurHandler,
+  //   reset: resetTypeInput,
+  //   errorMessage: typeErrorMessage,
+  // } = useInput(validateNotEmpty("Type"), AccountType.STUDENT_ASSISTANT);
 
   useEffect(() => {
     if (requestStatus === "completed") {
@@ -48,7 +88,12 @@ const AddAccountModal = () => {
       username,
     };
 
-    if (!isValidAccount(newAccount)) {
+    if (
+      !usernameIsValid ||
+      !passwordIsValid ||
+      validator.isEmpty(type) ||
+      !fullNameIsValid
+    ) {
       console.log("Invalid account");
       return;
     }
@@ -61,11 +106,12 @@ const AddAccountModal = () => {
       },
     };
     createAccount(requestConf);
-    setFullName("");
+    resetFullNameInput();
+    resetPasswordInput();
+    setType(AccountType.STUDENT_ASSISTANT);
+    resetUsernameInput();
     setActive(true);
     setEmail("");
-    setType(AccountType.STUDENT_ASSISTANT);
-    setUsername("");
   };
 
   return (
@@ -91,22 +137,24 @@ const AddAccountModal = () => {
           </div>
           <div className="modal-body">
             <form onSubmit={onAddAccount}>
-              <div className="form-floating mb-3">
+              <div className={`form-floating mb-3`}>
                 <input
                   type="text"
                   className="form-control"
                   id="newAccountUsername"
-                  onChange={(e) => setUsername(e.target.value)}
+                  onChange={usernameChangeHandler}
+                  onBlur={usernameBlurHandler}
                   value={username}
                 />
                 <label htmlFor="newAccountUsername">Username</label>
               </div>
               <div className="form-floating mb-3">
                 <input
-                  type="text"
+                  type="password"
                   className="form-control"
                   id="newAccountPassword"
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={passwordChangeHandler}
+                  onBlur={passwordBlurHandler}
                   value={password}
                 />
                 <label htmlFor="newAccountPassword">Password</label>
@@ -143,15 +191,19 @@ const AddAccountModal = () => {
                 </select>
                 <label htmlFor="newAccountActive">Active?</label>
               </div>
-              <div className="form-floating mb-3">
-                <input
-                  type="text"
-                  className="form-control"
-                  id="newAccountFullname"
-                  onChange={(e) => setFullName(e.target.value)}
-                  value={fullName}
-                />
-                <label htmlFor="newAccountFullname">Full name</label>
+              <div className={fullNameInputHasError ? "invalid" : ""}>
+                {fullNameInputHasError && <span>{fullNameErrorMessage}</span>}
+                <div className="form-floating mb-3">
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="newAccountFullname"
+                    onChange={fullNameChangeHandler}
+                    onBlur={fullNameBlurHandler}
+                    value={fullName}
+                  />
+                  <label htmlFor="newAccountFullname">Full name</label>
+                </div>
               </div>
               <div className="form-floating mb-3">
                 <input

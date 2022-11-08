@@ -41,6 +41,11 @@
   background-color: #fddddd !important;
 }
 
+.invalid span {
+  color: #b40e0e;
+  margin-left: 0.5rem;
+}
+
 .eze-menu {
   font-family: sans-serif;
   font-size: 0.925rem;

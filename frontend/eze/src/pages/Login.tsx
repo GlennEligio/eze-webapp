@@ -6,6 +6,7 @@ import useHttp, { RequestConfig } from "../hooks/useHttp";
 import useInput from "../hooks/useInput";
 import { authActions } from "../store/authSlice";
 import { LoginResponseDto } from "../api/AccountService";
+import { validateNotEmpty } from "../validation/validations";
 
 const Login = () => {
   const validateUserPass = (input: string) => {
@@ -35,7 +36,7 @@ const Login = () => {
     valueChangeHandler: unameChangeHandler,
     inputBlurHandler: unameBlurHandler,
     reset: resetUnameInput,
-  } = useInput(validateUserPass);
+  } = useInput(validateNotEmpty("Username"), "");
   const {
     value: enteredPass,
     hasError: passInputHasError,
@@ -43,27 +44,23 @@ const Login = () => {
     valueChangeHandler: passChangeHandler,
     inputBlurHandler: passBlurHandler,
     reset: resetPassInput,
-  } = useInput(validateUserPass);
+  } = useInput(validateNotEmpty("Password"), "");
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (status === "completed") {
-      if (data) {
-        if (error === null) {
-          const authResp = data as LoginResponseDto;
-          dispatch(
-            authActions.saveAuth({
-              accessToken: authResp.accessToken,
-              username: authResp.username,
-              accountType: authResp.accountType,
-              fullName: authResp.fullName,
-            })
-          );
-          navigate("/");
-          return;
-        }
-      }
+    if (status === "completed" && data && error === null) {
+      const authResp = data as LoginResponseDto;
+      dispatch(
+        authActions.saveAuth({
+          accessToken: authResp.accessToken,
+          username: authResp.username,
+          accountType: authResp.accountType,
+          fullName: authResp.fullName,
+        })
+      );
+      navigate("/");
+      return;
     }
   }, [status, data, error, dispatch, navigate]);
 
