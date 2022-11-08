@@ -133,7 +133,7 @@ public class EquipmentService implements IService<Equipment>, IExcelService<Equi
     @Override
     public ByteArrayInputStream listToExcel(List<Equipment> equipments) {
         log.info("Converting the equipments list into excel");
-        List<String> columnName = List.of("ID", "Equipment code", "Name", "Barcode", "Status", "Defective since", "Is Duplicable?", "Is Borrowed?");
+        List<String> columnName = List.of("ID", "Equipment code", "Name", "Barcode", "Status", "Defective since", "Is Duplicable?", "Is Borrowed?", "Delete Flag");
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("Equipments");
 
@@ -157,6 +157,7 @@ public class EquipmentService implements IService<Equipment>, IExcelService<Equi
                 }
                 dataRow.createCell(6).setCellValue(eq.getIsDuplicable());
                 dataRow.createCell(7).setCellValue(eq.getIsBorrowed());
+                dataRow.createCell(8).setCellValue(eq.getDeleteFlag());
             }
 
             // Making size of the columns auto resize to fit data
@@ -194,6 +195,7 @@ public class EquipmentService implements IService<Equipment>, IExcelService<Equi
                 }
                 equipment.setIsDuplicable(row.getCell(6).getBooleanCellValue());
                 equipment.setIsBorrowed(row.getCell(7).getBooleanCellValue());
+                equipment.setDeleteFlag(row.getCell(8).getBooleanCellValue());
                 equipments.add(equipment);
             }
             return equipments;

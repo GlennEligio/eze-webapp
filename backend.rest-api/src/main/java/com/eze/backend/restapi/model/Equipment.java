@@ -89,6 +89,9 @@ public class Equipment implements Serializable {
         if(newEquipment.getIsBorrowed() != null) {
             this.isBorrowed = newEquipment.getIsBorrowed();
         }
+        if(newEquipment.getDeleteFlag() != null) {
+            this.deleteFlag=newEquipment.getDeleteFlag();
+        }
     }
 
     public static EquipmentDto toEquipmentDto (Equipment equipment) {

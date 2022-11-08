@@ -140,12 +140,16 @@ public class Transaction implements Serializable {
             log.info("Status is not equal");
             equals = false;
         }
+        if(t.getDeleteFlag() != null && !t.getDeleteFlag().equals(deleteFlag)) {
+            log.info("Delete flag is not equal");
+            equals = false;
+        }
         return equals;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, txCode, equipments, equipmentsHist, borrower, professor, borrowedAt, returnedAt, status);
+        return Objects.hash(id, txCode, equipments, equipmentsHist, borrower, professor, borrowedAt, returnedAt, status, deleteFlag);
     }
 
     public void update(Transaction newTransaction) {
@@ -169,6 +173,9 @@ public class Transaction implements Serializable {
         }
         if(newTransaction.getStatus() != null) {
             this.status = newTransaction.getStatus();
+        }
+        if(newTransaction.getDeleteFlag() != null) {
+            this.deleteFlag = newTransaction.getDeleteFlag();
         }
     }
 

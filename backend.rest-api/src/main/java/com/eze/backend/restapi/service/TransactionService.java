@@ -91,8 +91,9 @@ public class TransactionService implements IService<Transaction>, IExcelService<
         });
 
         // Populate Equipment and Equipment history data of transaction
-        transaction.setEquipments(new ArrayList<>(equipments));
+        // For Equipment, remove those that is duplicable (i.e. only maintain those that is not duplicable)
         transaction.setEquipmentsHist(new ArrayList<>(equipments));
+        transaction.setEquipments(new ArrayList<>(equipments.stream().filter(e -> !e.getIsDuplicable()).toList()));
 
         // Populate Professor and Student data of transaction
         String profName = transaction.getProfessor().getName();
@@ -144,16 +145,20 @@ public class TransactionService implements IService<Transaction>, IExcelService<
     }
 
     @Override
+    @Transactional
     public void delete(Serializable code) {
         log.info("Deleting transaction with {}", code);
         Transaction transaction = txRepo.findByTxCode(code.toString()).orElseThrow(() -> new ApiException(notFound(code), HttpStatus.NOT_FOUND));
-        txRepo.softDelete(transaction.getTxCode());
+        returnAllEquipments(transaction);
+        txRepo.delete(transaction);
     }
 
     @Override
+    @Transactional
     public void softDelete(Serializable code) {
         log.info("Soft deleting transaction with {}", code);
         Transaction transaction = txRepo.findByTxCode(code.toString()).orElseThrow(() -> new ApiException(notFound(code), HttpStatus.NOT_FOUND));
+        returnAllEquipments(transaction);
         txRepo.softDelete(transaction.getTxCode());
     }
 
@@ -252,9 +257,25 @@ public class TransactionService implements IService<Transaction>, IExcelService<
         return txRepo.save(transactionMatch);
     }
 
+    public void returnAllEquipments(Transaction transaction) {
+        // Extract equipments in the transaction and set isBorrowed to false
+        List<Equipment> equipment = transaction.getEquipments().stream()
+                .filter(e -> !e.getIsDuplicable())
+                .map(e -> {
+                    e.setIsBorrowed(false);
+                    return e;
+                })
+                .toList();
+        // Save each equipment to update
+        equipment.forEach(e -> eqService.update(e, e.getEquipmentCode()));
+        // Set the transaction's eqList to new one and save
+        transaction.setEquipments(new ArrayList<>(equipment));
+        txRepo.save(transaction);
+    }
+
     @Override
     public ByteArrayInputStream listToExcel(List<Transaction> transactions) {
-        List<String> columnName = List.of("Transaction Code", "Equipment", "Borrower", "Year and Section", "Professor", "Borrowed At", "Returned At", "Status", "Is Returned");
+        List<String> columnName = List.of("Transaction Code", "Equipment", "Borrower", "Year and Section", "Professor", "Borrowed At", "Returned At", "Status", "Is Returned", "Delete flag");
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("Transactions");
 
@@ -285,6 +306,7 @@ public class TransactionService implements IService<Transaction>, IExcelService<
 
                     // Checks if the equipment is still in current Equipment list of Transaction
                     dataRow.createCell(8).setCellValue(transaction.getEquipments().contains(equipment));
+                    dataRow.createCell(9).setCellValue(transaction.getDeleteFlag());
                     counter++;
                 }
             }
@@ -358,6 +380,11 @@ public class TransactionService implements IService<Transaction>, IExcelService<
                     // get the status info if its present
                     String status = row.getCell(7).getStringCellValue();
                     transaction.setStatus(TxStatus.valueOf(status));
+
+                    // get the isDeleteFlag
+                    Boolean deleteFlag = row.getCell(9).getBooleanCellValue();
+                    transaction.setDeleteFlag(deleteFlag);
+
                     transactionMap.put(transactionCode, transaction);
                 } else {
                     Transaction transaction = transactionMap.get(transactionCode);

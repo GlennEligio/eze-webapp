@@ -141,7 +141,7 @@ public class StudentService implements IService<Student>, IExcelService<Student>
 
     @Override
     public ByteArrayInputStream listToExcel(List<Student> students) {
-        List<String> columnName = List.of("ID", "Student number", "Full name", "Year and section", "Contact number", "Birthday", "Address", "Email", "Guardian", "Guardian number", "Year level");
+        List<String> columnName = List.of("ID", "Student number", "Full name", "Year and section", "Contact number", "Birthday", "Address", "Email", "Guardian", "Guardian number", "Year level", "Delete Flag");
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("Students");
 
@@ -160,6 +160,7 @@ public class StudentService implements IService<Student>, IExcelService<Student>
                 dataRow.createCell(2).setCellValue(student.getFullName());
                 dataRow.createCell(3).setCellValue(student.getYearAndSection());
                 dataRow.createCell(4).setCellValue(student.getContactNumber());
+                dataRow.createCell(11).setCellValue(students.get(i).getDeleteFlag());
 
                 // Nullable properties check
                 if(student.getBirthday() != null) dataRow.createCell(5).setCellValue(student.getBirthday());
@@ -168,6 +169,7 @@ public class StudentService implements IService<Student>, IExcelService<Student>
                 if(student.getGuardian() != null) dataRow.createCell(8).setCellValue(student.getGuardian());
                 if(student.getGuardianNumber() != null) dataRow.createCell(9).setCellValue(student.getGuardianNumber());
                 if(student.getYearLevel() != null) dataRow.createCell(10).setCellValue(student.getYearLevel());
+
             }
 
             // Making size of the column auto resize to fit data
@@ -208,6 +210,8 @@ public class StudentService implements IService<Student>, IExcelService<Student>
 
                 YearLevel yl = ylService.get((int) row.getCell(10).getNumericCellValue());
                 student.setYearLevel(yl);
+
+                student.setDeleteFlag(row.getCell(11).getBooleanCellValue());
                 students.add(student);
             }
             return students;

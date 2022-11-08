@@ -85,6 +85,7 @@ public class YearLevelService implements IService<YearLevel>, IExcelService<Year
         yearLevel1.setYearNumber(yearLevel1.getYearNumber());
         RuleBasedNumberFormat nf = new RuleBasedNumberFormat(Locale.US, RuleBasedNumberFormat.SPELLOUT);
         yearLevel1.setYearName(nf.format(yearLevel1.getYearNumber(), "%spellout-ordinal"));
+        yearLevel1.setDeleteFlag(yearLevel.getDeleteFlag());
         return repository.save(yearLevel1);
     }
 
@@ -139,7 +140,7 @@ public class YearLevelService implements IService<YearLevel>, IExcelService<Year
 
     @Override
     public ByteArrayInputStream listToExcel(List<YearLevel> yearLevels) {
-        List<String> columnName = List.of("Year level", "Year name");
+        List<String> columnName = List.of("Year level", "Year name", "Delete Flag");
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("Year levels");
 
@@ -155,6 +156,7 @@ public class YearLevelService implements IService<YearLevel>, IExcelService<Year
                 YearLevel yl = yearLevels.get(i);
                 dataRow.createCell(0).setCellValue(yl.getYearNumber());
                 dataRow.createCell(1).setCellValue(yl.getYearName());
+                dataRow.createCell(2).setCellValue(yl.getDeleteFlag());
             }
 
             // Making size of the columns auto resize to fit data
@@ -180,6 +182,7 @@ public class YearLevelService implements IService<YearLevel>, IExcelService<Year
                 Row row = sheet.getRow(i);
 
                 yearLevel.setYearNumber((int) row.getCell(0).getNumericCellValue());
+                yearLevel.setDeleteFlag(row.getCell(2).getBooleanCellValue());
                 yearLevels.add(yearLevel);
             }
             return yearLevels;

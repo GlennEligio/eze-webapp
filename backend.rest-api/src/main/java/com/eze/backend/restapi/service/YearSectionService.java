@@ -72,6 +72,7 @@ public class YearSectionService implements IService<YearSection>, IExcelService<
                 .orElseThrow(() -> new ApiException(notFound(sectionName), HttpStatus.NOT_FOUND));
         YearLevel yl = ylService.get(yearSection.getYearLevel().getYearNumber());
         ys.setYearLevel(yl);
+        ys.setDeleteFlag(yearSection.getDeleteFlag());
         return repository.save(ys);
     }
 
@@ -125,7 +126,7 @@ public class YearSectionService implements IService<YearSection>, IExcelService<
 
     @Override
     public ByteArrayInputStream listToExcel(List<YearSection> yearSections) {
-        List<String> columnName = List.of("Section name", "Year level");
+        List<String> columnName = List.of("Section name", "Year level", "Delete flag");
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("Year sections");
 
@@ -141,6 +142,7 @@ public class YearSectionService implements IService<YearSection>, IExcelService<
                 YearSection yearSection = yearSections.get(i);
                 dataRow.createCell(0).setCellValue(yearSection.getSectionName());
                 dataRow.createCell(1).setCellValue(yearSection.getYearLevel().getYearNumber());
+                dataRow.createCell(2).setCellValue(yearSection.getDeleteFlag());
             }
 
             // Making size of the columns auto resize to fit data
@@ -169,6 +171,8 @@ public class YearSectionService implements IService<YearSection>, IExcelService<
 
                 Integer yearNumber = (int) row.getCell(1).getNumericCellValue();
                 YearLevel yearLevel = ylService.get(yearNumber);
+
+                yearSection.setDeleteFlag(row.getCell(2).getBooleanCellValue());
                 yearSection.setYearLevel(yearLevel);
                 yearSections.add(yearSection);
             }

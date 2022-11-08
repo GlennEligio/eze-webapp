@@ -148,7 +148,7 @@ public class AccountService implements IService<Account>, IExcelService<Account>
 
     @Override
     public ByteArrayInputStream listToExcel(List<Account> accounts) {
-        List<String> columns = List.of("ID", "Full name", "Username", "Email", "Type", "Created At", "Is Active");
+        List<String> columns = List.of("ID", "Full name", "Username", "Email", "Type", "Created At", "Is Active", "Delete Flag");
         try (Workbook workbook = new XSSFWorkbook()){
             Sheet sheet = workbook.createSheet("Accounts");
 
@@ -169,6 +169,7 @@ public class AccountService implements IService<Account>, IExcelService<Account>
                 dataRow.createCell(4).setCellValue(accounts.get(i).getType().getName());
                 dataRow.createCell(5).setCellValue(accounts.get(i).getCreatedAt().toString());
                 dataRow.createCell(6).setCellValue(accounts.get(i).getActive());
+                dataRow.createCell(7).setCellValue(accounts.get(i).getDeleteFlag());
             }
 
             // Making size of the columns auto resize to fit data
@@ -200,6 +201,7 @@ public class AccountService implements IService<Account>, IExcelService<Account>
                 account.setType(AccountType.of(row.getCell(4).getStringCellValue()));
                 account.setCreatedAt(LocalDateTime.parse(row.getCell(5).getStringCellValue()));
                 account.setActive(row.getCell(6).getBooleanCellValue());
+                account.setDeleteFlag(row.getCell(7).getBooleanCellValue());
                 accounts.add(account);
             }
             return accounts;

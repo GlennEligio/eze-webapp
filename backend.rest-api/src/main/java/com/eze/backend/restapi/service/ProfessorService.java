@@ -114,7 +114,7 @@ public class ProfessorService implements IService<Professor>, IExcelService<Prof
 
     @Override
     public ByteArrayInputStream listToExcel(List<Professor> professors) {
-        List<String> columnName = List.of("ID", "Name", "Contact Number");
+        List<String> columnName = List.of("ID", "Name", "Contact Number", "Delete flag");
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("Professor");
 
@@ -131,6 +131,7 @@ public class ProfessorService implements IService<Professor>, IExcelService<Prof
                 dataRow.createCell(0).setCellValue(prof.getId());
                 dataRow.createCell(1).setCellValue(prof.getName());
                 dataRow.createCell(2).setCellValue(prof.getContactNumber());
+                dataRow.createCell(3).setCellValue(prof.getDeleteFlag());
             }
 
             // Making size of the columns auto resize to fit data
@@ -158,6 +159,7 @@ public class ProfessorService implements IService<Professor>, IExcelService<Prof
                 professor.setId((long) row.getCell(0, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK).getNumericCellValue());
                 professor.setName(row.getCell(1).getStringCellValue());
                 professor.setContactNumber(row.getCell(2).getStringCellValue());
+                professor.setDeleteFlag(row.getCell(3).getBooleanCellValue());
                 professors.add(professor);
             }
             return professors;

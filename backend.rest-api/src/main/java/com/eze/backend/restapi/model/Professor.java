@@ -43,6 +43,9 @@ public class Professor implements Serializable {
         if(newProf.getContactNumber() != null) {
             this.contactNumber = newProf.getContactNumber();
         }
+        if(newProf.getDeleteFlag() != null) {
+            this.deleteFlag = newProf.getDeleteFlag();
+        }
     }
 
     public static ProfessorDto toProfessorDto(Professor professor) {
@@ -61,11 +64,11 @@ public class Professor implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Professor professor = (Professor) o;
-        return id.equals(professor.id) && name.equals(professor.name) && contactNumber.equals(professor.contactNumber);
+        return Objects.equals(id, professor.id) && Objects.equals(name, professor.name) && Objects.equals(contactNumber, professor.contactNumber) && Objects.equals(deleteFlag, professor.deleteFlag);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, contactNumber);
+        return Objects.hash(id, name, contactNumber, deleteFlag);
     }
 }
