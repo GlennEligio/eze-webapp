@@ -3,7 +3,7 @@ import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import AccountService from "../api/AccountService";
 import useHttp, { RequestConfig } from "../hooks/useHttp";
-import useInput from "../hooks/useInput";
+import useInput, { InputType } from "../hooks/useInput";
 import { authActions } from "../store/authSlice";
 import { LoginResponseDto } from "../api/AccountService";
 import { validateNotEmpty } from "../validation/validations";
@@ -36,7 +36,11 @@ const Login = () => {
     valueChangeHandler: unameChangeHandler,
     inputBlurHandler: unameBlurHandler,
     reset: resetUnameInput,
-  } = useInput(validateNotEmpty("Username"), "");
+  } = useInput<string, HTMLInputElement>(
+    validateNotEmpty("Username"),
+    "",
+    InputType.TEXT
+  );
   const {
     value: enteredPass,
     hasError: passInputHasError,
@@ -44,7 +48,11 @@ const Login = () => {
     valueChangeHandler: passChangeHandler,
     inputBlurHandler: passBlurHandler,
     reset: resetPassInput,
-  } = useInput(validateNotEmpty("Password"), "");
+  } = useInput<string, HTMLInputElement>(
+    validateNotEmpty("Password"),
+    "",
+    InputType.TEXT
+  );
   const dispatch = useDispatch();
   const navigate = useNavigate();
 

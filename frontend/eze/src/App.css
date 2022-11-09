@@ -44,6 +44,7 @@
 .invalid span {
   color: #b40e0e;
   margin-left: 0.5rem;
+  font-size: small;
 }
 
 .eze-menu {
