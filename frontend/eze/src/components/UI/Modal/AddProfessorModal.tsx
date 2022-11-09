@@ -9,18 +9,41 @@ import { useSelector } from "react-redux";
 import { IRootState } from "../../../store";
 import { useDispatch } from "react-redux";
 import { professorActions } from "../../../store/professorSlice";
+import {
+  validateNotEmpty,
+  validatePhMobileNumber,
+} from "../../../validation/validations";
+import useInput, { InputType } from "../../../hooks/useInput";
 
 const AddProfessorModal = () => {
   const auth = useSelector((state: IRootState) => state.auth);
   const dispatch = useDispatch();
-  const [name, setName] = useState("");
-  const [contactNumber, setContactNumber] = useState("");
   const {
     sendRequest: createProfessor,
     data,
     error,
     status,
   } = useHttp<Professor>(ProfessorService.createProfessor, false);
+
+  // useInput for the controlled input and validation
+  const {
+    value: name,
+    hasError: nameInputHasError,
+    isValid: nameIsValid,
+    valueChangeHandler: nameChangeHandler,
+    inputBlurHandler: nameBlurHandler,
+    reset: resetNameInput,
+    errorMessage: nameErrorMessage,
+  } = useInput(validateNotEmpty("Name"), "", InputType.TEXT);
+  const {
+    value: contactNumber,
+    hasError: contactNumberInputHasError,
+    isValid: contactNumberIsValid,
+    valueChangeHandler: contactNumberChangeHandler,
+    inputBlurHandler: contactNumberBlurHandler,
+    reset: resetContactNumber,
+    errorMessage: contactNumberErrorMessage,
+  } = useInput(validatePhMobileNumber("Contact number"), "", InputType.TEXT);
 
   // Add the received Professor to the Redux
   useEffect(() => {
@@ -37,7 +60,7 @@ const AddProfessorModal = () => {
       contactNumber,
     };
 
-    if (!isValidProfessor(newProfessor)) {
+    if (!nameIsValid || !contactNumberIsValid) {
       console.log("Invalid professor");
       return;
     }
@@ -51,8 +74,8 @@ const AddProfessorModal = () => {
       relativeUrl: "/api/v1/professors",
     };
     createProfessor(requestConf);
-    setContactNumber("");
-    setName("");
+    resetContactNumber();
+    resetNameInput();
   };
 
   return (
@@ -78,27 +101,37 @@ const AddProfessorModal = () => {
           </div>
           <div className="modal-body">
             <form onSubmit={addAccountHandler}>
-              <div className="form-floating mb-3">
-                <input
-                  type="text"
-                  className="form-control"
-                  id="newProfessorName"
-                  onChange={(e) => setName(e.target.value)}
-                  value={name}
-                />
-                <label htmlFor="newProfessorName">Name</label>
+              <div className={nameInputHasError ? "invalid" : ""}>
+                {nameInputHasError && <span>{nameErrorMessage}</span>}
+                <div className="form-floating mb-3">
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="newProfessorName"
+                    onChange={nameChangeHandler}
+                    onBlur={nameBlurHandler}
+                    value={name}
+                  />
+                  <label htmlFor="newProfessorName">Name</label>
+                </div>
               </div>
-              <div className="form-floating mb-3">
-                <input
-                  type="text"
-                  className="form-control"
-                  id="newProfessorContactNumber"
-                  onChange={(e) => setContactNumber(e.target.value)}
-                  value={contactNumber}
-                />
-                <label htmlFor="newProfessorContactNumber">
-                  Contact Number
-                </label>
+              <div className={contactNumberInputHasError ? "invalid" : ""}>
+                {contactNumberInputHasError && (
+                  <span>{contactNumberErrorMessage}</span>
+                )}
+                <div className="form-floating mb-3">
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="newProfessorContactNumber"
+                    onChange={contactNumberChangeHandler}
+                    onBlur={contactNumberBlurHandler}
+                    value={contactNumber}
+                  />
+                  <label htmlFor="newProfessorContactNumber">
+                    Contact Number
+                  </label>
+                </div>
               </div>
               <div className="modal-footer">
                 <button

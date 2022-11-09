@@ -17,6 +17,7 @@ interface UseInputHookReturn<T, E> {
   isValid: boolean;
   errorMessage: string;
   reset: () => void;
+  set: (newValue: T) => void;
   inputBlurHandler: () => void;
   valueChangeHandler: (event: ChangeEvent<E>) => void;
 }
@@ -57,6 +58,10 @@ const useInput = <T, E>(
     setIsTouched(true);
   };
 
+  const set = (newValue: T) => {
+    setEnteredValue(newValue);
+  };
+
   const reset = () => {
     setEnteredValue(defaultValue);
     setIsTouched(false);
@@ -68,6 +73,7 @@ const useInput = <T, E>(
     isValid: valueIsValid,
     errorMessage,
     reset,
+    set,
     inputBlurHandler,
     valueChangeHandler,
   };

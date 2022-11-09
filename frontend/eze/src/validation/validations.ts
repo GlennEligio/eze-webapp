@@ -1,11 +1,11 @@
 import validator from "validator";
 
 export const validateNotEmpty = (inputName: string) => {
-  return (inputValue: any) => {
+  return (inputValue: string) => {
     let errorMessage = "";
     let valueIsValid = true;
 
-    if (validator.isEmpty(inputValue)) {
+    if (validator.isEmpty(inputValue.trim())) {
       errorMessage = `${inputName} can't be empty`;
       valueIsValid = false;
     }
@@ -17,13 +17,17 @@ export const validateNotEmpty = (inputName: string) => {
   };
 };
 
-export const validatePattern = (inputName: string, pattern: string) => {
+export const validatePattern = (
+  inputName: string,
+  pattern: RegExp,
+  message?: string
+) => {
   return (inputValue: any) => {
     let errorMessage = "";
     let valueIsValid = true;
 
-    if (validator.isEmpty(inputValue)) {
-      errorMessage = `${inputName} can't be empty`;
+    if (!validator.matches(inputValue, pattern)) {
+      errorMessage = `${inputName} ${message}`;
       valueIsValid = false;
     }
 
@@ -34,13 +38,50 @@ export const validatePattern = (inputName: string, pattern: string) => {
   };
 };
 
-export const validatePhMobileNumber = (inputName: string, number: string) => {
+export const validateContains = (
+  inputName: string,
+  listOfAllowedInputs: string[]
+) => {
+  return (inputValue: any) => {
+    let errorMessage = "";
+    let valueIsValid = true;
+
+    if (!listOfAllowedInputs.includes(inputValue)) {
+      errorMessage = `${inputName} can only be ${listOfAllowedInputs}`;
+      valueIsValid = false;
+    }
+
+    return {
+      valueIsValid,
+      errorMessage,
+    };
+  };
+};
+
+export const validatePhMobileNumber = (inputName: string) => {
   return (inputValue: any) => {
     let errorMessage = "";
     let valueIsValid = true;
 
     if (!validator.isMobilePhone(inputValue, "en-PH")) {
       errorMessage = `${inputName} must be valid PH mobile number`;
+      valueIsValid = false;
+    }
+
+    return {
+      valueIsValid,
+      errorMessage,
+    };
+  };
+};
+
+export const validatePositive = (inputName: string) => {
+  return (inputValue: string) => {
+    let errorMessage = "";
+    let valueIsValid = true;
+
+    if (!(validator.isNumeric(inputValue) && Number.parseInt(inputValue) > 0)) {
+      errorMessage = `${inputName} must be positive integer`;
       valueIsValid = false;
     }
 

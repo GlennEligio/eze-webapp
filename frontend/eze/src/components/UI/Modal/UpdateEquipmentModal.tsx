@@ -9,16 +9,20 @@ import { useSelector } from "react-redux";
 import { IRootState } from "../../../store";
 import { equipmentActions } from "../../../store/equipmentSlice";
 import { useDispatch } from "react-redux";
+import useInput from "../../../hooks/useInput";
+import { validateContains } from "../../../validation/validations";
+import { validateNotEmpty } from "../../../validation/validations";
+import { InputType } from "../../../hooks/useInput";
 
 const UpdateEquipmentModal = () => {
   const auth = useSelector((state: IRootState) => state.auth);
   const equipment = useSelector((state: IRootState) => state.equipment);
   const dispatch = useDispatch();
-  const [name, setName] = useState("");
-  const [status, setStatus] = useState("GOOD");
-  const [barcode, setBarcode] = useState("");
+  // const [name, setName] = useState("");
+  // const [status, setStatus] = useState("GOOD");
+  // const [barcode, setBarcode] = useState("");
   const [defectiveSince, setDefectiveSince] = useState("");
-  const [isDuplicable, setIsDuplicable] = useState(true);
+  // const [isDuplicable, setIsDuplicable] = useState(true);
   const {
     sendRequest: updateEquipment,
     data,
@@ -26,6 +30,60 @@ const UpdateEquipmentModal = () => {
     status: requestStatus,
   } = useHttp<Equipment>(EquipmentService.updateEquipment, false);
 
+  // useInput for the controlled input and validation
+  const {
+    value: name,
+    hasError: nameInputHasError,
+    isValid: nameIsValid,
+    valueChangeHandler: nameChangeHandler,
+    inputBlurHandler: nameBlurHandler,
+    reset: resetNameInput,
+    errorMessage: nameErrorMessage,
+    set: setName,
+  } = useInput(validateNotEmpty("Equipment name"), "", InputType.TEXT);
+
+  const {
+    value: barcode,
+    hasError: barcodeInputHasError,
+    isValid: barcodeIsValid,
+    valueChangeHandler: barcodeChangeHandler,
+    inputBlurHandler: barcodeBlurHandler,
+    reset: resetBarcodeInput,
+    errorMessage: barcodeErrorMessage,
+    set: setBarcode,
+  } = useInput(validateNotEmpty("Barcode"), "", InputType.TEXT);
+
+  const {
+    value: status,
+    hasError: statusInputHasError,
+    isValid: statusIsValid,
+    valueChangeHandler: statusChangeHandler,
+    inputBlurHandler: statusBlurHandler,
+    reset: resetStatusInput,
+    errorMessage: statusErrorMessage,
+    set: setStatus,
+  } = useInput(
+    validateContains("Status", ["GOOD", "DEFECTIVE"]),
+    "GOOD",
+    InputType.SELECT
+  );
+
+  const {
+    value: isDuplicable,
+    hasError: isDuplicableInputHasError,
+    isValid: isDuplicableIsValid,
+    valueChangeHandler: isDuplicableChangeHandler,
+    inputBlurHandler: isDuplicableBlurHander,
+    reset: resetIsDuplicable,
+    errorMessage: isDuplicableErrorMessage,
+    set: setIsDuplicable,
+  } = useInput(
+    validateContains("Is Duplicable", ["YES", "NO"]),
+    "YES",
+    InputType.SELECT
+  );
+
+  // prepopulate inputs based on selectedEquipment
   useEffect(() => {
     const selectedEquipment = equipment.selectedEquipment;
     if (selectedEquipment === null) return;
@@ -36,17 +94,20 @@ const UpdateEquipmentModal = () => {
       selectedEquipment.defectiveSince ? selectedEquipment.defectiveSince : ""
     );
     setIsDuplicable(
-      selectedEquipment.isDuplicable ? selectedEquipment.isDuplicable : true
+      selectedEquipment.isDuplicable
+        ? selectedEquipment.isDuplicable
+          ? "YES"
+          : "NO"
+        : "YES"
     );
   }, [equipment.selectedEquipment]);
 
+  // Update Equipment in the Redux
   useEffect(() => {
-    if (requestStatus == "completed") {
-      if (error === null) {
-        dispatch(equipmentActions.updateEquipment({ equipment: data }));
-      }
+    if (requestStatus == "completed" && data && error === null) {
+      dispatch(equipmentActions.updateEquipment({ equipment: data }));
     }
-  }, [data]);
+  }, [data, requestStatus, error]);
 
   const updateEquipmentHandler = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -55,10 +116,15 @@ const UpdateEquipmentModal = () => {
       status: status,
       barcode: barcode,
       defectiveSince: defectiveSince,
-      isDuplicable: isDuplicable,
+      isDuplicable: isDuplicable === "YES" ? true : false,
     };
 
-    if (!isValidEquipment(updatedEquipment)) {
+    if (
+      !nameIsValid ||
+      !statusIsValid ||
+      !barcodeIsValid ||
+      !isDuplicableIsValid
+    ) {
       console.log("Invalid equipment");
       return;
     }
@@ -98,55 +164,71 @@ const UpdateEquipmentModal = () => {
           </div>
           <div className="modal-body">
             <form onSubmit={updateEquipmentHandler}>
-              <div className="form-floating mb-3">
-                <input
-                  type="text"
-                  className="form-control"
-                  id="updateEquipmentName"
-                  placeholder="Sample equipment name"
-                  onChange={(e) => setName(e.target.value)}
-                  value={name}
-                />
-                <label htmlFor="updateEquipmentName">Name</label>
+              <div className={nameInputHasError ? "invalid" : ""}>
+                {nameInputHasError && <span>{nameErrorMessage}</span>}
+                <div className="form-floating mb-3">
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="updateEquipmentName"
+                    placeholder="Sample equipment name"
+                    onChange={nameChangeHandler}
+                    onBlur={nameBlurHandler}
+                    value={name}
+                  />
+                  <label htmlFor="updateEquipmentName">Name</label>
+                </div>
               </div>
-              <div className="form-floating mb-3">
-                <select
-                  className="form-select"
-                  id="updateEquipmentStatus"
-                  aria-label="Status"
-                  onChange={(e) => setStatus(e.currentTarget.value)}
-                  value={status}
-                >
-                  <option value="GOOD">GOOD</option>
-                  <option value="DEFECTIVE">DEFECTIVE</option>
-                </select>
-                <label htmlFor="updateEquipmentStatus">Status</label>
+              <div className={statusInputHasError ? "invalid" : ""}>
+                {statusInputHasError && <span>{statusErrorMessage}</span>}
+                <div className="form-floating mb-3">
+                  <select
+                    className="form-select"
+                    id="updateEquipmentStatus"
+                    aria-label="Status"
+                    onChange={statusChangeHandler}
+                    onBlur={statusBlurHandler}
+                    value={status}
+                  >
+                    <option value="GOOD">GOOD</option>
+                    <option value="DEFECTIVE">DEFECTIVE</option>
+                  </select>
+                  <label htmlFor="updateEquipmentStatus">Status</label>
+                </div>
               </div>
-              <div className="form-floating mb-3">
-                <select
-                  className="form-select"
-                  id="updateEquipmentDuplicable"
-                  aria-label="IsDuplicable"
-                  onChange={(e) =>
-                    setIsDuplicable(e.currentTarget.value === "YES")
-                  }
-                  value={isDuplicable ? "YES" : "NO"}
-                >
-                  <option value="YES">YES</option>
-                  <option value="NO">NO</option>
-                </select>
-                <label htmlFor="updateEquipmentDuplicable">Duplicable?</label>
+              <div className={isDuplicableInputHasError ? "invalid" : ""}>
+                {isDuplicableInputHasError && (
+                  <span>{isDuplicableErrorMessage}</span>
+                )}
+                <div className="form-floating mb-3">
+                  <select
+                    className="form-select"
+                    id="updateEquipmentDuplicable"
+                    aria-label="IsDuplicable"
+                    onChange={isDuplicableChangeHandler}
+                    onBlur={isDuplicableBlurHander}
+                    value={isDuplicable}
+                  >
+                    <option value="YES">YES</option>
+                    <option value="NO">NO</option>
+                  </select>
+                  <label htmlFor="updateEquipmentDuplicable">Duplicable?</label>
+                </div>
               </div>
-              <div className="form-floating mb-3">
-                <input
-                  type="text"
-                  className="form-control"
-                  id="updateEquipmentBarcode"
-                  placeholder="SOMEBARCODESTRING"
-                  onChange={(e) => setBarcode(e.target.value)}
-                  value={barcode}
-                />
-                <label htmlFor="updateEquipmentBarcode">Barcode</label>
+              <div className={barcodeInputHasError ? "invalid" : ""}>
+                {barcodeInputHasError && <span>{barcodeErrorMessage}</span>}
+                <div className="form-floating mb-3">
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="updateEquipmentBarcode"
+                    placeholder="SOMEBARCODESTRING"
+                    onChange={barcodeChangeHandler}
+                    onBlur={barcodeBlurHandler}
+                    value={barcode}
+                  />
+                  <label htmlFor="updateEquipmentBarcode">Barcode</label>
+                </div>
               </div>
               <div className="form-floating mb-3">
                 <input

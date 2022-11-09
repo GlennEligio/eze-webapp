@@ -10,6 +10,11 @@ import { IRootState } from "../../../store";
 import { useDispatch } from "react-redux";
 import { yearLevelAction } from "../../../store/yearLevelSlice";
 import { YearLevel } from "../../../api/YearLevelService";
+import {
+  validateNotEmpty,
+  validatePositive,
+} from "../../../validation/validations";
+import useInput, { InputType } from "../../../hooks/useInput";
 
 interface AddYearSectionModalProps {
   yearLevels: YearLevel[];
@@ -18,8 +23,8 @@ interface AddYearSectionModalProps {
 const AddYearSectionModal: FC<AddYearSectionModalProps> = (props) => {
   const auth = useSelector((state: IRootState) => state.auth);
   const dispatch = useDispatch();
-  const [yearNumber, setYearNumber] = useState("");
-  const [sectionName, setSectionName] = useState("");
+  // const [yearNumber, setYearNumber] = useState("");
+  // const [sectionName, setSectionName] = useState("");
   const {
     sendRequest: createYearSection,
     data,
@@ -27,9 +32,31 @@ const AddYearSectionModal: FC<AddYearSectionModalProps> = (props) => {
     status,
   } = useHttp<YearSection>(YearSectionService.createYearSection, false);
 
+  // useInput for the controlled input and validation
+  const {
+    value: yearNumber,
+    hasError: yearNumberInputHasError,
+    isValid: yearNumberIsValid,
+    valueChangeHandler: yearNumberChangeHandler,
+    inputBlurHandler: yearNumberBlurHandler,
+    reset: resetYearNumber,
+    errorMessage: yearNumberErrorMessage,
+    set: setYearNumber,
+  } = useInput(validatePositive("Year number"), "", InputType.SELECT);
+  const {
+    value: sectionName,
+    hasError: sectionNameInputHasError,
+    isValid: sectionNameIsValid,
+    valueChangeHandler: sectionNameChangeHandler,
+    inputBlurHandler: sectionNameBlurHandler,
+    reset: resetSectionName,
+    errorMessage: sectionNameErrorMessage,
+    set: setSectionName,
+  } = useInput(validateNotEmpty("Year number"), "", InputType.TEXT);
+
+  // Adding YearSection to a YearLevel after a successful request
   useEffect(() => {
     if (status === "completed" && error === null) {
-      console.log("Adding yearSection in the Redux", yearNumber, data);
       dispatch(
         yearLevelAction.addYearLevelSection({
           yearNumber: Number.parseInt(yearNumber),
@@ -96,36 +123,48 @@ const AddYearSectionModal: FC<AddYearSectionModalProps> = (props) => {
           </div>
           <div className="modal-body">
             <form onSubmit={addYearSectionHandler}>
-              <div className="form-floating mb-3">
-                <select
-                  className="form-select"
-                  id="newYearSectionYearLevel"
-                  aria-label="IsDuplicable"
-                  onChange={(e) => setYearNumber(e.currentTarget.value)}
-                  value={yearNumber}
-                >
-                  {props.yearLevels &&
-                    [...props.yearLevels]
-                      .sort((yl1, yl2) => yl1.yearNumber - yl2.yearNumber)
-                      .map((yl) => {
-                        return (
-                          <option key={yl.yearNumber} value={yl.yearNumber}>
-                            {yl.yearNumber}
-                          </option>
-                        );
-                      })}
-                </select>
-                <label htmlFor="newYearSectionYearLevel">Year Level</label>
+              <div className={yearNumberInputHasError ? "invalid" : ""}>
+                {yearNumberInputHasError && (
+                  <span>{yearNumberErrorMessage}</span>
+                )}
+                <div className="form-floating mb-3">
+                  <select
+                    className="form-select"
+                    id="newYearSectionYearLevel"
+                    aria-label="IsDuplicable"
+                    onChange={yearNumberChangeHandler}
+                    onBlur={yearNumberBlurHandler}
+                    value={yearNumber}
+                  >
+                    {props.yearLevels &&
+                      [...props.yearLevels]
+                        .sort((yl1, yl2) => yl1.yearNumber - yl2.yearNumber)
+                        .map((yl) => {
+                          return (
+                            <option key={yl.yearNumber} value={yl.yearNumber}>
+                              {yl.yearNumber}
+                            </option>
+                          );
+                        })}
+                  </select>
+                  <label htmlFor="newYearSectionYearLevel">Year Level</label>
+                </div>
               </div>
-              <div className="form-floating mb-3">
-                <input
-                  type="text"
-                  className="form-control"
-                  id="newYearSectionName"
-                  onChange={(e) => setSectionName(e.target.value)}
-                  value={sectionName}
-                />
-                <label htmlFor="newYearSectionName">Section name</label>
+              <div className={sectionNameInputHasError ? "invalid" : ""}>
+                {sectionNameInputHasError && (
+                  <span>{sectionNameErrorMessage}</span>
+                )}
+                <div className="form-floating mb-3">
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="newYearSectionName"
+                    onChange={sectionNameChangeHandler}
+                    onBlur={sectionNameBlurHandler}
+                    value={sectionName}
+                  />
+                  <label htmlFor="newYearSectionName">Section name</label>
+                </div>
               </div>
               <div className="modal-footer">
                 <button

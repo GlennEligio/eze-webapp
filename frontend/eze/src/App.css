@@ -36,7 +36,8 @@
   max-height: 50% !important;
 }
 
-.invalid input {
+.invalid input,
+.invalid select {
   border: 2px solid #b40e0e !important;
   background-color: #fddddd !important;
 }

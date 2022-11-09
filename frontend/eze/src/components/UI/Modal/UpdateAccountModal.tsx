@@ -10,17 +10,21 @@ import { useSelector } from "react-redux";
 import { IRootState } from "../../../store";
 import { useDispatch } from "react-redux";
 import { accountActions } from "../../../store/accountSlice";
-import { isValidStudent } from "../../../api/StudentService";
+// import { isValidStudent } from "../../../api/StudentService";
+import useInput from "../../../hooks/useInput";
+import { InputType } from "../../../hooks/useInput";
+import { validateContains } from "../../../validation/validations";
+import { validateNotEmpty } from "../../../validation/validations";
 
 const UpdateAccountModal = () => {
   const auth = useSelector((state: IRootState) => state.auth);
   const account = useSelector((state: IRootState) => state.account);
   const dispatch = useDispatch();
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [fullName, setFullName] = useState("");
+  // const [username, setUsername] = useState("");
+  // const [password, setPassword] = useState("");
+  // const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
-  const [type, setType] = useState(AccountType.STUDENT_ASSISTANT);
+  // const [type, setType] = useState(AccountType.STUDENT_ASSISTANT);
   const [active, setActive] = useState(true);
   const {
     sendRequest: updateAccount,
@@ -28,6 +32,48 @@ const UpdateAccountModal = () => {
     error,
     status: requestStatus,
   } = useHttp<Account>(AccountService.updateAccount, false);
+
+  // useInput for the controlled input and validation
+  const {
+    value: fullName,
+    hasError: fullNameInputHasError,
+    isValid: fullNameIsValid,
+    valueChangeHandler: fullNameChangeHandler,
+    inputBlurHandler: fullNameBlurHandler,
+    errorMessage: fullNameErrorMessage,
+    set: setFullName,
+  } = useInput(validateNotEmpty("Full name"), "", InputType.TEXT);
+  const {
+    value: username,
+    hasError: usernameInputHasError,
+    isValid: usernameIsValid,
+    errorMessage: usernameErrorMessage,
+    set: setUsername,
+  } = useInput(validateNotEmpty("Username"), "", InputType.TEXT);
+  const {
+    value: password,
+    hasError: passwordInputHasError,
+    isValid: passwordIsValid,
+    valueChangeHandler: passwordChangeHandler,
+    inputBlurHandler: passwordBlurHandler,
+    errorMessage: passwordErrorMessage,
+  } = useInput(validateNotEmpty("Password"), "", InputType.TEXT);
+  const {
+    value: type,
+    hasError: typeInputHasError,
+    isValid: typeIsValid,
+    valueChangeHandler: typeChangeHandler,
+    inputBlurHandler: typeBlurHandler,
+    set: setType,
+    errorMessage: typeErrorMessage,
+  } = useInput(
+    validateContains("Type", [
+      AccountType.ADMIN,
+      AccountType.STUDENT_ASSISTANT,
+    ]),
+    AccountType.STUDENT_ASSISTANT,
+    InputType.SELECT
+  );
 
   // Add account in the Context
   useEffect(() => {
@@ -61,7 +107,12 @@ const UpdateAccountModal = () => {
       username,
     };
 
-    if (!isValidAccount(updatedAccount)) {
+    if (
+      !fullNameIsValid ||
+      !passwordIsValid ||
+      !typeIsValid ||
+      !usernameIsValid
+    ) {
       console.log("Invalid Account");
       return;
     }
@@ -98,45 +149,50 @@ const UpdateAccountModal = () => {
           </div>
           <div className="modal-body">
             <form onSubmit={updateAccountHandler}>
-              <div className="form-floating mb-3">
-                <input
-                  type="text"
-                  className="form-control"
-                  id="updateAccountUsername"
-                  onChange={(e) => setUsername(e.target.value)}
-                  value={username}
-                />
-                <label htmlFor="updateAccountUsername">Username</label>
+              <div className={usernameInputHasError ? "invalid" : ""}>
+                {usernameInputHasError && <span>{usernameErrorMessage}</span>}
+                <div className="form-floating mb-3">
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="updateAccountUsername"
+                    readOnly
+                    value={username}
+                  />
+                  <label htmlFor="updateAccountUsername">Username</label>
+                </div>
               </div>
-              <div className="form-floating mb-3">
-                <input
-                  type="text"
-                  className="form-control"
-                  id="updateAccountPassword"
-                  onChange={(e) => setPassword(e.target.value)}
-                  value={password}
-                />
-                <label htmlFor="updateAccountPassword">Password</label>
+              <div className={passwordInputHasError ? "invalid" : ""}>
+                {passwordInputHasError && <span>{passwordErrorMessage}</span>}
+                <div className="form-floating mb-3">
+                  <input
+                    type="password"
+                    className="form-control"
+                    id="updateAccountPassword"
+                    onChange={passwordChangeHandler}
+                    onBlur={passwordBlurHandler}
+                    value={password}
+                  />
+                  <label htmlFor="updateAccountPassword">Password</label>
+                </div>
               </div>
-              <div className="form-floating mb-3">
-                <select
-                  className="form-select"
-                  id="updateAccountType"
-                  onChange={(e) =>
-                    setType(
-                      e.currentTarget.value === "ADMIN"
-                        ? AccountType.ADMIN
-                        : AccountType.STUDENT_ASSISTANT
-                    )
-                  }
-                  value={type}
-                >
-                  <option value={AccountType.ADMIN}>ADMIN</option>
-                  <option value={AccountType.STUDENT_ASSISTANT}>
-                    STUDENT ASSISTANT
-                  </option>
-                </select>
-                <label htmlFor="updateAccountType">Type</label>
+              <div className={typeInputHasError ? "invalid" : ""}>
+                {typeInputHasError && <span>{typeErrorMessage}</span>}
+                <div className="form-floating mb-3">
+                  <select
+                    className="form-select"
+                    id="updateAccountType"
+                    onChange={typeChangeHandler}
+                    onBlur={typeBlurHandler}
+                    value={type}
+                  >
+                    <option value={AccountType.ADMIN}>ADMIN</option>
+                    <option value={AccountType.STUDENT_ASSISTANT}>
+                      STUDENT ASSISTANT
+                    </option>
+                  </select>
+                  <label htmlFor="updateAccountType">Type</label>
+                </div>
               </div>
               <div className="form-floating mb-3">
                 <select
@@ -150,12 +206,16 @@ const UpdateAccountModal = () => {
                 </select>
                 <label htmlFor="updateAccountActive">Active?</label>
               </div>
+              <div className={fullNameInputHasError ? "invalid" : ""}>
+                {fullNameInputHasError && <span>{fullNameErrorMessage}</span>}
+              </div>
               <div className="form-floating mb-3">
                 <input
                   type="text"
                   className="form-control"
                   id="updateAccountFullname"
-                  onChange={(e) => setFullName(e.target.value)}
+                  onChange={fullNameChangeHandler}
+                  onBlur={fullNameBlurHandler}
                   value={fullName}
                 />
                 <label htmlFor="updateAccountFullname">Full name</label>

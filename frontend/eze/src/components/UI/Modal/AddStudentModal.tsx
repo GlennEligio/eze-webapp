@@ -11,18 +11,11 @@ import { studentActions } from "../../../store/studentSlice";
 import { useDispatch } from "react-redux";
 import { YearLevel } from "../../../api/YearLevelService";
 import { YearSection } from "../../../api/YearSectionService";
-
-// id: number;
-// studentNumber: string;
-// fullName: string;
-// yearAndSection: string;
-// contactNumber: string;
-// birthday: string;
-// address: string;
-// email: string;
-// guardian: string;
-// guardianNumber: string;
-// yearLevel: string;
+import useInput, { InputType } from "../../../hooks/useInput";
+import {
+  validateNotEmpty,
+  validatePattern,
+} from "../../../validation/validations";
 
 interface AddStudentModalProps {
   yearLevels: YearLevel[];
@@ -31,7 +24,7 @@ interface AddStudentModalProps {
 const AddStudentModal: FC<AddStudentModalProps> = (props) => {
   const auth = useSelector((state: IRootState) => state.auth);
   const dispatch = useDispatch();
-  const [studentNumber, setStudentNumber] = useState("");
+  // const [studentNumber, setStudentNumber] = useState("");
   const [fullName, setFullName] = useState("");
   const [yearAndSection, setYearAndSection] = useState("BSECE 1-1");
   const [contactNumber, setContactNumber] = useState("");
@@ -50,6 +43,25 @@ const AddStudentModal: FC<AddStudentModalProps> = (props) => {
     error,
     status,
   } = useHttp<Student>(StudentService.createStudent, false);
+
+  // useInput for the controlled input and validation
+  const {
+    value: studentNumber,
+    hasError: studentNumberInputHasError,
+    isValid: studentNumberIsValid,
+    valueChangeHandler: studentNumberChangeHandler,
+    inputBlurHandler: studentNumberBlurHandler,
+    reset: resetStudentNumber,
+    errorMessage: studentNumberErrorMessage,
+  } = useInput(
+    validatePattern(
+      "Student number",
+      /^\d{4}-\d{5}-[(a-z)|(A-Z)]{2}-\d{2}$/,
+      "must be a valid PUP Student No."
+    ),
+    "",
+    InputType.TEXT
+  );
 
   // Add new Student in Context when request is success
   useEffect(() => {
@@ -87,7 +99,7 @@ const AddStudentModal: FC<AddStudentModalProps> = (props) => {
     }
   }, [yearLevels, yearNumber]);
 
-  const onAddStudent = (event: React.FormEvent<HTMLFormElement>) => {
+  const addStudentHandler = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     console.log("Adding Student");
     const newStudent: CreateUpdateStudentDto = {
@@ -121,7 +133,7 @@ const AddStudentModal: FC<AddStudentModalProps> = (props) => {
       relativeUrl: "/api/v1/students?complete=false",
     };
     createStudent(requestConf);
-    setStudentNumber("");
+    resetStudentNumber();
     setContactNumber("");
     setFullName("");
     setYearAndSection("BSECE 5-1");
@@ -155,17 +167,23 @@ const AddStudentModal: FC<AddStudentModalProps> = (props) => {
             ></button>
           </div>
           <div className="modal-body">
-            <form onSubmit={onAddStudent}>
+            <form onSubmit={addStudentHandler}>
               {/** Student Number input */}
-              <div className="form-floating mb-3">
-                <input
-                  type="text"
-                  className="form-control"
-                  id="newStudentSN"
-                  onChange={(e) => setStudentNumber(e.target.value)}
-                  value={studentNumber}
-                />
-                <label htmlFor="newStudentSN">Student Number</label>
+              <div className={studentNumberInputHasError ? "invalid" : ""}>
+                {studentNumberInputHasError && (
+                  <span>{studentNumberErrorMessage}</span>
+                )}
+                <div className="form-floating mb-3">
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="newStudentSN"
+                    onChange={studentNumberChangeHandler}
+                    onBlur={studentNumberBlurHandler}
+                    value={studentNumber}
+                  />
+                  <label htmlFor="newStudentSN">Student Number</label>
+                </div>
               </div>
               {/** Full name input */}
               <div className="form-floating mb-3">

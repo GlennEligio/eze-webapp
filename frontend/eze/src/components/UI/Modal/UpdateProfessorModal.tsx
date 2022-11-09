@@ -9,6 +9,11 @@ import { useSelector } from "react-redux";
 import { IRootState } from "../../../store";
 import { useDispatch } from "react-redux";
 import { professorActions } from "../../../store/professorSlice";
+import {
+  validateNotEmpty,
+  validatePhMobileNumber,
+} from "../../../validation/validations";
+import useInput, { InputType } from "../../../hooks/useInput";
 
 interface UpdateProfessorModalProps {
   selectedProfessor: Professor | null;
@@ -17,14 +22,41 @@ interface UpdateProfessorModalProps {
 const UpdateProfessorModal: React.FC<UpdateProfessorModalProps> = (props) => {
   const auth = useSelector((state: IRootState) => state.auth);
   const dispatch = useDispatch();
-  const [name, setName] = useState("");
-  const [contactNumber, setContactNumber] = useState("");
+  // const [name, setName] = useState("");
+  // const [contactNumber, setContactNumber] = useState("");
   const {
     sendRequest: updateProfessor,
     data,
     error,
     status,
   } = useHttp<Professor>(ProfessorService.updateProfessor, false);
+
+  // useInput for the controlled input and validation
+  const {
+    value: name,
+    hasError: nameInputHasError,
+    isValid: nameIsValid,
+    errorMessage: nameErrorMessage,
+    set: setName,
+  } = useInput<string, HTMLInputElement>(
+    validateNotEmpty("Name"),
+    "",
+    InputType.TEXT
+  );
+  const {
+    value: contactNumber,
+    hasError: contactNumberInputHasError,
+    isValid: contactNumberIsValid,
+    valueChangeHandler: contactNumberChangeHandler,
+    inputBlurHandler: contactNumberBlurHandler,
+    reset: resetContactNumber,
+    errorMessage: contactNumberErrorMessage,
+    set: setContactNumber,
+  } = useInput<string, HTMLInputElement>(
+    validatePhMobileNumber("Contact number"),
+    "",
+    InputType.TEXT
+  );
 
   // Add the received Professor to the Redux
   useEffect(() => {
@@ -49,7 +81,7 @@ const UpdateProfessorModal: React.FC<UpdateProfessorModalProps> = (props) => {
       contactNumber,
     };
 
-    if (!isValidProfessor(updatedProfessor)) {
+    if (!nameIsValid || !contactNumberIsValid) {
       console.log("Invalid professor");
       return;
     }
@@ -88,27 +120,36 @@ const UpdateProfessorModal: React.FC<UpdateProfessorModalProps> = (props) => {
           </div>
           <div className="modal-body">
             <form onSubmit={updateProfessorHandler}>
-              <div className="form-floating mb-3">
-                <input
-                  type="text"
-                  className="form-control"
-                  id="updateProfessorName"
-                  disabled={true}
-                  value={name}
-                />
-                <label htmlFor="updateProfessorName">Name</label>
+              <div className={nameInputHasError ? "invalid" : ""}>
+                {nameInputHasError && <span>{nameErrorMessage}</span>}
+                <div className="form-floating mb-3">
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="updateProfessorName"
+                    disabled={true}
+                    value={name}
+                  />
+                  <label htmlFor="updateProfessorName">Name</label>
+                </div>
               </div>
-              <div className="form-floating mb-3">
-                <input
-                  type="text"
-                  className="form-control"
-                  id="updateProfessorContactNumber"
-                  onChange={(e) => setContactNumber(e.target.value)}
-                  value={contactNumber}
-                />
-                <label htmlFor="updateProfessorContactNumber">
-                  Contact Number
-                </label>
+              <div className={contactNumberInputHasError ? "invalid" : ""}>
+                {contactNumberInputHasError && (
+                  <span>{contactNumberErrorMessage}</span>
+                )}
+                <div className="form-floating mb-3">
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="updateProfessorContactNumber"
+                    onChange={contactNumberChangeHandler}
+                    onBlur={contactNumberBlurHandler}
+                    value={contactNumber}
+                  />
+                  <label htmlFor="updateProfessorContactNumber">
+                    Contact Number
+                  </label>
+                </div>
               </div>
               <div className="modal-footer">
                 <button

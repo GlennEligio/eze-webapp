@@ -11,17 +11,17 @@ import { IRootState } from "../../../store";
 import { useDispatch } from "react-redux";
 import { accountActions } from "../../../store/accountSlice";
 import validator from "validator";
-import { validateNotEmpty } from "../../../validation/validations";
+import {
+  validateContains,
+  validateNotEmpty,
+} from "../../../validation/validations";
 import useInput, { InputType } from "../../../hooks/useInput";
+import { request } from "http";
 
 const AddAccountModal = () => {
   const auth = useSelector((state: IRootState) => state.auth);
   const dispatch = useDispatch();
-  // const [username, setUsername] = useState("");
-  // const [password, setPassword] = useState("");
-  // const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
-  // const [type, setType] = useState(AccountType.STUDENT_ASSISTANT);
   const [active, setActive] = useState(true);
   const {
     sendRequest: createAccount,
@@ -67,20 +67,22 @@ const AddAccountModal = () => {
     reset: resetTypeInput,
     errorMessage: typeErrorMessage,
   } = useInput(
-    validateNotEmpty("Type"),
+    validateContains("Type", [
+      AccountType.ADMIN,
+      AccountType.STUDENT_ASSISTANT,
+    ]),
     AccountType.STUDENT_ASSISTANT,
     InputType.SELECT
   );
 
+  // Add Account in Redux after successful request
   useEffect(() => {
-    if (requestStatus === "completed") {
-      if (error === null) {
-        dispatch(accountActions.addAccount({ newAccount: data }));
-      }
+    if (requestStatus === "completed" && data && error === null) {
+      dispatch(accountActions.addAccount({ newAccount: data }));
     }
-  }, [data]);
+  }, [data, requestStatus, error]);
 
-  const onAddAccount = (event: React.FormEvent<HTMLFormElement>) => {
+  const addAccountHandler = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     console.log("Adding Account");
     const newAccount: CreateUpdateAccountDto = {
@@ -140,7 +142,7 @@ const AddAccountModal = () => {
             ></button>
           </div>
           <div className="modal-body">
-            <form onSubmit={onAddAccount}>
+            <form onSubmit={addAccountHandler}>
               <div className={usernameInputHasError ? "invalid" : ""}>
                 {usernameInputHasError && <span>{usernameErrorMessage}</span>}
                 <div className={`form-floating mb-3`}>
@@ -168,6 +170,9 @@ const AddAccountModal = () => {
                   />
                   <label htmlFor="newAccountPassword">Password</label>
                 </div>
+              </div>
+              <div className={typeInputHasError ? "invalid" : ""}>
+                {typeInputHasError && <span>{typeErrorMessage}</span>}
               </div>
               <div className="form-floating mb-3">
                 <select
