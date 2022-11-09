@@ -11,6 +11,7 @@ import useHttp, { RequestConfig } from "../hooks/useHttp";
 import { useDispatch } from "react-redux";
 import TransactionItem from "../components/Transaction/TransactionItem";
 import TransactionDetailsModal from "../components/UI/Modal/TransactionDetailsModal";
+import validator from "validator";
 
 function ReturnForm() {
   // Borrow Form input states
@@ -161,6 +162,8 @@ function ReturnForm() {
 
   // Search student handler
   const searchStudentHandler: MouseEventHandler = () => {
+    // Check if student number is empty
+    if (validator.isEmpty(studentNumber)) return;
     const params = { complete: "true" };
     const requestConfig: RequestConfig = {
       headers: {
@@ -175,6 +178,8 @@ function ReturnForm() {
 
   // Search professor handler
   const searchProfessorHandler: MouseEventHandler = () => {
+    // Check if professor input is not empty
+    if (validator.isEmpty(professorName)) return;
     const requestConfig: RequestConfig = {
       headers: {
         Authorization: `Bearer ${auth.accessToken}`,
@@ -186,6 +191,8 @@ function ReturnForm() {
 
   // Search equipment handler
   const searchEquipmentHandler: MouseEventHandler = () => {
+    // Check if barcode input is not empty
+    if (validator.isEmpty(equipmentBarcode)) return;
     // Check if the barcode already exist in the equipments list state
     let alreadyExist = false;
     equipments.forEach((e) => {
@@ -277,10 +284,10 @@ function ReturnForm() {
         <main className="col-12 d-flex flex-column h-100">
           <div className="row">
             <div className="col-3"></div>
-            <div className="col-5 d-flex align-items-center justify-content-center">
+            {/* <div className="col-5 d-flex align-items-center justify-content-center">
               <span className="me-2">Scan borrower's right index finger</span>
               <i className="bi bi-fingerprint fs-3"></i>
-            </div>
+            </div> */}
             <div className="col-4"></div>
           </div>
           <div className="row">

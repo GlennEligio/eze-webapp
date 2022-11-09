@@ -11,6 +11,13 @@ import { studentActions } from "../../../store/studentSlice";
 import { useDispatch } from "react-redux";
 import { YearLevel } from "../../../api/YearLevelService";
 import { YearSection } from "../../../api/YearSectionService";
+import useInput, { InputType } from "../../../hooks/useInput";
+import {
+  validateNotEmpty,
+  validatePattern,
+  validatePhMobileNumber,
+  validatePositive,
+} from "../../../validation/validations";
 
 interface UpdateStudentModalProps {
   yearLevels: YearLevel[];
@@ -20,16 +27,16 @@ const UpdateStudentModal: FC<UpdateStudentModalProps> = (props) => {
   const auth = useSelector((state: IRootState) => state.auth);
   const student = useSelector((state: IRootState) => state.student);
   const dispatch = useDispatch();
-  const [studentNumber, setStudentNumber] = useState("");
-  const [fullName, setFullName] = useState("");
-  const [yearAndSection, setYearAndSection] = useState("BSECE 1-1");
-  const [contactNumber, setContactNumber] = useState("");
+  // const [studentNumber, setStudentNumber] = useState("");
+  // const [fullName, setFullName] = useState("");
+  // const [yearAndSection, setYearAndSection] = useState("BSECE 1-1");
+  // const [contactNumber, setContactNumber] = useState("");
   const [birthday, setBirthday] = useState("");
   const [address, setAddress] = useState("");
   const [email, setEmail] = useState("");
   const [guardian, setGuardian] = useState("");
   const [guardianNumber, setGuardianNumber] = useState("");
-  const [yearNumber, setYearNumber] = useState(1);
+  // const [yearNumber, setYearNumber] = useState(1);
   const [yearLevels, setYearLevels] = useState<YearLevel[]>([]);
   const [yearSections, setYearSections] = useState<YearSection[]>([]);
 
@@ -39,6 +46,67 @@ const UpdateStudentModal: FC<UpdateStudentModalProps> = (props) => {
     error,
     status,
   } = useHttp<Student>(StudentService.updateStudent, false);
+
+  // UseInput for controlled input
+  // useInput for the controlled input and validation
+  const {
+    value: studentNumber,
+    hasError: studentNumberInputHasError,
+    isValid: studentNumberIsValid,
+    valueChangeHandler: studentNumberChangeHandler,
+    inputBlurHandler: studentNumberBlurHandler,
+    reset: resetStudentNumber,
+    errorMessage: studentNumberErrorMessage,
+    set: setStudentNumber,
+  } = useInput(
+    validatePattern(
+      "Student number",
+      /^\d{4}-\d{5}-[(a-z)|(A-Z)]{2}-\d{2}$/,
+      "must be a valid PUP Student No."
+    ),
+    "",
+    InputType.TEXT
+  );
+  const {
+    value: fullName,
+    hasError: fullNameInputHasError,
+    isValid: fullNameIsValid,
+    valueChangeHandler: fullNameChangeHandler,
+    inputBlurHandler: fullNameBlurHandler,
+    reset: resetFullName,
+    errorMessage: fullNameErrorMessage,
+    set: setFullName,
+  } = useInput(validateNotEmpty("Full name"), "", InputType.TEXT);
+  const {
+    value: yearAndSection,
+    hasError: yearAndSectionInputHasError,
+    isValid: yearAndSectionIsValid,
+    valueChangeHandler: yearAndSectionChangeHandler,
+    inputBlurHandler: yearAndSectionBlurHandler,
+    reset: resetYearAndSection,
+    errorMessage: yearAndSectionErrorMessage,
+    set: setYearAndSection,
+  } = useInput(validateNotEmpty("Year and section"), "", InputType.SELECT);
+  const {
+    value: yearNumber,
+    hasError: yearNumberInputHasError,
+    isValid: yearNumberIsValid,
+    valueChangeHandler: yearNumberChangeHandler,
+    inputBlurHandler: yearNumberBlurHandler,
+    reset: resetYearNumber,
+    errorMessage: yearNumberErrorMessage,
+    set: setYearNumber,
+  } = useInput(validatePositive("Year level"), "", InputType.SELECT);
+  const {
+    value: contactNumber,
+    hasError: contactNumberInputHasError,
+    isValid: contactNumberIsValid,
+    valueChangeHandler: contactNumberChangeHandler,
+    inputBlurHandler: contactNumberBlurHandler,
+    reset: resetContactNumber,
+    errorMessage: contactNumberErrorMessage,
+    set: setContactNumber,
+  } = useInput(validatePhMobileNumber("Contact number"), "", InputType.TEXT);
 
   // Update the Student in the Context API
   useEffect(() => {
@@ -86,7 +154,9 @@ const UpdateStudentModal: FC<UpdateStudentModalProps> = (props) => {
         : ""
     );
     setYearNumber(
-      student.selectedStudent.yearLevel ? student.selectedStudent.yearLevel : 5
+      student.selectedStudent.yearLevel
+        ? student.selectedStudent.yearLevel.toString()
+        : ""
     );
   }, [student.selectedStudent]);
 
@@ -103,7 +173,7 @@ const UpdateStudentModal: FC<UpdateStudentModalProps> = (props) => {
   // Update yearSections based on yearNumber selected
   useEffect(() => {
     const selectedYearLevel = yearLevels.find(
-      (yl) => yl.yearNumber === yearNumber
+      (yl) => yl.yearNumber === Number.parseInt(yearNumber)
     );
     if (selectedYearLevel) {
       if (
@@ -129,7 +199,7 @@ const UpdateStudentModal: FC<UpdateStudentModalProps> = (props) => {
         sectionName: yearAndSection,
       },
       yearLevel: {
-        yearNumber: yearNumber,
+        yearNumber: Number.parseInt(yearNumber),
       },
       address,
       birthday,
@@ -178,62 +248,85 @@ const UpdateStudentModal: FC<UpdateStudentModalProps> = (props) => {
           <div className="modal-body">
             <form onSubmit={updateStudentHandler}>
               {/** Student Number input */}
-              <div className="form-floating mb-3">
-                <input
-                  type="text"
-                  className="form-control"
-                  id="updateStudentSN"
-                  onChange={(e) => setStudentNumber(e.target.value)}
-                  value={studentNumber}
-                />
-                <label htmlFor="updateStudentSN">Student Number</label>
+              <div className={studentNumberInputHasError ? "invalid" : ""}>
+                {studentNumberInputHasError && (
+                  <span>{studentNumberErrorMessage}</span>
+                )}
+                <div className="form-floating mb-3">
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="updateStudentSN"
+                    onChange={studentNumberChangeHandler}
+                    onBlur={studentNumberBlurHandler}
+                    value={studentNumber}
+                  />
+                  <label htmlFor="updateStudentSN">Student Number</label>
+                </div>
               </div>
               {/** Full name input */}
-              <div className="form-floating mb-3">
-                <input
-                  type="text"
-                  className="form-control"
-                  id="updateStudentFullName"
-                  onChange={(e) => setFullName(e.target.value)}
-                  value={fullName}
-                />
-                <label htmlFor="updateStudentFullName">Full name</label>
+              <div className={fullNameInputHasError ? "invalid" : ""}>
+                {fullNameInputHasError && <span>{fullNameErrorMessage}</span>}
+                <div className="form-floating mb-3">
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="updateStudentFullName"
+                    onChange={fullNameChangeHandler}
+                    onBlur={fullNameBlurHandler}
+                    value={fullName}
+                  />
+                  <label htmlFor="updateStudentFullName">Full name</label>
+                </div>
               </div>
               {/** Year Number */}
-              <div className="form-floating mb-3">
-                <select
-                  className="form-select"
-                  id="updateStudentYearNumber"
-                  onChange={(e) =>
-                    setYearNumber(Number.parseInt(e.currentTarget.value))
-                  }
-                  value={yearNumber}
-                >
-                  {yearLevels.map((yl) => (
-                    <option key={yl.yearName} value={yl.yearNumber.toString()}>
-                      {yl.yearName}
-                    </option>
-                  ))}
-                </select>
-                <label htmlFor="updateStudentYearNumber">Year Level</label>
-              </div>
-              {/** Year and Section input */}
-              <div className="form-floating mb-3">
-                <select
-                  className="form-select"
-                  id="updateStudentYearSection"
-                  onChange={(e) => setYearAndSection(e.currentTarget.value)}
-                  value={yearAndSection}
-                >
-                  {yearSections &&
-                    yearSections.length > 0 &&
-                    yearSections.map((ys) => (
-                      <option key={ys.sectionName} value={ys.sectionName}>
-                        {ys.sectionName}
+              <div className={yearNumberInputHasError ? "invalid" : ""}>
+                {yearNumberInputHasError && (
+                  <span>{yearNumberErrorMessage}</span>
+                )}
+                <div className="form-floating mb-3">
+                  <select
+                    className="form-select"
+                    id="updateStudentYearNumber"
+                    onChange={yearNumberChangeHandler}
+                    onBlur={yearNumberBlurHandler}
+                    value={yearNumber}
+                  >
+                    {yearLevels.map((yl) => (
+                      <option
+                        key={yl.yearName}
+                        value={yl.yearNumber.toString()}
+                      >
+                        {yl.yearName}
                       </option>
                     ))}
-                </select>
-                <label htmlFor="updateStudentYearSection">Section</label>
+                  </select>
+                  <label htmlFor="updateStudentYearNumber">Year Level</label>
+                </div>
+              </div>
+              {/** Year and Section input */}
+              <div className={yearAndSectionInputHasError ? "invalid" : ""}>
+                {yearAndSectionInputHasError && (
+                  <span>{yearAndSectionErrorMessage}</span>
+                )}
+                <div className="form-floating mb-3">
+                  <select
+                    className="form-select"
+                    id="updateStudentYearSection"
+                    onChange={yearAndSectionChangeHandler}
+                    onBlur={yearAndSectionBlurHandler}
+                    value={yearAndSection}
+                  >
+                    {yearSections &&
+                      yearSections.length > 0 &&
+                      yearSections.map((ys) => (
+                        <option key={ys.sectionName} value={ys.sectionName}>
+                          {ys.sectionName}
+                        </option>
+                      ))}
+                  </select>
+                  <label htmlFor="updateStudentYearSection">Section</label>
+                </div>
               </div>
               {/** Email */}
               <div className="form-floating mb-3">
@@ -247,17 +340,23 @@ const UpdateStudentModal: FC<UpdateStudentModalProps> = (props) => {
                 <label htmlFor="updateStudentFullname">Email</label>
               </div>
               {/** Contact Number */}
-              <div className="form-floating mb-3">
-                <input
-                  type="text"
-                  className="form-control"
-                  id="updateStudentContactNumber"
-                  onChange={(e) => setContactNumber(e.target.value)}
-                  value={contactNumber}
-                />
-                <label htmlFor="updateStudentContactNumber">
-                  Contact Number
-                </label>
+              <div className={contactNumberInputHasError ? "invalid" : ""}>
+                {contactNumberInputHasError && (
+                  <span>{contactNumberErrorMessage}</span>
+                )}
+                <div className="form-floating mb-3">
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="updateStudentContactNumber"
+                    onChange={contactNumberChangeHandler}
+                    onBlur={contactNumberBlurHandler}
+                    value={contactNumber}
+                  />
+                  <label htmlFor="updateStudentContactNumber">
+                    Contact Number
+                  </label>
+                </div>
               </div>
               {/** Birthday */}
               <div className="form-floating mb-3">

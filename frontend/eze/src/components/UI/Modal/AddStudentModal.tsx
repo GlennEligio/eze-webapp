@@ -15,6 +15,8 @@ import useInput, { InputType } from "../../../hooks/useInput";
 import {
   validateNotEmpty,
   validatePattern,
+  validatePhMobileNumber,
+  validatePositive,
 } from "../../../validation/validations";
 
 interface AddStudentModalProps {
@@ -25,15 +27,15 @@ const AddStudentModal: FC<AddStudentModalProps> = (props) => {
   const auth = useSelector((state: IRootState) => state.auth);
   const dispatch = useDispatch();
   // const [studentNumber, setStudentNumber] = useState("");
-  const [fullName, setFullName] = useState("");
-  const [yearAndSection, setYearAndSection] = useState("BSECE 1-1");
-  const [contactNumber, setContactNumber] = useState("");
+  // const [fullName, setFullName] = useState("");
+  // const [yearAndSection, setYearAndSection] = useState("BSECE 1-1");
+  // const [contactNumber, setContactNumber] = useState("");
   const [birthday, setBirthday] = useState("");
   const [address, setAddress] = useState("");
   const [email, setEmail] = useState("");
   const [guardian, setGuardian] = useState("");
   const [guardianNumber, setGuardianNumber] = useState("");
-  const [yearNumber, setYearNumber] = useState(1);
+  // const [yearNumber, setYearNumber] = useState(1);
   const [yearSections, setYearSections] = useState<YearSection[]>([]);
   const [yearLevels, setYearLevels] = useState<YearLevel[]>([]);
 
@@ -62,13 +64,51 @@ const AddStudentModal: FC<AddStudentModalProps> = (props) => {
     "",
     InputType.TEXT
   );
+  const {
+    value: fullName,
+    hasError: fullNameInputHasError,
+    isValid: fullNameIsValid,
+    valueChangeHandler: fullNameChangeHandler,
+    inputBlurHandler: fullNameBlurHandler,
+    reset: resetFullName,
+    errorMessage: fullNameErrorMessage,
+  } = useInput(validateNotEmpty("Full name"), "", InputType.TEXT);
+  const {
+    value: yearAndSection,
+    hasError: yearAndSectionInputHasError,
+    isValid: yearAndSectionIsValid,
+    valueChangeHandler: yearAndSectionChangeHandler,
+    inputBlurHandler: yearAndSectionBlurHandler,
+    reset: resetYearAndSection,
+    errorMessage: yearAndSectionErrorMessage,
+    set: setYearAndSection,
+  } = useInput(validateNotEmpty("Year and section"), "", InputType.SELECT);
+  const {
+    value: yearNumber,
+    hasError: yearNumberInputHasError,
+    isValid: yearNumberIsValid,
+    valueChangeHandler: yearNumberChangeHandler,
+    inputBlurHandler: yearNumberBlurHandler,
+    reset: resetYearNumber,
+    errorMessage: yearNumberErrorMessage,
+    set: setYearNumber,
+  } = useInput(validatePositive("Year level"), "", InputType.SELECT);
+  const {
+    value: contactNumber,
+    hasError: contactNumberInputHasError,
+    isValid: contactNumberIsValid,
+    valueChangeHandler: contactNumberChangeHandler,
+    inputBlurHandler: contactNumberBlurHandler,
+    reset: resetContactNumber,
+    errorMessage: contactNumberErrorMessage,
+  } = useInput(validatePhMobileNumber("Contact number"), "", InputType.TEXT);
 
   // Add new Student in Context when request is success
   useEffect(() => {
     if (status == "completed" && error === null) {
       dispatch(studentActions.addStudent({ newStudent: data }));
     }
-  }, [data]);
+  }, [data, status, error]);
 
   // Prepopulate the yearLevels state and the value of yearAndSection and yearNumber state
   useEffect(() => {
@@ -77,14 +117,14 @@ const AddStudentModal: FC<AddStudentModalProps> = (props) => {
         (yl1, yl2) => yl1.yearNumber - yl2.yearNumber
       );
       setYearLevels(sortedYls);
-      setYearNumber(sortedYls[0].yearNumber);
+      setYearNumber(sortedYls[0].yearNumber.toString());
     }
   }, [props.yearLevels]);
 
   // Update yearSections based on yearNumber selected
   useEffect(() => {
     const selectedYearLevel = yearLevels.find(
-      (yl) => yl.yearNumber === yearNumber
+      (yl) => yl.yearNumber === Number.parseInt(yearNumber)
     );
     if (selectedYearLevel) {
       if (
@@ -110,7 +150,7 @@ const AddStudentModal: FC<AddStudentModalProps> = (props) => {
         sectionName: yearAndSection,
       },
       yearLevel: {
-        yearNumber: yearNumber,
+        yearNumber: Number.parseInt(yearNumber),
       },
       address,
       birthday,
@@ -119,7 +159,13 @@ const AddStudentModal: FC<AddStudentModalProps> = (props) => {
       guardianNumber,
     };
 
-    if (!isValidStudent(newStudent)) {
+    if (
+      !studentNumberIsValid ||
+      !fullNameIsValid ||
+      !yearAndSectionIsValid ||
+      !contactNumberIsValid ||
+      !yearNumberIsValid
+    ) {
       console.log("Invalid student");
       return;
     }
@@ -134,10 +180,10 @@ const AddStudentModal: FC<AddStudentModalProps> = (props) => {
     };
     createStudent(requestConf);
     resetStudentNumber();
-    setContactNumber("");
-    setFullName("");
-    setYearAndSection("BSECE 5-1");
-    setYearNumber(5);
+    resetContactNumber();
+    resetFullName();
+    resetYearAndSection();
+    resetYearNumber();
     setAddress("");
     setBirthday("");
     setEmail("");
@@ -186,51 +232,68 @@ const AddStudentModal: FC<AddStudentModalProps> = (props) => {
                 </div>
               </div>
               {/** Full name input */}
-              <div className="form-floating mb-3">
-                <input
-                  type="text"
-                  className="form-control"
-                  id="newStudentFullName"
-                  onChange={(e) => setFullName(e.target.value)}
-                  value={fullName}
-                />
-                <label htmlFor="newStudentFullName">Full name</label>
+              <div className={fullNameInputHasError ? "invalid" : ""}>
+                {fullNameInputHasError && <span>{fullNameErrorMessage}</span>}
+                <div className="form-floating mb-3">
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="newStudentFullName"
+                    onChange={fullNameChangeHandler}
+                    onBlur={fullNameBlurHandler}
+                    value={fullName}
+                  />
+                  <label htmlFor="newStudentFullName">Full name</label>
+                </div>
               </div>
               {/** Year Number */}
-              <div className="form-floating mb-3">
-                <select
-                  className="form-select"
-                  id="newStudentYearNumber"
-                  onChange={(e) =>
-                    setYearNumber(Number.parseInt(e.currentTarget.value))
-                  }
-                  value={yearNumber}
-                >
-                  {yearLevels.map((yl) => (
-                    <option key={yl.yearName} value={yl.yearNumber.toString()}>
-                      {yl.yearName}
-                    </option>
-                  ))}
-                </select>
-                <label htmlFor="newStudentYearNumber">Year Level</label>
-              </div>
-              {/** Year and Section input */}
-              <div className="form-floating mb-3">
-                <select
-                  className="form-select"
-                  id="newStudentYearSection"
-                  onChange={(e) => setYearAndSection(e.currentTarget.value)}
-                  value={yearAndSection}
-                >
-                  {yearSections &&
-                    yearSections.length > 0 &&
-                    yearSections.map((ys) => (
-                      <option key={ys.sectionName} value={ys.sectionName}>
-                        {ys.sectionName}
+              <div className={yearNumberInputHasError ? "invalid" : ""}>
+                {yearNumberInputHasError && (
+                  <span>{yearNumberErrorMessage}</span>
+                )}
+                <div className="form-floating mb-3">
+                  <select
+                    className="form-select"
+                    id="newStudentYearNumber"
+                    onChange={yearNumberChangeHandler}
+                    onBlur={yearNumberBlurHandler}
+                    value={yearNumber}
+                  >
+                    {yearLevels.map((yl) => (
+                      <option
+                        key={yl.yearName}
+                        value={yl.yearNumber.toString()}
+                      >
+                        {yl.yearName}
                       </option>
                     ))}
-                </select>
-                <label htmlFor="newStudentYearSection">Section</label>
+                  </select>
+                  <label htmlFor="newStudentYearNumber">Year Level</label>
+                </div>
+              </div>
+              {/** Year and Section input */}
+              <div className={yearAndSectionInputHasError ? "invalid" : ""}>
+                {yearAndSectionInputHasError && (
+                  <span>{yearAndSectionErrorMessage}</span>
+                )}
+                <div className="form-floating mb-3">
+                  <select
+                    className="form-select"
+                    id="newStudentYearSection"
+                    onChange={yearAndSectionChangeHandler}
+                    onBlur={yearAndSectionBlurHandler}
+                    value={yearAndSection}
+                  >
+                    {yearSections &&
+                      yearSections.length > 0 &&
+                      yearSections.map((ys) => (
+                        <option key={ys.sectionName} value={ys.sectionName}>
+                          {ys.sectionName}
+                        </option>
+                      ))}
+                  </select>
+                  <label htmlFor="newStudentYearSection">Section</label>
+                </div>
               </div>
               {/** Email */}
               <div className="form-floating mb-3">
@@ -244,15 +307,23 @@ const AddStudentModal: FC<AddStudentModalProps> = (props) => {
                 <label htmlFor="newStudentFullname">Email</label>
               </div>
               {/** Contact Number */}
-              <div className="form-floating mb-3">
-                <input
-                  type="text"
-                  className="form-control"
-                  id="newStudentContactNumber"
-                  onChange={(e) => setContactNumber(e.target.value)}
-                  value={contactNumber}
-                />
-                <label htmlFor="newStudentContactNumber">Contact Number</label>
+              <div className={contactNumberInputHasError ? "invalid" : ""}>
+                {contactNumberInputHasError && (
+                  <span>{contactNumberErrorMessage}</span>
+                )}
+                <div className="form-floating mb-3">
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="newStudentContactNumber"
+                    onChange={contactNumberChangeHandler}
+                    onBlur={contactNumberBlurHandler}
+                    value={contactNumber}
+                  />
+                  <label htmlFor="newStudentContactNumber">
+                    Contact Number
+                  </label>
+                </div>
               </div>
               {/** Birthday */}
               <div className="form-floating mb-3">
