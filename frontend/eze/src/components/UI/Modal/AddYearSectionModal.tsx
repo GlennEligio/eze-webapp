@@ -15,6 +15,7 @@ import {
   validatePositive,
 } from "../../../validation/validations";
 import useInput, { InputType } from "../../../hooks/useInput";
+import RequestStatusMessage from "../Other/RequestStatusMessage";
 
 interface AddYearSectionModalProps {
   yearLevels: YearLevel[];
@@ -115,6 +116,7 @@ const AddYearSectionModal: FC<AddYearSectionModalProps> = (props) => {
       tabIndex={-1}
       aria-labelledby="addYearSectionModalLabel"
       aria-hidden="true"
+      ref={modal}
     >
       <div className="modal-dialog modal-dialog-centered">
         <div className="modal-content">
@@ -130,6 +132,16 @@ const AddYearSectionModal: FC<AddYearSectionModalProps> = (props) => {
             ></button>
           </div>
           <div className="modal-body">
+            {
+              <RequestStatusMessage
+                data={data}
+                error={error}
+                status={status}
+                loadingMessage="Adding year section..."
+                successMessage="Year section added"
+                key="Add Year Section"
+              />
+            }
             <form onSubmit={addYearSectionHandler}>
               <div className={yearNumberInputHasError ? "invalid" : ""}>
                 {yearNumberInputHasError && (

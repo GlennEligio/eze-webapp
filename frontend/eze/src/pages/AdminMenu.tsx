@@ -87,7 +87,7 @@ function AdminMenu() {
                     imageLoc="/img/Calendar.png"
                     title="Schedule"
                     key="Schedule"
-                    destPage="/schedules"
+                    destPage="/"
                     leftSpacer={true}
                   />
                   <EzeMenuButton
@@ -95,7 +95,7 @@ function AdminMenu() {
                     imageLoc="/img/camera2.png"
                     title="Camera"
                     key="Camera"
-                    destPage="/camera"
+                    destPage="/"
                   />
                 </div>
               </div>

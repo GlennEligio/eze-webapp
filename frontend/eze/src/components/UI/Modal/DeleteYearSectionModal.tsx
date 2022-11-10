@@ -1,4 +1,4 @@
-import React, { useState, useEffect, FC } from "react";
+import React, { useState, useEffect, FC, useRef } from "react";
 import useHttp, { RequestConfig } from "../../../hooks/useHttp";
 import YearSectionService, {
   YearSection,
@@ -9,6 +9,7 @@ import { useDispatch } from "react-redux";
 import { yearLevelAction } from "../../../store/yearLevelSlice";
 import { YearLevel } from "../../../api/YearLevelService";
 import validator from "validator";
+import RequestStatusMessage from "../Other/RequestStatusMessage";
 
 interface DeleteYearSectionModalProps {
   yearLevels: YearLevel[];
@@ -17,6 +18,7 @@ interface DeleteYearSectionModalProps {
 const DeleteYearSectionModal: FC<DeleteYearSectionModalProps> = (props) => {
   const auth = useSelector((state: IRootState) => state.auth);
   const dispatch = useDispatch();
+  const modal = useRef<HTMLDivElement | null>(null);
   const [yearNumber, setYearNumber] = useState("");
   const [sectionName, setSectionName] = useState("");
   const [yearSections, setYearSections] = useState<YearSection[]>([]);
@@ -25,7 +27,17 @@ const DeleteYearSectionModal: FC<DeleteYearSectionModalProps> = (props) => {
     data,
     error,
     status,
+    resetHttpState,
   } = useHttp<boolean>(YearSectionService.deleteYearSection, false);
+
+  // Add hidden.bs.modal eventHandler to Modal on Component Mount
+  useEffect(() => {
+    if (modal.current) {
+      modal.current.addEventListener("hidden.bs.modal", () => {
+        resetHttpState();
+      });
+    }
+  }, []);
 
   // Remove YearSection in the YearLevel object in Context
   useEffect(() => {
@@ -70,6 +82,7 @@ const DeleteYearSectionModal: FC<DeleteYearSectionModalProps> = (props) => {
     }
   }, [yearNumber, props.yearLevels]);
 
+  // form submitHandler for deleting YearSection
   const deleteYearSectionHandler = (
     event: React.FormEvent<HTMLFormElement>
   ) => {
@@ -94,6 +107,7 @@ const DeleteYearSectionModal: FC<DeleteYearSectionModalProps> = (props) => {
       tabIndex={-1}
       aria-labelledby="deleteYearSectionModalLabel"
       aria-hidden="true"
+      ref={modal}
     >
       <div className="modal-dialog modal-dialog-centered">
         <div className="modal-content">
@@ -107,6 +121,16 @@ const DeleteYearSectionModal: FC<DeleteYearSectionModalProps> = (props) => {
             ></button>
           </div>
           <div className="modal-body">
+            {
+              <RequestStatusMessage
+                data={data}
+                error={error}
+                status={status}
+                loadingMessage="Deleting year section..."
+                successMessage="Year section deleted"
+                key="Delete Year Section"
+              />
+            }
             <form onSubmit={deleteYearSectionHandler}>
               <div className="form-floating mb-3">
                 <select
