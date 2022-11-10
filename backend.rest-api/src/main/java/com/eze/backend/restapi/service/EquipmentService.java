@@ -92,7 +92,14 @@ public class EquipmentService implements IService<Equipment>, IExcelService<Equi
     @Transactional
     public void softDelete(Serializable code) {
         log.info("Soft deleting equipment with code {}", code);
-        Equipment equipment = repository.findByEquipmentCode(code.toString()).orElseThrow(() -> new ApiException(notFound(code), HttpStatus.NOT_FOUND));
+        Optional<Equipment> equipmentOptional = repository.findByEquipmentCode(code.toString());
+        if(equipmentOptional.isEmpty()) {
+            throw new ApiException(notFound(code), HttpStatus.NOT_FOUND);
+        }
+        Equipment equipment = equipmentOptional.get();
+        if(Boolean.TRUE.equals(equipment.getDeleteFlag())) {
+            throw new ApiException("Equipment is already soft deleted", HttpStatus.BAD_REQUEST);
+        }
         repository.softDelete(equipment.getEquipmentCode());
     }
 

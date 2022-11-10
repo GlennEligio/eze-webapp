@@ -74,7 +74,14 @@ public class ProfessorService implements IService<Professor>, IExcelService<Prof
     @Transactional
     public void softDelete(Serializable name) {
         log.info("Soft deleting professor");
-        Professor professor1 = repository.findByName(name.toString()).orElseThrow(() -> new ApiException(notFound(name), HttpStatus.NOT_FOUND));
+        Optional<Professor> professorOptional = repository.findByName(name.toString());
+        if(professorOptional.isEmpty()) {
+            throw new ApiException(notFound(name), HttpStatus.NOT_FOUND);
+        }
+        Professor professor1 = professorOptional.get();
+        if(Boolean.TRUE.equals(professor1.getDeleteFlag())) {
+            throw new ApiException("Professor is already soft deleted", HttpStatus.BAD_REQUEST);
+        }
         repository.softDelete(professor1.getName());
     }
 

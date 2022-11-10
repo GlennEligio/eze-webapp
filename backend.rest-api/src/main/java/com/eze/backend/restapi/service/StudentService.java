@@ -98,8 +98,14 @@ public class StudentService implements IService<Student>, IExcelService<Student>
     @Transactional
     public void softDelete(Serializable studentNo) {
         log.info("Soft deleting student with student number {}", studentNo);
-        Student student = repository.findByStudentNumber(studentNo.toString())
-                .orElseThrow(() -> new ApiException(notFound(studentNo), HttpStatus.NOT_FOUND));
+        Optional<Student> studentOptional = repository.findByStudentNumber(studentNo.toString());
+        if(studentOptional.isEmpty()) {
+          throw new ApiException(notFound(studentNo), HttpStatus.NOT_FOUND);
+        }
+        Student student = studentOptional.get();
+        if(student.getDeleteFlag()) {
+            throw new ApiException("Student is already soft deleted", HttpStatus.BAD_REQUEST);
+        }
         repository.softDelete(student.getStudentNumber());
     }
 

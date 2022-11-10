@@ -1,3 +1,6 @@
 TODOS:
-1. Add function in delete of resources in FRE to make selected resource null if delete success
-2. Add function in softDelete service to throw ApiException if the resource to be soft deleted have their deleteFlag already set to true
+1. Add function in softDelete service to throw ApiException if the resource to be soft deleted have their deleteFlag already set to true
+2. Add image input to the AddStudent and Update Student form modals and display them in the Borrow and Return forms
+3. Add functionality to capture Student images in the Admin Menu
+4. Add biometric functionlity to recognize the Student
+5. Add functionality for Room Scheduling (for room key borrow)

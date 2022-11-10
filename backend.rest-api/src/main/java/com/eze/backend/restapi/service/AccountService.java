@@ -99,9 +99,14 @@ public class AccountService implements IService<Account>, IExcelService<Account>
     @Transactional
     public void softDelete(Serializable username) {
         log.info("Soft deleting account: {}", username);
-        Account account = repository.findByUsername(username.toString())
-                .orElseThrow(() -> new ApiException(notFound(username), HttpStatus.NOT_FOUND));
-        repository.softDelete(account.getUsername());
+        Optional<Account> accountOptional = repository.findByUsername(username.toString());
+        if(accountOptional.isEmpty()) {
+            throw new ApiException(notFound(username), HttpStatus.NOT_FOUND);
+        }
+        if(accountOptional.get().getDeleteFlag()) {
+            throw new ApiException("Account is already soft deleted", HttpStatus.BAD_REQUEST);
+        }
+        repository.softDelete(accountOptional.get().getUsername());
     }
 
     @Override

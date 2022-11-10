@@ -101,8 +101,14 @@ public class YearLevelService implements IService<YearLevel>, IExcelService<Year
     @Transactional
     public void softDelete(Serializable yearNumber) {
         log.info("Soft deleting YearLevel with yearNumber {}", yearNumber);
-        YearLevel yearLevel = repository.findByYearNumber(Integer.parseInt(yearNumber.toString()))
-                .orElseThrow(() -> new ApiException(notFound(yearNumber), HttpStatus.NOT_FOUND));
+        Optional<YearLevel> yearLevelOptional = repository.findByYearNumber(Integer.parseInt(yearNumber.toString()));
+        if(yearLevelOptional.isEmpty()) {
+            throw new ApiException(notFound(yearNumber), HttpStatus.NOT_FOUND);
+        }
+        YearLevel yearLevel = yearLevelOptional.get();
+        if(Boolean.TRUE.equals(yearLevel.getDeleteFlag())) {
+            throw new ApiException("Year level is already soft deleted", HttpStatus.BAD_REQUEST);
+        }
         repository.softDelete(yearLevel.getYearNumber());
     }
 

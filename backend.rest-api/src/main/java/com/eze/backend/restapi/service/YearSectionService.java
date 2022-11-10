@@ -88,8 +88,14 @@ public class YearSectionService implements IService<YearSection>, IExcelService<
     @Transactional
     public void softDelete(Serializable sectionName) {
         log.info("Soft deleting YearSection with sectionName {}", sectionName);
-        YearSection yearSection = repository.findBySectionName(sectionName.toString())
-                .orElseThrow(() -> new ApiException(notFound(sectionName), HttpStatus.NOT_FOUND));
+        Optional<YearSection> yearSectionOptional = repository.findBySectionName(sectionName.toString());
+        if(yearSectionOptional.isEmpty()) {
+            throw new ApiException(notFound(sectionName), HttpStatus.NOT_FOUND);
+        }
+        YearSection yearSection = yearSectionOptional.get();
+        if(Boolean.TRUE.equals(yearSection.getDeleteFlag())) {
+            throw new ApiException("Year section is already soft deleted", HttpStatus.BAD_REQUEST);
+        }
         repository.softDelete(yearSection.getSectionName());
     }
 

@@ -148,7 +148,14 @@ public class TransactionService implements IService<Transaction>, IExcelService<
     @Transactional
     public void delete(Serializable code) {
         log.info("Deleting transaction with {}", code);
-        Transaction transaction = txRepo.findByTxCode(code.toString()).orElseThrow(() -> new ApiException(notFound(code), HttpStatus.NOT_FOUND));
+        Optional<Transaction> transactionOptional = txRepo.findByTxCode(code.toString());
+        if(transactionOptional.isEmpty()) {
+            throw new ApiException(notFound(code), HttpStatus.NOT_FOUND);
+        }
+        Transaction transaction = transactionOptional.get();
+        if(Boolean.TRUE.equals(transaction.getDeleteFlag())) {
+            throw new ApiException("Transaction is already soft deleted", HttpStatus.BAD_REQUEST);
+        }
         returnAllEquipments(transaction);
         txRepo.delete(transaction);
     }
