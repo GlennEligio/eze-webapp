@@ -1,4 +1,4 @@
-import React, { useState, useEffect, FC } from "react";
+import React, { useState, useEffect, FC, useRef } from "react";
 import useHttp, { RequestConfig } from "../../../hooks/useHttp";
 import StudentService, {
   CreateUpdateStudentDto,
@@ -18,6 +18,7 @@ import {
   validatePhMobileNumber,
   validatePositive,
 } from "../../../validation/validations";
+import RequestStatusMessage from "../Other/RequestStatusMessage";
 
 interface UpdateStudentModalProps {
   yearLevels: YearLevel[];
@@ -27,16 +28,12 @@ const UpdateStudentModal: FC<UpdateStudentModalProps> = (props) => {
   const auth = useSelector((state: IRootState) => state.auth);
   const student = useSelector((state: IRootState) => state.student);
   const dispatch = useDispatch();
-  // const [studentNumber, setStudentNumber] = useState("");
-  // const [fullName, setFullName] = useState("");
-  // const [yearAndSection, setYearAndSection] = useState("BSECE 1-1");
-  // const [contactNumber, setContactNumber] = useState("");
+  const modal = useRef<HTMLDivElement | null>(null);
   const [birthday, setBirthday] = useState("");
   const [address, setAddress] = useState("");
   const [email, setEmail] = useState("");
   const [guardian, setGuardian] = useState("");
   const [guardianNumber, setGuardianNumber] = useState("");
-  // const [yearNumber, setYearNumber] = useState(1);
   const [yearLevels, setYearLevels] = useState<YearLevel[]>([]);
   const [yearSections, setYearSections] = useState<YearSection[]>([]);
 
@@ -45,17 +42,14 @@ const UpdateStudentModal: FC<UpdateStudentModalProps> = (props) => {
     data,
     error,
     status,
+    resetHttpState,
   } = useHttp<Student>(StudentService.updateStudent, false);
 
-  // UseInput for controlled input
   // useInput for the controlled input and validation
   const {
     value: studentNumber,
     hasError: studentNumberInputHasError,
     isValid: studentNumberIsValid,
-    valueChangeHandler: studentNumberChangeHandler,
-    inputBlurHandler: studentNumberBlurHandler,
-    reset: resetStudentNumber,
     errorMessage: studentNumberErrorMessage,
     set: setStudentNumber,
   } = useInput(
@@ -73,7 +67,6 @@ const UpdateStudentModal: FC<UpdateStudentModalProps> = (props) => {
     isValid: fullNameIsValid,
     valueChangeHandler: fullNameChangeHandler,
     inputBlurHandler: fullNameBlurHandler,
-    reset: resetFullName,
     errorMessage: fullNameErrorMessage,
     set: setFullName,
   } = useInput(validateNotEmpty("Full name"), "", InputType.TEXT);
@@ -83,7 +76,6 @@ const UpdateStudentModal: FC<UpdateStudentModalProps> = (props) => {
     isValid: yearAndSectionIsValid,
     valueChangeHandler: yearAndSectionChangeHandler,
     inputBlurHandler: yearAndSectionBlurHandler,
-    reset: resetYearAndSection,
     errorMessage: yearAndSectionErrorMessage,
     set: setYearAndSection,
   } = useInput(validateNotEmpty("Year and section"), "", InputType.SELECT);
@@ -93,7 +85,6 @@ const UpdateStudentModal: FC<UpdateStudentModalProps> = (props) => {
     isValid: yearNumberIsValid,
     valueChangeHandler: yearNumberChangeHandler,
     inputBlurHandler: yearNumberBlurHandler,
-    reset: resetYearNumber,
     errorMessage: yearNumberErrorMessage,
     set: setYearNumber,
   } = useInput(validatePositive("Year level"), "", InputType.SELECT);
@@ -103,14 +94,23 @@ const UpdateStudentModal: FC<UpdateStudentModalProps> = (props) => {
     isValid: contactNumberIsValid,
     valueChangeHandler: contactNumberChangeHandler,
     inputBlurHandler: contactNumberBlurHandler,
-    reset: resetContactNumber,
     errorMessage: contactNumberErrorMessage,
     set: setContactNumber,
   } = useInput(validatePhMobileNumber("Contact number"), "", InputType.TEXT);
 
+  // add hidden.bs.modal eventHandler to Modal at Component Mount
+  useEffect(() => {
+    if (modal.current) {
+      modal.current.addEventListener("hidden.bs.modal", () => {
+        resetHttpState();
+      });
+    }
+  }, []);
+
   // Update the Student in the Context API
   useEffect(() => {
-    if (status == "completed" && error === null) {
+    if (status === "completed" && error === null && data) {
+      console.log(data);
       dispatch(studentActions.updateStudent({ student: data }));
     }
   }, [data]);
@@ -129,7 +129,7 @@ const UpdateStudentModal: FC<UpdateStudentModalProps> = (props) => {
     setYearAndSection(
       student.selectedStudent.yearAndSection
         ? student.selectedStudent.yearAndSection
-        : "BSECE 5-1"
+        : ""
     );
     setContactNumber(
       student.selectedStudent.contactNumber
@@ -208,7 +208,13 @@ const UpdateStudentModal: FC<UpdateStudentModalProps> = (props) => {
       guardianNumber,
     };
 
-    if (!isValidStudent(updatedStudent)) {
+    if (
+      !studentNumberIsValid ||
+      !contactNumberIsValid ||
+      !fullNameIsValid ||
+      !yearAndSectionIsValid ||
+      !yearNumberIsValid
+    ) {
       console.log("Invalid student");
       return;
     }
@@ -219,7 +225,7 @@ const UpdateStudentModal: FC<UpdateStudentModalProps> = (props) => {
         Authorization: `Bearer ${auth.accessToken}`,
         "Content-type": "application/json",
       },
-      relativeUrl: `/api/v1/students/${studentNumber}`,
+      relativeUrl: `/api/v1/students/${studentNumber}?complete=false`,
     };
     updateStudent(requestConf);
   };
@@ -231,6 +237,7 @@ const UpdateStudentModal: FC<UpdateStudentModalProps> = (props) => {
       tabIndex={-1}
       aria-labelledby="updateStudentModalLabel"
       aria-hidden="true"
+      ref={modal}
     >
       <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div className="modal-content">
@@ -246,6 +253,16 @@ const UpdateStudentModal: FC<UpdateStudentModalProps> = (props) => {
             ></button>
           </div>
           <div className="modal-body">
+            {
+              <RequestStatusMessage
+                data={data}
+                error={error}
+                loadingMessage="Updating student..."
+                status={status}
+                successMessage="Student updated"
+                key="Update Student"
+              />
+            }
             <form onSubmit={updateStudentHandler}>
               {/** Student Number input */}
               <div className={studentNumberInputHasError ? "invalid" : ""}>
@@ -257,8 +274,8 @@ const UpdateStudentModal: FC<UpdateStudentModalProps> = (props) => {
                     type="text"
                     className="form-control"
                     id="updateStudentSN"
-                    onChange={studentNumberChangeHandler}
-                    onBlur={studentNumberBlurHandler}
+                    readOnly
+                    disabled
                     value={studentNumber}
                   />
                   <label htmlFor="updateStudentSN">Student Number</label>

@@ -1,4 +1,4 @@
-import { RequestConfig } from "../hooks/useHttp";
+import { RequestConfig, ApiError } from "../hooks/useHttp";
 import { Equipment, isValidEquipment } from "./EquipmentService";
 import { isValidProfessor, Professor } from "./ProfessorService";
 import { isValidStudent, StudentFull } from "./StudentService";
@@ -49,7 +49,7 @@ const getTransactions = async (requestConfig: RequestConfig) => {
     if (response.ok) {
       return response.json();
     }
-    throw new Error("Failed to fetch transactions");
+    throw new ApiError("Failed to fetch transactions");
   });
   return responseObj;
 };
@@ -65,7 +65,7 @@ const getTransactionByCode = async (requestConfig: RequestConfig) => {
     if (response.ok) {
       return response.json();
     }
-    throw new Error("Failed to fetch transaction");
+    throw new ApiError("Failed to fetch transaction");
   });
   return responseObj;
 };
@@ -82,7 +82,7 @@ const createTransaction = async (requestConfig: RequestConfig) => {
     if (response.ok) {
       return response.json();
     }
-    throw new Error("Failed to create transaction");
+    throw new ApiError("Failed to create transaction");
   });
   return responseObj;
 };
@@ -98,7 +98,7 @@ const returnEquipments = async (requestConfig: RequestConfig) => {
     if (response.ok) {
       return response.json();
     }
-    throw new Error("Failed to return equipments");
+    throw new ApiError("Failed to return equipments");
   });
   return responseObj;
 };

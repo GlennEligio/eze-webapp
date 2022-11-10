@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import useHttp, { RequestConfig } from "../../../hooks/useHttp";
 import EquipmentService from "../../../api/EquipmentService";
 import { useSelector } from "react-redux";
@@ -6,11 +6,13 @@ import { IRootState } from "../../../store";
 import { equipmentActions } from "../../../store/equipmentSlice";
 import { useDispatch } from "react-redux";
 import validator from "validator";
+import RequestStatusMessage from "../Other/RequestStatusMessage";
 
 const DeleteEquipmentModal = () => {
   const auth = useSelector((state: IRootState) => state.auth);
   const equipment = useSelector((state: IRootState) => state.equipment);
   const dispatch = useDispatch();
+  const modal = useRef<HTMLDivElement | null>(null);
   const [name, setName] = useState("");
   const [status, setStatus] = useState("GOOD");
   const [barcode, setBarcode] = useState("");
@@ -21,20 +23,24 @@ const DeleteEquipmentModal = () => {
     data,
     error,
     status: requestStatus,
+    resetHttpState,
   } = useHttp<boolean>(EquipmentService.deleteEquipment, false);
 
+  // remove Equipment and set selectedEquipment to null after successful delete request
   useEffect(() => {
-    if (requestStatus == "completed") {
-      if (error == null) {
-        dispatch(
-          equipmentActions.removeEquipment({
-            equipmentCode: equipment.selectedEquipment?.equipmentCode,
-          })
-        );
-      }
+    if (requestStatus === "completed" && data && error === null) {
+      dispatch(
+        equipmentActions.removeEquipment({
+          equipmentCode: equipment.selectedEquipment?.equipmentCode,
+        })
+      );
+      dispatch(
+        equipmentActions.updateSelectedEquipment({ selectedEquipment: null })
+      );
     }
-  }, [requestStatus]);
+  }, [requestStatus, data, error]);
 
+  // prepopulate inputs based on selectedEquipment
   useEffect(() => {
     const selectedEquipment = equipment.selectedEquipment;
     if (selectedEquipment == null) return;
@@ -44,6 +50,22 @@ const DeleteEquipmentModal = () => {
     setDefectiveSince(selectedEquipment.defectiveSince || "");
     setIsDuplicable(selectedEquipment.isDuplicable || false);
   }, [equipment.selectedEquipment]);
+
+  // hidden modal event handler for resetting useHttp and useInput state
+  useEffect(() => {
+    if (modal.current !== null && modal.current !== undefined) {
+      modal.current.addEventListener("hidden.bs.modal", () => {
+        resetHttpState();
+        const selectedEquipment = equipment.selectedEquipment;
+        if (selectedEquipment == null) return;
+        setName(selectedEquipment.name || "");
+        setBarcode(selectedEquipment.barcode || "");
+        setStatus(selectedEquipment.status || "");
+        setDefectiveSince(selectedEquipment.defectiveSince || "");
+        setIsDuplicable(selectedEquipment.isDuplicable || false);
+      });
+    }
+  }, []);
 
   const deleteEquipmentHandler = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -84,6 +106,16 @@ const DeleteEquipmentModal = () => {
             ></button>
           </div>
           <div className="modal-body">
+            {
+              <RequestStatusMessage
+                data={data}
+                error={error}
+                loadingMessage="Deleting equipment..."
+                status={requestStatus}
+                successMessage="Equipment deleted"
+                key={"Delete Equipment"}
+              />
+            }
             <form onSubmit={deleteEquipmentHandler}>
               <div className="form-floating mb-3">
                 <input

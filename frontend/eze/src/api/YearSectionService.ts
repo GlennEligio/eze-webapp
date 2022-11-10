@@ -1,4 +1,4 @@
-import { RequestConfig } from "../hooks/useHttp";
+import { RequestConfig, ApiError } from "../hooks/useHttp";
 import validator from "validator";
 
 export interface YearSection {
@@ -27,7 +27,7 @@ const createYearSection = async (requestConfig: RequestConfig) => {
     if (response.ok) {
       return response.json();
     }
-    throw new Error("Failed to fetch YearSections");
+    throw new ApiError("Failed to fetch YearSections");
   });
   return responseObj;
 };
@@ -43,7 +43,7 @@ const deleteYearSection = async (requestConfig: RequestConfig) => {
     if (response.ok) {
       return true;
     }
-    throw new Error("Failed to fetch YearSections");
+    throw new ApiError("Failed to fetch YearSections");
   });
   return responseObj;
 };

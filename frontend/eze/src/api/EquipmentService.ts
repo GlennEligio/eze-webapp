@@ -1,4 +1,4 @@
-import { RequestConfig } from "../hooks/useHttp";
+import { RequestConfig, ApiError } from "../hooks/useHttp";
 import validator from "validator";
 
 export interface Equipment {
@@ -33,7 +33,7 @@ const getEquipments = async (requestConfig: RequestConfig) => {
     if (response.ok) {
       return response.json();
     }
-    throw new Error("Failed to fetch equipments");
+    throw new ApiError("Failed to fetch equipments");
   });
   return responseObj;
 };
@@ -49,7 +49,7 @@ const getEquipmentByBarcode = async (requestConfig: RequestConfig) => {
     if (response.ok) {
       return response.json();
     }
-    throw new Error("Failed to fetch equipment");
+    throw new ApiError("Failed to fetch equipment");
   });
   return responseObj;
 };
@@ -67,7 +67,7 @@ const createEquipment = async (requestConfig: RequestConfig) => {
     if (response.ok) {
       return response.json();
     }
-    throw new Error("Failed to create equipment");
+    throw new ApiError("Failed to create equipment");
   });
   return responseObj;
 };
@@ -88,7 +88,7 @@ const updateEquipment = async (requestConfig: RequestConfig) => {
     if (response.ok) {
       return response.json();
     }
-    throw new Error("Failed to update equipment");
+    throw new ApiError("Failed to update equipment");
   });
   return responseObj;
 };
@@ -106,7 +106,7 @@ const deleteEquipment = async (requestConfig: RequestConfig) => {
     if (response.ok) {
       return true;
     }
-    throw new Error("Failed to update equipment");
+    throw new ApiError("Failed to update equipment");
   });
   return responseObj;
 };

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, FC } from "react";
+import React, { useState, useEffect, FC, useRef } from "react";
 import useHttp, { RequestConfig } from "../../../hooks/useHttp";
 import YearSectionService, {
   CreateYearSection,
@@ -23,13 +23,13 @@ interface AddYearSectionModalProps {
 const AddYearSectionModal: FC<AddYearSectionModalProps> = (props) => {
   const auth = useSelector((state: IRootState) => state.auth);
   const dispatch = useDispatch();
-  // const [yearNumber, setYearNumber] = useState("");
-  // const [sectionName, setSectionName] = useState("");
+  const modal = useRef<HTMLDivElement | null>(null);
   const {
     sendRequest: createYearSection,
     data,
     error,
     status,
+    resetHttpState,
   } = useHttp<YearSection>(YearSectionService.createYearSection, false);
 
   // useInput for the controlled input and validation
@@ -49,10 +49,18 @@ const AddYearSectionModal: FC<AddYearSectionModalProps> = (props) => {
     isValid: sectionNameIsValid,
     valueChangeHandler: sectionNameChangeHandler,
     inputBlurHandler: sectionNameBlurHandler,
-    reset: resetSectionName,
     errorMessage: sectionNameErrorMessage,
     set: setSectionName,
   } = useInput(validateNotEmpty("Year number"), "", InputType.TEXT);
+
+  // add hidden.bs.modal eventHandler in the Modal at Component Mount
+  useEffect(() => {
+    if (modal.current) {
+      modal.current.addEventListener("hidden.bs.modal", () => {
+        resetHttpState();
+      });
+    }
+  }, []);
 
   // Adding YearSection to a YearLevel after a successful request
   useEffect(() => {
@@ -84,7 +92,7 @@ const AddYearSectionModal: FC<AddYearSectionModalProps> = (props) => {
       },
     };
 
-    if (!isValidYearSection(newYearSection)) {
+    if (!yearNumberIsValid || !sectionNameIsValid) {
       console.log("Invalid YearSection");
       return;
     }

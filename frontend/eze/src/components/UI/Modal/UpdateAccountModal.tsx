@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import useHttp, { RequestConfig } from "../../../hooks/useHttp";
 import AccountService, {
   Account,
@@ -15,22 +15,21 @@ import useInput from "../../../hooks/useInput";
 import { InputType } from "../../../hooks/useInput";
 import { validateContains } from "../../../validation/validations";
 import { validateNotEmpty } from "../../../validation/validations";
+import RequestStatusMessage from "../Other/RequestStatusMessage";
 
 const UpdateAccountModal = () => {
   const auth = useSelector((state: IRootState) => state.auth);
   const account = useSelector((state: IRootState) => state.account);
   const dispatch = useDispatch();
-  // const [username, setUsername] = useState("");
-  // const [password, setPassword] = useState("");
-  // const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
-  // const [type, setType] = useState(AccountType.STUDENT_ASSISTANT);
   const [active, setActive] = useState(true);
+  const modal = useRef<HTMLDivElement | null>(null);
   const {
     sendRequest: updateAccount,
     data,
     error,
     status: requestStatus,
+    resetHttpState,
   } = useHttp<Account>(AccountService.updateAccount, false);
 
   // useInput for the controlled input and validation
@@ -57,6 +56,7 @@ const UpdateAccountModal = () => {
     valueChangeHandler: passwordChangeHandler,
     inputBlurHandler: passwordBlurHandler,
     errorMessage: passwordErrorMessage,
+    reset: resetPasswordInput,
   } = useInput(validateNotEmpty("Password"), "", InputType.TEXT);
   const {
     value: type,
@@ -94,6 +94,22 @@ const UpdateAccountModal = () => {
     setType(selectedAcn.type);
     setActive(selectedAcn.active);
   }, [account.selectedAccount]);
+
+  // set up modal so that when hidden.bs.modal event is triggered, it will
+  // 1. reset the useHttp and 2. reset the inputs
+  useEffect(() => {
+    if (modal.current !== null && modal.current !== undefined) {
+      modal.current.addEventListener("hidden.bs.modal", () => {
+        resetHttpState();
+        resetPasswordInput();
+        if (account.selectedAccount !== null) {
+          setType(account.selectedAccount.type as AccountType);
+          setUsername(account.selectedAccount.username);
+          setFullName(account.selectedAccount.fullName);
+        }
+      });
+    }
+  }, [modal.current]);
 
   const updateAccountHandler = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -135,6 +151,7 @@ const UpdateAccountModal = () => {
       tabIndex={-1}
       aria-labelledby="updateAccountModalLabel"
       aria-hidden="true"
+      ref={modal}
     >
       <div className="modal-dialog modal-dialog-centered">
         <div className="modal-content">
@@ -148,6 +165,16 @@ const UpdateAccountModal = () => {
             ></button>
           </div>
           <div className="modal-body">
+            {
+              <RequestStatusMessage
+                data={data}
+                error={error}
+                key={"Update account"}
+                loadingMessage="Updating Account..."
+                status={requestStatus}
+                successMessage="Account updated"
+              />
+            }
             <form onSubmit={updateAccountHandler}>
               <div className={usernameInputHasError ? "invalid" : ""}>
                 {usernameInputHasError && <span>{usernameErrorMessage}</span>}
@@ -208,17 +235,17 @@ const UpdateAccountModal = () => {
               </div>
               <div className={fullNameInputHasError ? "invalid" : ""}>
                 {fullNameInputHasError && <span>{fullNameErrorMessage}</span>}
-              </div>
-              <div className="form-floating mb-3">
-                <input
-                  type="text"
-                  className="form-control"
-                  id="updateAccountFullname"
-                  onChange={fullNameChangeHandler}
-                  onBlur={fullNameBlurHandler}
-                  value={fullName}
-                />
-                <label htmlFor="updateAccountFullname">Full name</label>
+                <div className="form-floating mb-3">
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="updateAccountFullname"
+                    onChange={fullNameChangeHandler}
+                    onBlur={fullNameBlurHandler}
+                    value={fullName}
+                  />
+                  <label htmlFor="updateAccountFullname">Full name</label>
+                </div>
               </div>
               <div className="form-floating mb-3">
                 <input

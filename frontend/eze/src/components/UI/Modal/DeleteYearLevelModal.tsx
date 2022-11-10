@@ -1,4 +1,4 @@
-import React, { useState, useEffect, FC } from "react";
+import React, { useState, useEffect, FC, useRef } from "react";
 import useHttp, { RequestConfig } from "../../../hooks/useHttp";
 import YearLevelService, { YearLevel } from "../../../api/YearLevelService";
 import { useSelector } from "react-redux";
@@ -6,6 +6,7 @@ import { IRootState } from "../../../store";
 import { useDispatch } from "react-redux";
 import { yearLevelAction } from "../../../store/yearLevelSlice";
 import validator from "validator";
+import RequestStatusMessage from "../Other/RequestStatusMessage";
 
 interface DeleteYearLevelModalProps {
   yearLevels: YearLevel[];
@@ -14,6 +15,7 @@ interface DeleteYearLevelModalProps {
 const DeleteYearLevelModal: FC<DeleteYearLevelModalProps> = (props) => {
   const auth = useSelector((state: IRootState) => state.auth);
   const dispatch = useDispatch();
+  const modal = useRef<HTMLDivElement | null>(null);
   const [yearNumber, setYearNumber] = useState("");
   const [yearLevels, setYearLevels] = useState<YearLevel[]>([]);
   const {
@@ -21,7 +23,17 @@ const DeleteYearLevelModal: FC<DeleteYearLevelModalProps> = (props) => {
     error,
     data,
     status,
+    resetHttpState,
   } = useHttp<boolean>(YearLevelService.deleteYearLevel, false);
+
+  // add hidden.bs.modal eventHandler to Modal at Component Mount
+  useEffect(() => {
+    if (modal.current) {
+      modal.current.addEventListener("hidden.bs.modal", () => {
+        resetHttpState();
+      });
+    }
+  }, []);
 
   // remove yearLevel in Context upon success
   useEffect(() => {
@@ -87,6 +99,15 @@ const DeleteYearLevelModal: FC<DeleteYearLevelModalProps> = (props) => {
             ></button>
           </div>
           <div className="modal-body">
+            {
+              <RequestStatusMessage
+                data={data}
+                error={error}
+                status={status}
+                loadingMessage="Deleting year level"
+                successMessage="Year level deleted"
+              />
+            }
             <form onSubmit={deleteYearLevelHandler}>
               <div className="form-floating mb-3">
                 <select

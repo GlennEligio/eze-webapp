@@ -1,4 +1,4 @@
-import { RequestConfig } from "../hooks/useHttp";
+import { RequestConfig, ApiError } from "../hooks/useHttp";
 import validator from "validator";
 
 export interface Professor {
@@ -25,7 +25,7 @@ const getProfessors = async (requestConfig: RequestConfig) => {
     if (response.ok) {
       return response.json();
     }
-    throw new Error("Failed to fetch professors");
+    throw new ApiError("Failed to fetch professors");
   });
   return responseObj;
 };
@@ -41,7 +41,7 @@ const getProfessorByName = async (requestConfig: RequestConfig) => {
     if (response.ok) {
       return response.json();
     }
-    throw new Error("Failed to fetch professor");
+    throw new ApiError("Failed to fetch professor");
   });
   return responseObj;
 };
@@ -58,7 +58,7 @@ const createProfessor = async (requestConfig: RequestConfig) => {
     if (response.ok) {
       return response.json();
     }
-    throw new Error("Failed to create professor");
+    throw new ApiError("Failed to create professor");
   });
 
   return responseObj;
@@ -76,7 +76,7 @@ const updateProfessor = async (requestConfig: RequestConfig) => {
     if (response.ok) {
       return response.json();
     }
-    throw new Error("Failed to update professor");
+    throw new ApiError("Failed to update professor");
   });
 
   return responseObj;
@@ -93,7 +93,7 @@ const deleteProfessor = async (requestConfig: RequestConfig) => {
     if (response.ok) {
       return true;
     }
-    throw new Error("Failed to delete professor");
+    throw new ApiError("Failed to delete professor");
   });
 
   return responseObj;

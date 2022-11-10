@@ -4,6 +4,15 @@ enum RequestActionKind {
   SEND = "SEND",
   SUCCESS = "SUCCESS",
   ERROR = "ERROR",
+  RESET = "RESET",
+}
+
+export class ApiError extends Error {
+  message: string;
+  constructor(m: string) {
+    super();
+    this.message = m;
+  }
 }
 
 interface RequestState<T> {
@@ -31,6 +40,12 @@ const createDataFetchReducer =
   <T,>() =>
   (state: RequestState<T>, action: RequestAction): RequestState<T> => {
     switch (action.type) {
+      case RequestActionKind.RESET:
+        return {
+          status: null,
+          data: null,
+          error: null,
+        };
       case RequestActionKind.SEND:
         return {
           ...state,
@@ -93,6 +108,18 @@ function useHttp<T>(requestFunction: Function, startWithPending = false) {
     error: null,
   });
 
+  const determineErrorMessage = (error: any) => {
+    if (error instanceof ApiError) {
+      return error.message;
+    } else {
+      return "Something went wrong";
+    }
+  };
+
+  const resetHttpState = () => {
+    dispatch({ type: RequestActionKind.RESET });
+  };
+
   const sendRequest = useCallback(
     async function (requestConfig?: RequestConfig) {
       console.log("Send request:", requestConfig);
@@ -104,7 +131,7 @@ function useHttp<T>(requestFunction: Function, startWithPending = false) {
       } catch (error) {
         dispatch({
           type: RequestActionKind.ERROR,
-          errorMessage: (error as Error).message || "Something went wrong!",
+          errorMessage: determineErrorMessage(error),
         });
       }
     },
@@ -113,6 +140,7 @@ function useHttp<T>(requestFunction: Function, startWithPending = false) {
 
   return {
     sendRequest,
+    resetHttpState,
     ...httpState,
   };
 }

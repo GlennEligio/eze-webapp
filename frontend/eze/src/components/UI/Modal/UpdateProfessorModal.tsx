@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import useHttp, { RequestConfig } from "../../../hooks/useHttp";
 import ProfessorService, {
   CreateUpdateProfessor,
-  isValidProfessor,
   Professor,
 } from "../../../api/ProfessorService";
 import { useSelector } from "react-redux";
@@ -14,6 +13,7 @@ import {
   validatePhMobileNumber,
 } from "../../../validation/validations";
 import useInput, { InputType } from "../../../hooks/useInput";
+import RequestStatusMessage from "../Other/RequestStatusMessage";
 
 interface UpdateProfessorModalProps {
   selectedProfessor: Professor | null;
@@ -22,13 +22,13 @@ interface UpdateProfessorModalProps {
 const UpdateProfessorModal: React.FC<UpdateProfessorModalProps> = (props) => {
   const auth = useSelector((state: IRootState) => state.auth);
   const dispatch = useDispatch();
-  // const [name, setName] = useState("");
-  // const [contactNumber, setContactNumber] = useState("");
+  const modal = useRef<HTMLDivElement | null>(null);
   const {
     sendRequest: updateProfessor,
     data,
     error,
     status,
+    resetHttpState,
   } = useHttp<Professor>(ProfessorService.updateProfessor, false);
 
   // useInput for the controlled input and validation
@@ -49,7 +49,6 @@ const UpdateProfessorModal: React.FC<UpdateProfessorModalProps> = (props) => {
     isValid: contactNumberIsValid,
     valueChangeHandler: contactNumberChangeHandler,
     inputBlurHandler: contactNumberBlurHandler,
-    reset: resetContactNumber,
     errorMessage: contactNumberErrorMessage,
     set: setContactNumber,
   } = useInput<string, HTMLInputElement>(
@@ -72,6 +71,19 @@ const UpdateProfessorModal: React.FC<UpdateProfessorModalProps> = (props) => {
       setContactNumber(props.selectedProfessor.contactNumber);
     }
   }, [props.selectedProfessor]);
+
+  // Add hidden.bs.modal eventHandler to Modal at component mount
+  useEffect(() => {
+    if (modal.current !== null && modal.current !== undefined) {
+      modal.current.addEventListener("hidden.bs.modal", () => {
+        resetHttpState();
+      });
+      if (props.selectedProfessor) {
+        setName(props.selectedProfessor.name);
+        setContactNumber(props.selectedProfessor.contactNumber);
+      }
+    }
+  }, []);
 
   const updateProfessorHandler = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -119,6 +131,16 @@ const UpdateProfessorModal: React.FC<UpdateProfessorModalProps> = (props) => {
             ></button>
           </div>
           <div className="modal-body">
+            {
+              <RequestStatusMessage
+                data={data}
+                error={error}
+                status={status}
+                loadingMessage="Updating professor..."
+                successMessage="Professor updated"
+                key="Update Professor"
+              />
+            }
             <form onSubmit={updateProfessorHandler}>
               <div className={nameInputHasError ? "invalid" : ""}>
                 {nameInputHasError && <span>{nameErrorMessage}</span>}

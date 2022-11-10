@@ -1,8 +1,7 @@
-import React, { useState, useEffect, FC } from "react";
+import React, { useState, useEffect, FC, useRef } from "react";
 import useHttp, { RequestConfig } from "../../../hooks/useHttp";
 import StudentService, {
   CreateUpdateStudentDto,
-  isValidStudent,
   Student,
 } from "../../../api/StudentService";
 import { useSelector } from "react-redux";
@@ -18,6 +17,7 @@ import {
   validatePhMobileNumber,
   validatePositive,
 } from "../../../validation/validations";
+import RequestStatusMessage from "../Other/RequestStatusMessage";
 
 interface AddStudentModalProps {
   yearLevels: YearLevel[];
@@ -26,24 +26,20 @@ interface AddStudentModalProps {
 const AddStudentModal: FC<AddStudentModalProps> = (props) => {
   const auth = useSelector((state: IRootState) => state.auth);
   const dispatch = useDispatch();
-  // const [studentNumber, setStudentNumber] = useState("");
-  // const [fullName, setFullName] = useState("");
-  // const [yearAndSection, setYearAndSection] = useState("BSECE 1-1");
-  // const [contactNumber, setContactNumber] = useState("");
+  const modal = useRef<HTMLDivElement | null>(null);
   const [birthday, setBirthday] = useState("");
   const [address, setAddress] = useState("");
   const [email, setEmail] = useState("");
   const [guardian, setGuardian] = useState("");
   const [guardianNumber, setGuardianNumber] = useState("");
-  // const [yearNumber, setYearNumber] = useState(1);
   const [yearSections, setYearSections] = useState<YearSection[]>([]);
   const [yearLevels, setYearLevels] = useState<YearLevel[]>([]);
-
   const {
     sendRequest: createStudent,
     data,
     error,
     status,
+    resetHttpState,
   } = useHttp<Student>(StudentService.createStudent, false);
 
   // useInput for the controlled input and validation
@@ -103,9 +99,26 @@ const AddStudentModal: FC<AddStudentModalProps> = (props) => {
     errorMessage: contactNumberErrorMessage,
   } = useInput(validatePhMobileNumber("Contact number"), "", InputType.TEXT);
 
+  // add hidden.bs.modal eventHandler to Modal at Component Mount
+  useEffect(() => {
+    if (modal.current) {
+      modal.current.addEventListener("hidden.bs.modal", () => {
+        resetHttpState();
+        resetStudentNumber();
+        resetContactNumber();
+        resetFullName();
+        setAddress("");
+        setBirthday("");
+        setEmail("");
+        setGuardian("");
+        setGuardianNumber("");
+      });
+    }
+  }, []);
+
   // Add new Student in Context when request is success
   useEffect(() => {
-    if (status == "completed" && error === null) {
+    if (status == "completed" && error === null && data) {
       dispatch(studentActions.addStudent({ newStudent: data }));
     }
   }, [data, status, error]);
@@ -139,6 +152,7 @@ const AddStudentModal: FC<AddStudentModalProps> = (props) => {
     }
   }, [yearLevels, yearNumber]);
 
+  // form submitHandler for adding Student
   const addStudentHandler = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     console.log("Adding Student");
@@ -182,8 +196,6 @@ const AddStudentModal: FC<AddStudentModalProps> = (props) => {
     resetStudentNumber();
     resetContactNumber();
     resetFullName();
-    resetYearAndSection();
-    resetYearNumber();
     setAddress("");
     setBirthday("");
     setEmail("");
@@ -198,6 +210,7 @@ const AddStudentModal: FC<AddStudentModalProps> = (props) => {
       tabIndex={-1}
       aria-labelledby="addStudentModalLabel"
       aria-hidden="true"
+      ref={modal}
     >
       <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div className="modal-content">
@@ -213,6 +226,16 @@ const AddStudentModal: FC<AddStudentModalProps> = (props) => {
             ></button>
           </div>
           <div className="modal-body">
+            {
+              <RequestStatusMessage
+                data={data}
+                error={error}
+                status={status}
+                loadingMessage="Adding student..."
+                successMessage="Student added"
+                key="Add Student"
+              />
+            }
             <form onSubmit={addStudentHandler}>
               {/** Student Number input */}
               <div className={studentNumberInputHasError ? "invalid" : ""}>

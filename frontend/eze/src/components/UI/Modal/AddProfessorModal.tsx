@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import useHttp, { RequestConfig } from "../../../hooks/useHttp";
 import ProfessorService, {
   CreateUpdateProfessor,
-  isValidProfessor,
   Professor,
 } from "../../../api/ProfessorService";
 import { useSelector } from "react-redux";
@@ -14,15 +13,18 @@ import {
   validatePhMobileNumber,
 } from "../../../validation/validations";
 import useInput, { InputType } from "../../../hooks/useInput";
+import RequestStatusMessage from "../Other/RequestStatusMessage";
 
 const AddProfessorModal = () => {
   const auth = useSelector((state: IRootState) => state.auth);
   const dispatch = useDispatch();
+  const modal = useRef<HTMLDivElement | null>(null);
   const {
     sendRequest: createProfessor,
     data,
     error,
     status,
+    resetHttpState,
   } = useHttp<Professor>(ProfessorService.createProfessor, false);
 
   // useInput for the controlled input and validation
@@ -52,7 +54,19 @@ const AddProfessorModal = () => {
     }
   }, [data, status, error]);
 
-  const addAccountHandler = (event: React.FormEvent<HTMLFormElement>) => {
+  // useEffect ONMOUNT for adding hidden.bs.modal eventHandler for modal to reset useHttp and useInput states
+  useEffect(() => {
+    if (modal.current !== null && modal.current !== undefined) {
+      modal.current.addEventListener("hidden.bs.modal", () => {
+        resetHttpState();
+        resetContactNumber();
+        resetNameInput();
+      });
+    }
+  }, []);
+
+  // form submitHandler for adding Professor
+  const addProfessorHandler = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     console.log("Adding Professor");
     const newProfessor: CreateUpdateProfessor = {
@@ -85,6 +99,7 @@ const AddProfessorModal = () => {
       tabIndex={-1}
       aria-labelledby="addProfessorModalLabel"
       aria-hidden="true"
+      ref={modal}
     >
       <div className="modal-dialog modal-dialog-centered">
         <div className="modal-content">
@@ -100,7 +115,17 @@ const AddProfessorModal = () => {
             ></button>
           </div>
           <div className="modal-body">
-            <form onSubmit={addAccountHandler}>
+            {
+              <RequestStatusMessage
+                data={data}
+                error={error}
+                status={status}
+                loadingMessage="Adding professor..."
+                successMessage="Professor added"
+                key="Add Professor"
+              />
+            }
+            <form onSubmit={addProfessorHandler}>
               <div className={nameInputHasError ? "invalid" : ""}>
                 {nameInputHasError && <span>{nameErrorMessage}</span>}
                 <div className="form-floating mb-3">

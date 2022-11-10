@@ -48,6 +48,27 @@
   font-size: small;
 }
 
+.request-status-message {
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+.request-status-message.pending {
+  color: black;
+}
+
+.request-status-message span {
+  margin-left: 0.5rem;
+}
+
+.request-status-message.success {
+  color: green;
+}
+
+.request-status-message.error {
+  color: red;
+}
+
 .eze-menu {
   font-family: sans-serif;
   font-size: 0.925rem;

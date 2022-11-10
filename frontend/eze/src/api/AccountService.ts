@@ -1,5 +1,5 @@
 import validator from "validator";
-import { RequestConfig } from "../hooks/useHttp";
+import { RequestConfig, ApiError } from "../hooks/useHttp";
 
 export enum AccountType {
   SADMIN = "SADMIN",
@@ -54,7 +54,7 @@ const login = async (requestConfig: RequestConfig) => {
     if (response.ok) {
       return response.json();
     }
-    throw new Error("Invalid username/password");
+    throw new ApiError("Invalid username/password");
   });
   return responseObj;
 };
@@ -67,7 +67,7 @@ const getAccounts = async (requestConfig: RequestConfig) => {
     if (response.ok) {
       return response.json();
     }
-    throw new Error("Failed to fetch accounts");
+    throw new ApiError("Failed to fetch accounts");
   });
   return responseObj;
 };
@@ -81,7 +81,7 @@ const createAccount = async (requestConfig: RequestConfig) => {
     if (response.ok) {
       return response.json();
     }
-    throw new Error("Failed to create account");
+    throw new ApiError("Failed to create account");
   });
   return responseObj;
 };
@@ -98,7 +98,7 @@ const updateAccount = async (requestConfig: RequestConfig) => {
     if (response.ok) {
       return response.json();
     }
-    throw new Error("Failed to update account");
+    throw new ApiError("Failed to update account");
   });
   return responseObj;
 };
@@ -115,7 +115,7 @@ const deleteAccount = async (requestConfig: RequestConfig) => {
     if (response.ok) {
       return true;
     }
-    throw new Error("Failed to update account");
+    throw new ApiError("Failed to update account");
   });
   return responseObj;
 };

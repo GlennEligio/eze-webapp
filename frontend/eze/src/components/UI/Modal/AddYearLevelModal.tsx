@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useRef, useEffect } from "react";
 import useHttp, { RequestConfig } from "../../../hooks/useHttp";
 import YearLevelService, {
   CreateYearLevelDto,
@@ -11,16 +11,18 @@ import { useDispatch } from "react-redux";
 import { yearLevelAction } from "../../../store/yearLevelSlice";
 import useInput, { InputType } from "../../../hooks/useInput";
 import { validatePositive } from "../../../validation/validations";
+import RequestStatusMessage from "../Other/RequestStatusMessage";
 
 const AddYearLevelModal = () => {
   const auth = useSelector((state: IRootState) => state.auth);
   const dispatch = useDispatch();
-  // const [yearNumber, setYearNumber] = useState(1);
+  const modal = useRef<HTMLDivElement | null>(null);
   const {
     sendRequest: createYearLevel,
     data,
     error,
     status: requestStatus,
+    resetHttpState,
   } = useHttp<YearLevel>(YearLevelService.createYearLevel, false);
 
   // useInput for the controlled input and validation
@@ -33,6 +35,15 @@ const AddYearLevelModal = () => {
     reset: resetYearNumber,
     errorMessage: yearNumberErrorMessage,
   } = useInput(validatePositive("Year number"), "1", InputType.TEXT);
+
+  // add hidden.bs.modal eventHandler to Modal at Component Mount
+  useEffect(() => {
+    if (modal.current) {
+      modal.current.addEventListener("hidden.bs.modal", () => {
+        resetHttpState();
+      });
+    }
+  }, []);
 
   // add YearLevel in the Redux after successful request
   useEffect(() => {
@@ -72,6 +83,7 @@ const AddYearLevelModal = () => {
       tabIndex={-1}
       aria-labelledby="addYearLevelModalLabel"
       aria-hidden="true"
+      ref={modal}
     >
       <div className="modal-dialog modal-dialog-centered">
         <div className="modal-content">
@@ -87,6 +99,16 @@ const AddYearLevelModal = () => {
             ></button>
           </div>
           <div className="modal-body">
+            {
+              <RequestStatusMessage
+                data={data}
+                error={error}
+                status={requestStatus}
+                loadingMessage="Adding year level"
+                successMessage="Year level added"
+                key="Add YearLevel"
+              />
+            }
             <form onSubmit={addYearLevelHandler}>
               <div className={yearNumberInputHasError ? "invalid" : ""}>
                 {yearNumberInputHasError && (

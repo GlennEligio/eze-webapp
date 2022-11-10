@@ -1,4 +1,4 @@
-import { RequestConfig } from "../hooks/useHttp";
+import { RequestConfig, ApiError } from "../hooks/useHttp";
 import { YearSection } from "./YearSectionService";
 import validator from "validator";
 
@@ -25,7 +25,7 @@ const getYearLevels = async (requestConfig: RequestConfig) => {
     if (response.ok) {
       return response.json();
     }
-    throw new Error("Failed to fetch YearLevels");
+    throw new ApiError("Failed to fetch year levels");
   });
   return responseObj;
 };
@@ -42,7 +42,7 @@ const createYearLevel = async (requestConfig: RequestConfig) => {
     if (response.ok) {
       return response.json();
     }
-    throw new Error("Failed to delete YearLevels");
+    throw new ApiError("Failed to add year level");
   });
   return responseObj;
 };
@@ -59,7 +59,7 @@ const deleteYearLevel = async (requestConfig: RequestConfig) => {
     if (response.ok) {
       return true;
     }
-    throw new Error("Failed to fetch YearLevels");
+    throw new ApiError("Failed to delete year level");
   });
   return responseObj;
 };

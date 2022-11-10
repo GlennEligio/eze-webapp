@@ -1,33 +1,33 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import useHttp, { RequestConfig } from "../../../hooks/useHttp";
 import AccountService, {
   Account,
   AccountType,
   CreateUpdateAccountDto,
-  isValidAccount,
 } from "../../../api/AccountService";
 import { useSelector } from "react-redux";
 import { IRootState } from "../../../store";
 import { useDispatch } from "react-redux";
 import { accountActions } from "../../../store/accountSlice";
-import validator from "validator";
 import {
   validateContains,
   validateNotEmpty,
 } from "../../../validation/validations";
 import useInput, { InputType } from "../../../hooks/useInput";
-import { request } from "http";
+import RequestStatusMessage from "../Other/RequestStatusMessage";
 
 const AddAccountModal = () => {
   const auth = useSelector((state: IRootState) => state.auth);
   const dispatch = useDispatch();
   const [email, setEmail] = useState("");
   const [active, setActive] = useState(true);
+  const modal = useRef<HTMLDivElement | null>(null);
   const {
     sendRequest: createAccount,
     data,
     error,
     status: requestStatus,
+    resetHttpState,
   } = useHttp<Account>(AccountService.createAccount, false);
 
   // useInput for the controlled input and validation
@@ -120,6 +120,19 @@ const AddAccountModal = () => {
     setEmail("");
   };
 
+  // set up modal so that when hidden.bs.modal event is triggered, it will reset the useHttp and useInput states
+  useEffect(() => {
+    if (modal.current !== null && modal.current !== undefined) {
+      modal.current.addEventListener("hidden.bs.modal", () => {
+        resetHttpState();
+        resetPasswordInput();
+        resetTypeInput();
+        resetUsernameInput();
+        resetFullNameInput();
+      });
+    }
+  }, [modal.current]);
+
   return (
     <div
       className="modal fade"
@@ -127,6 +140,7 @@ const AddAccountModal = () => {
       tabIndex={-1}
       aria-labelledby="addAccountModalLabel"
       aria-hidden="true"
+      ref={modal}
     >
       <div className="modal-dialog modal-dialog-centered">
         <div className="modal-content">
@@ -142,6 +156,16 @@ const AddAccountModal = () => {
             ></button>
           </div>
           <div className="modal-body">
+            {
+              <RequestStatusMessage
+                data={data}
+                error={error}
+                key={"Add account"}
+                loadingMessage="Adding Account..."
+                status={requestStatus}
+                successMessage="Account added"
+              />
+            }
             <form onSubmit={addAccountHandler}>
               <div className={usernameInputHasError ? "invalid" : ""}>
                 {usernameInputHasError && <span>{usernameErrorMessage}</span>}

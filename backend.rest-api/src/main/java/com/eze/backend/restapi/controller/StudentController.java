@@ -80,9 +80,13 @@ public class StudentController {
     }
 
     @PutMapping("/students/{studentNo}")
-    public ResponseEntity<StudentDto> updateStudent(@Valid @RequestBody StudentDto dto,
-                                                 @PathVariable("studentNo") String studentNo) {
-        return ResponseEntity.ok(Student.toStudentDto(service.update(Student.toStudent(dto), studentNo)));
+    public ResponseEntity<Object> updateStudent(@Valid @RequestBody StudentDto dto,
+                                                 @PathVariable("studentNo") String studentNo,
+                                                    @RequestParam(required = false, defaultValue = "true") boolean complete) {
+        if(complete) {
+            return ResponseEntity.ok(Student.toStudentDto(service.update(Student.toStudent(dto), studentNo)));
+        }
+        return ResponseEntity.ok(Student.toStudentListDto(service.update(Student.toStudent(dto), studentNo)));
     }
 
     @DeleteMapping("/students/{studentNo}")

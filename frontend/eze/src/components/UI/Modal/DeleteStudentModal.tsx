@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import useHttp, { RequestConfig } from "../../../hooks/useHttp";
 import StudentService from "../../../api/StudentService";
 import { useSelector } from "react-redux";
@@ -6,11 +6,13 @@ import { IRootState } from "../../../store";
 import { studentActions } from "../../../store/studentSlice";
 import { useDispatch } from "react-redux";
 import validator from "validator";
+import RequestStatusMessage from "../Other/RequestStatusMessage";
 
 const DeleteStudentModal = () => {
   const auth = useSelector((state: IRootState) => state.auth);
   const student = useSelector((state: IRootState) => state.student);
   const dispatch = useDispatch();
+  const modal = useRef<HTMLDivElement | null>(null);
   const [studentNumber, setStudentNumber] = useState("");
   const [fullName, setFullName] = useState("");
   const [yearAndSection, setYearAndSection] = useState("BSECE 5-1");
@@ -27,14 +29,25 @@ const DeleteStudentModal = () => {
     data,
     error,
     status,
+    resetHttpState,
   } = useHttp<boolean>(StudentService.deleteStudent, false);
+
+  // add hidden.bs.modal eventHandler to Modal at Component Mound
+  useEffect(() => {
+    if (modal.current) {
+      modal.current.addEventListener("hidden.bs.modal", () => {
+        resetHttpState();
+      });
+    }
+  }, []);
 
   // Update the Student in the Context API
   useEffect(() => {
     if (status == "completed" && error === null) {
       dispatch(studentActions.removeStudent({ studentNumber: studentNumber }));
+      dispatch(studentActions.updateSelectedStudent({ selectedStudent: null }));
     }
-  }, [data]);
+  }, [data, status, error]);
 
   // Prepopulate the inputs based on selectedStudent in Context
   useEffect(() => {
@@ -101,6 +114,7 @@ const DeleteStudentModal = () => {
       tabIndex={-1}
       aria-labelledby="deleteStudentModalLabel"
       aria-hidden="true"
+      ref={modal}
     >
       <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div className="modal-content">
@@ -116,6 +130,16 @@ const DeleteStudentModal = () => {
             ></button>
           </div>
           <div className="modal-body">
+            {
+              <RequestStatusMessage
+                data={data}
+                error={error}
+                status={status}
+                loadingMessage="Deleting student..."
+                successMessage="Student deleted"
+                key="Delete Student"
+              />
+            }
             <form onSubmit={deleteStudentHandler}>
               {/** Student Number input */}
               <div className="form-floating mb-3">

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import useHttp, { RequestConfig } from "../../../hooks/useHttp";
 import EquipmentService, {
   Equipment,
@@ -16,20 +16,19 @@ import {
   validatePattern,
 } from "../../../validation/validations";
 import { InputType } from "../../../hooks/useInput";
+import RequestStatusMessage from "../Other/RequestStatusMessage";
 
 const AddEquipmentModal = () => {
   const auth = useSelector((state: IRootState) => state.auth);
   const dispatch = useDispatch();
-  // const [name, setName] = useState("");
-  // const [status, setStatus] = useState("GOOD");
-  // const [barcode, setBarcode] = useState("");
   const [defectiveSince, setDefectiveSince] = useState("");
-  // const [isDuplicable, setIsDuplicable] = useState(true);
+  const modal = useRef<HTMLDivElement | null>(null);
   const {
     sendRequest: createEquipment,
     data,
     error,
     status: requestStatus,
+    resetHttpState,
   } = useHttp<Equipment>(EquipmentService.createEquipment, false);
 
   // useInput for the controlled input and validation
@@ -88,7 +87,21 @@ const AddEquipmentModal = () => {
     }
   }, [data, requestStatus, error]);
 
-  const onAddEquipment = (event: React.FormEvent<HTMLFormElement>) => {
+  // hidden modal event handler for resetting useHttp and useInput state
+  useEffect(() => {
+    if (modal.current !== null && modal.current !== undefined) {
+      modal.current.addEventListener("hidden.bs.modal", () => {
+        resetHttpState();
+        resetNameInput();
+        resetBarcodeInput();
+        resetStatusInput();
+        setDefectiveSince("");
+        resetIsDuplicable();
+      });
+    }
+  }, []);
+
+  const addEquipmentHandler = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     console.log("Adding Equipment");
     const newEquipment: CreateUpdateEquipmentDto = {
@@ -131,6 +144,7 @@ const AddEquipmentModal = () => {
       tabIndex={-1}
       aria-labelledby="addEquipmentModalLabel"
       aria-hidden="true"
+      ref={modal}
     >
       <div className="modal-dialog modal-dialog-centered">
         <div className="modal-content">
@@ -146,7 +160,17 @@ const AddEquipmentModal = () => {
             ></button>
           </div>
           <div className="modal-body">
-            <form onSubmit={onAddEquipment}>
+            {
+              <RequestStatusMessage
+                data={data}
+                error={error}
+                loadingMessage="Adding equipment..."
+                status={requestStatus}
+                successMessage="Equipment added"
+                key={"Add Equipment"}
+              />
+            }
+            <form onSubmit={addEquipmentHandler}>
               <div className={nameInputHasError ? "invalid" : ""}>
                 {nameInputHasError && <span>{nameErrorMessage}</span>}
                 <div className="form-floating mb-3">

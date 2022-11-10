@@ -1,4 +1,4 @@
-import { RequestConfig } from "../hooks/useHttp";
+import { RequestConfig, ApiError } from "../hooks/useHttp";
 import validator from "validator";
 export interface Student {
   id: number;
@@ -65,7 +65,7 @@ const getStudents = async (requestConfig: RequestConfig) => {
     if (response.ok) {
       return response.json();
     }
-    throw new Error("Failed to fetch students");
+    throw new ApiError("Failed to fetch students");
   });
   return responseObj;
 };
@@ -81,7 +81,7 @@ const getStudentByStudentNumber = async (requestConfig: RequestConfig) => {
     if (response.ok) {
       return response.json();
     }
-    throw new Error("Failed to fetch student");
+    throw new ApiError("Failed to fetch student");
   });
   return responseObj;
 };
@@ -98,7 +98,7 @@ const createStudent = async (requestConfig: RequestConfig) => {
     if (response.ok) {
       return response.json();
     }
-    throw new Error("Failed to create student");
+    throw new ApiError("Failed to create student");
   });
   return responseObj;
 };
@@ -115,7 +115,7 @@ const updateStudent = async (requestConfig: RequestConfig) => {
     if (response.ok) {
       return response.json();
     }
-    throw new Error("Failed to update student");
+    throw new ApiError("Failed to update student");
   });
   return responseObj;
 };
@@ -131,7 +131,7 @@ const deleteStudent = async (requestConfig: RequestConfig) => {
     if (response.ok) {
       return true;
     }
-    throw new Error("Failed to delete student");
+    throw new ApiError("Failed to delete student");
   });
   return responseObj;
 };

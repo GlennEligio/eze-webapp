@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import useHttp, { RequestConfig } from "../../../hooks/useHttp";
 import ProfessorService, { Professor } from "../../../api/ProfessorService";
 import { useSelector } from "react-redux";
@@ -6,6 +6,7 @@ import { IRootState } from "../../../store";
 import { useDispatch } from "react-redux";
 import validator from "validator";
 import { professorActions } from "../../../store/professorSlice";
+import RequestStatusMessage from "../Other/RequestStatusMessage";
 
 interface DeleteProfessorModalProps {
   selectedProfessor: Professor | null;
@@ -15,21 +16,26 @@ const DeleteProfessorModal: React.FC<DeleteProfessorModalProps> = (props) => {
   const auth = useSelector((state: IRootState) => state.auth);
   const [name, setName] = useState("");
   const [contactNumber, setContactNumber] = useState("");
+  const modal = useRef<HTMLDivElement | null>(null);
   const dispatch = useDispatch();
   const {
     sendRequest: deleteProfessor,
     data,
     error,
     status,
+    resetHttpState,
   } = useHttp<boolean>(ProfessorService.deleteProfessor, false);
 
   // Delete the Professor to the Redux store
   useEffect(() => {
-    if (status == "completed" && error === null) {
+    if (status == "completed" && error === null && data) {
       dispatch(
         professorActions.removeProfessor({
           name: name,
         })
+      );
+      dispatch(
+        professorActions.updateSelectedProfessor({ selectedProfessor: null })
       );
     }
   }, [data, status, error]);
@@ -42,6 +48,20 @@ const DeleteProfessorModal: React.FC<DeleteProfessorModalProps> = (props) => {
     }
   }, [props.selectedProfessor]);
 
+  // Add hidden.bs.modal eventHandler to Modal at Component Mount
+  useEffect(() => {
+    if (modal.current) {
+      modal.current.addEventListener("hidden.bs.modal", () => {
+        resetHttpState();
+        if (props.selectedProfessor) {
+          setName(props.selectedProfessor.name);
+          setContactNumber(props.selectedProfessor.contactNumber);
+        }
+      });
+    }
+  }, []);
+
+  // form submitHandler for deleting Professor
   const deleteProfessorHandler = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     console.log("Deleting Professor");
@@ -64,6 +84,7 @@ const DeleteProfessorModal: React.FC<DeleteProfessorModalProps> = (props) => {
       tabIndex={-1}
       aria-labelledby="deleteProfessorModalLabel"
       aria-hidden="true"
+      ref={modal}
     >
       <div className="modal-dialog modal-dialog-centered">
         <div className="modal-content">
@@ -79,6 +100,16 @@ const DeleteProfessorModal: React.FC<DeleteProfessorModalProps> = (props) => {
             ></button>
           </div>
           <div className="modal-body">
+            {
+              <RequestStatusMessage
+                data={data}
+                error={error}
+                status={status}
+                loadingMessage="Deleting professor..."
+                successMessage="Professor deleted"
+                key="Delete Professor"
+              />
+            }
             <form onSubmit={deleteProfessorHandler}>
               <div className="form-floating mb-3">
                 <input

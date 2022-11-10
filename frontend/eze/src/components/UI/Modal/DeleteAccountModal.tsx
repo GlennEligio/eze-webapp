@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import useHttp, { RequestConfig } from "../../../hooks/useHttp";
 import { useSelector } from "react-redux";
 import { IRootState } from "../../../store";
@@ -6,36 +6,37 @@ import { useDispatch } from "react-redux";
 import { accountActions } from "../../../store/accountSlice";
 import AccountService, { AccountType } from "../../../api/AccountService";
 import validator from "validator";
+import RequestStatusMessage from "../Other/RequestStatusMessage";
 
 const DeleteAccountModal = () => {
   const auth = useSelector((state: IRootState) => state.auth);
   const account = useSelector((state: IRootState) => state.account);
+  const modal = useRef<HTMLDivElement | null>(null);
   const dispatch = useDispatch();
   const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [type, setType] = useState(AccountType.STUDENT_ASSISTANT);
   const [active, setActive] = useState(true);
   const {
     sendRequest: deleteAccount,
-    data,
     error,
+    data,
     status: requestStatus,
+    resetHttpState,
   } = useHttp<boolean>(AccountService.deleteAccount, false);
 
   // remove Account in context after successful remova
   useEffect(() => {
-    if (requestStatus == "completed") {
-      if (error == null) {
-        dispatch(
-          accountActions.removeAccount({
-            username: account.selectedAccount?.username,
-          })
-        );
-      }
+    if (requestStatus == "completed" && error == null && data) {
+      dispatch(
+        accountActions.removeAccount({
+          username: account.selectedAccount?.username,
+        })
+      );
+      dispatch(accountActions.updateSelectedAccount({ selectedAccount: null }));
     }
-  }, [requestStatus]);
+  }, [requestStatus, error, data]);
 
   // Populate inputs with the selected Account in Context
   useEffect(() => {
@@ -47,6 +48,16 @@ const DeleteAccountModal = () => {
     setType(selectedAcn.type);
     setActive(!!selectedAcn.active ? selectedAcn.active : true);
   }, [account.selectedAccount]);
+
+  // Add eventHandler to hidden.bs.modal event of Modal to reset useHttp state
+  // set up modal so that when hidden.bs.modal event is triggered, it will reset the useHttp and useInput states
+  useEffect(() => {
+    if (modal.current !== null && modal.current !== undefined) {
+      modal.current.addEventListener("hidden.bs.modal", () => {
+        resetHttpState();
+      });
+    }
+  }, [modal.current]);
 
   const deleteAccountHandler = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -70,6 +81,7 @@ const DeleteAccountModal = () => {
       id="deleteAccountModal"
       tabIndex={-1}
       aria-hidden="true"
+      ref={modal}
     >
       <div className="modal-dialog modal-dialog-centered">
         <div className="modal-content">
@@ -83,6 +95,16 @@ const DeleteAccountModal = () => {
             ></button>
           </div>
           <div className="modal-body">
+            {
+              <RequestStatusMessage
+                data={data}
+                error={error}
+                key={"Delete account"}
+                loadingMessage="Deleting Account..."
+                status={requestStatus}
+                successMessage="Account deleting"
+              />
+            }
             <form onSubmit={deleteAccountHandler}>
               <div className="form-floating mb-3">
                 <input

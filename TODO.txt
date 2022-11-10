@@ -1,0 +1,3 @@
+TODOS:
+1. Add function in delete of resources in FRE to make selected resource null if delete success
+2. Add function in softDelete service to throw ApiException if the resource to be soft deleted have their deleteFlag already set to true

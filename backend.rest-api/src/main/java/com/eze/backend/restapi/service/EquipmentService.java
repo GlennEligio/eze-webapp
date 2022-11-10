@@ -53,6 +53,14 @@ public class EquipmentService implements IService<Equipment>, IExcelService<Equi
     @Override
     public Equipment create(Equipment equipment) {
         log.info("Creating equipment {}", equipment);
+        if(equipment.getBarcode() != null) {
+            log.info("Equipment has barcode");
+            Optional<Equipment> optionalEquipment = repository.findByBarcode(equipment.getBarcode());
+            if(optionalEquipment.isPresent()) {
+                log.info("Duplicate equipment with same barcode");
+                throw new ApiException(alreadyExist(equipment.getBarcode()), HttpStatus.BAD_REQUEST);
+            }
+        }
         if(equipment.getEquipmentCode() != null) {
             Optional<Equipment> optionalEquipment = repository.findByEquipmentCode(equipment.getEquipmentCode());
             if(optionalEquipment.isPresent()) {

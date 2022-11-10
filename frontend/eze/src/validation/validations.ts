@@ -7,6 +7,7 @@ export const validateNotEmpty = (inputName: string) => {
 
     if (validator.isEmpty(inputValue.trim())) {
       errorMessage = `${inputName} can't be empty`;
+      console.log(errorMessage);
       valueIsValid = false;
     }
 
@@ -28,6 +29,7 @@ export const validatePattern = (
 
     if (!validator.matches(inputValue, pattern)) {
       errorMessage = `${inputName} ${message}`;
+      console.log(errorMessage);
       valueIsValid = false;
     }
 
@@ -48,6 +50,7 @@ export const validateContains = (
 
     if (!listOfAllowedInputs.includes(inputValue)) {
       errorMessage = `${inputName} can only be ${listOfAllowedInputs}`;
+      console.log(errorMessage);
       valueIsValid = false;
     }
 
@@ -65,6 +68,7 @@ export const validatePhMobileNumber = (inputName: string) => {
 
     if (!validator.isMobilePhone(inputValue, "en-PH")) {
       errorMessage = `${inputName} must be valid PH mobile number`;
+      console.log(errorMessage);
       valueIsValid = false;
     }
 
@@ -82,6 +86,7 @@ export const validatePositive = (inputName: string) => {
 
     if (!(validator.isNumeric(inputValue) && Number.parseInt(inputValue) > 0)) {
       errorMessage = `${inputName} must be positive integer`;
+      console.log(errorMessage);
       valueIsValid = false;
     }
 
@@ -99,6 +104,7 @@ export const validateNotUndefined = (inputName: string) => {
 
     if (inputValue !== undefined || inputValue !== null) {
       errorMessage = `${inputName} must be present`;
+      console.log(errorMessage);
       valueIsValid = false;
     }
 
