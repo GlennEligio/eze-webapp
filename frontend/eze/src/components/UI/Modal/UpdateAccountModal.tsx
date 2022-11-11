@@ -13,8 +13,11 @@ import { accountActions } from "../../../store/accountSlice";
 // import { isValidStudent } from "../../../api/StudentService";
 import useInput from "../../../hooks/useInput";
 import { InputType } from "../../../hooks/useInput";
-import { validateContains } from "../../../validation/validations";
-import { validateNotEmpty } from "../../../validation/validations";
+import {
+  validateContains,
+  validateNotEmpty,
+  validateUrl,
+} from "../../../validation/validations";
 import RequestStatusMessage from "../Other/RequestStatusMessage";
 
 const UpdateAccountModal = () => {
@@ -74,6 +77,15 @@ const UpdateAccountModal = () => {
     AccountType.STUDENT_ASSISTANT,
     InputType.SELECT
   );
+  const {
+    value: profile,
+    hasError: profileInputHasError,
+    isValid: profileIsValid,
+    valueChangeHandler: profileChangeHandler,
+    inputBlurHandler: profileBlurHandler,
+    set: setProfile,
+    errorMessage: profileErrorMessage,
+  } = useInput(validateUrl("Profile image url"), "", InputType.TEXT);
 
   // Add account in the Context
   useEffect(() => {
@@ -93,6 +105,7 @@ const UpdateAccountModal = () => {
     setEmail(selectedAcn.email);
     setType(selectedAcn.type);
     setActive(selectedAcn.active);
+    setProfile(selectedAcn.profile);
   }, [account.selectedAccount]);
 
   // set up modal so that when hidden.bs.modal event is triggered, it will
@@ -102,11 +115,14 @@ const UpdateAccountModal = () => {
       modal.current.addEventListener("hidden.bs.modal", () => {
         resetHttpState();
         resetPasswordInput();
-        if (account.selectedAccount !== null) {
-          setType(account.selectedAccount.type as AccountType);
-          setUsername(account.selectedAccount.username);
-          setFullName(account.selectedAccount.fullName);
-        }
+        const selectedAcn = account.selectedAccount;
+        if (selectedAcn === null) return;
+        setUsername(selectedAcn.username);
+        setFullName(selectedAcn.fullName);
+        setEmail(selectedAcn.email);
+        setType(selectedAcn.type);
+        setActive(selectedAcn.active);
+        setProfile(selectedAcn.profile);
       });
     }
   }, [modal.current]);
@@ -121,13 +137,15 @@ const UpdateAccountModal = () => {
       password,
       type,
       username,
+      profile,
     };
 
     if (
       !fullNameIsValid ||
       !passwordIsValid ||
       !typeIsValid ||
-      !usernameIsValid
+      !usernameIsValid ||
+      !profileIsValid
     ) {
       console.log("Invalid Account");
       return;
@@ -153,7 +171,7 @@ const UpdateAccountModal = () => {
       aria-hidden="true"
       ref={modal}
     >
-      <div className="modal-dialog modal-dialog-centered">
+      <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div className="modal-content">
           <div className="modal-header">
             <h1 className="modal-title fs-5">Update Account</h1>
@@ -256,6 +274,20 @@ const UpdateAccountModal = () => {
                   value={email}
                 />
                 <label htmlFor="updateAccountFullname">Email</label>
+              </div>
+              <div className={profileInputHasError ? "invalid" : ""}>
+                {profileInputHasError && <span>{profileErrorMessage}</span>}
+                <div className="form-floating mb-3">
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="updateAccountProfile"
+                    onChange={profileChangeHandler}
+                    onBlur={profileBlurHandler}
+                    value={profile}
+                  />
+                  <label htmlFor="updateAccountProfile">Profile url</label>
+                </div>
               </div>
               <div className="modal-footer">
                 <button

@@ -1,14 +1,40 @@
-import { FC } from "react";
+import { FC, useCallback, useEffect, useState } from "react";
+import { blob } from "stream/consumers";
 
 interface MenuHeaderProps {
   type: string;
   name: string;
+  imageUrl: string;
   key: React.Key;
   "data-bs-target": string;
   "data-bs-toggle": string;
 }
 
 const MenuHeader: FC<MenuHeaderProps> = (props) => {
+  const [image, setImage] = useState("");
+
+  useEffect(() => {
+    // prevents sending request to localhost
+    if (
+      !props.imageUrl.startsWith("http://") &&
+      !props.imageUrl.startsWith("https://")
+    ) {
+      return;
+    }
+    fetch(props.imageUrl)
+      .then((response) => {
+        console.log(response);
+        if (response.ok) {
+          setImage(props.imageUrl);
+        } else {
+          setImage("");
+        }
+      })
+      .catch(() => {
+        setImage("");
+      });
+  }, [props.imageUrl]);
+
   const accountType =
     props.type === "USER" ? "Student Assistant" : "Administrator";
 
@@ -31,7 +57,16 @@ const MenuHeader: FC<MenuHeaderProps> = (props) => {
                 role="button"
                 className="text-dark"
               >
-                <i className="bi bi-person-circle fs-1"></i>
+                {!!image ? (
+                  <img
+                    src={image}
+                    alt="Account profile"
+                    width={"45px"}
+                    height={"45px"}
+                  />
+                ) : (
+                  <i className="bi bi-person-circle fs-1"></i>
+                )}
               </a>
             </div>
           </div>

@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.URL;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
@@ -33,7 +34,8 @@ public class Account implements Serializable {
     private String password;
     @Enumerated(EnumType.ORDINAL)
     private AccountType type;
-    private byte[] profile;
+    @URL(message = "Profile image url must be a valid url",protocol = "http")
+    private String profile;
     private LocalDateTime createdAt;
     private Boolean active;
     private Boolean deleteFlag;
@@ -46,14 +48,12 @@ public class Account implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Account account = (Account) o;
-        return Objects.equals(id, account.id) && Objects.equals(fullName, account.fullName) && Objects.equals(username, account.username) && Objects.equals(email, account.email) && Objects.equals(password, account.password) && type == account.type && Arrays.equals(profile, account.profile) && Objects.equals(createdAt, account.createdAt) && Objects.equals(active, account.active) && Objects.equals(deleteFlag, account.deleteFlag);
+        return Objects.equals(id, account.id) && Objects.equals(fullName, account.fullName) && Objects.equals(username, account.username) && Objects.equals(email, account.email) && Objects.equals(password, account.password) && type == account.type && Objects.equals(profile, account.profile) && Objects.equals(createdAt, account.createdAt) && Objects.equals(active, account.active) && Objects.equals(deleteFlag, account.deleteFlag);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(id, fullName, username, email, password, type, createdAt, active, deleteFlag);
-        result = 31 * result + Arrays.hashCode(profile);
-        return result;
+        return Objects.hash(id, fullName, username, email, password, type, profile, createdAt, active, deleteFlag);
     }
 
     public void update(Account newAccount) {

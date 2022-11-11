@@ -4,6 +4,7 @@ import com.eze.backend.restapi.model.Account;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.URL;
 
 import javax.validation.constraints.NotBlank;
 
@@ -19,6 +20,8 @@ public class RegisterRequestDto {
     private String fullName;
     @NotBlank(message = "Email can't be blank")
     private String email;
+    @URL(message = "Profile image url must be a valid url",protocol = "http")
+    private String profile;
 
     public Account createAccount() {
         Account account = new Account();
@@ -26,6 +29,7 @@ public class RegisterRequestDto {
         account.setPassword(this.password);
         account.setFullName(this.fullName);
         account.setEmail(this.email);
+        account.setProfile(this.profile);
         return account;
     }
 }

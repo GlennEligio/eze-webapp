@@ -18,6 +18,7 @@ export interface LoginResponseDto {
   accountType: string;
   accessToken: string;
   refreshToken: string;
+  profile: string;
 }
 
 export interface Account {
@@ -28,6 +29,7 @@ export interface Account {
   type: AccountType;
   createdAt: string;
   active: boolean;
+  profile: string;
 }
 
 export interface CreateUpdateAccountDto {
@@ -37,6 +39,7 @@ export interface CreateUpdateAccountDto {
   email: string;
   type: AccountType;
   active: boolean;
+  profile: string;
 }
 
 const BACKEND_URI = "http://localhost:8080";

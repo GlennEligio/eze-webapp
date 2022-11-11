@@ -16,6 +16,7 @@ const DeleteAccountModal = () => {
   const [username, setUsername] = useState("");
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
+  const [profile, setProfile] = useState("");
   const [type, setType] = useState(AccountType.STUDENT_ASSISTANT);
   const [active, setActive] = useState(true);
   const {
@@ -47,6 +48,7 @@ const DeleteAccountModal = () => {
     setEmail(!!selectedAcn.email ? selectedAcn.email : "");
     setType(selectedAcn.type);
     setActive(!!selectedAcn.active ? selectedAcn.active : true);
+    setProfile(!!selectedAcn.profile ? selectedAcn.profile : "");
   }, [account.selectedAccount]);
 
   // Add eventHandler to hidden.bs.modal event of Modal to reset useHttp state
@@ -161,6 +163,16 @@ const DeleteAccountModal = () => {
                   value={email}
                 />
                 <label htmlFor="deleteAccountFullname">Email</label>
+              </div>
+              <div className="form-floating mb-3">
+                <input
+                  type="text"
+                  className="form-control"
+                  id="deleteAccountProfile"
+                  disabled={true}
+                  value={profile}
+                />
+                <label htmlFor="deleteAccountPassword">Profile image url</label>
               </div>
               <div className="modal-footer">
                 <button

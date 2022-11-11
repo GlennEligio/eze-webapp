@@ -13,4 +13,5 @@ public class LoginResponseDto {
     private String fullName;
     private String accessToken;
     private String refreshToken;
+    private String profile;
 }

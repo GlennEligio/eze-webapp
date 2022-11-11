@@ -6,6 +6,7 @@ export interface AuthState {
   username: string;
   accountType: string;
   fullName: string;
+  profile: string;
 }
 
 interface JwtPayload {
@@ -37,6 +38,7 @@ const createIntialState = () => {
   const username = localStorage.getItem("username");
   const type = localStorage.getItem("accountType");
   const name = localStorage.getItem("fullName");
+  const profile = localStorage.getItem("profile");
   return {
     accessToken:
       storedToken !== null && checkJwtValidity(storedToken)
@@ -45,6 +47,7 @@ const createIntialState = () => {
     username: username !== null ? (username as string) : "",
     accountType: type !== null ? (type as string) : "",
     fullName: name !== null ? (name as string) : "",
+    profile: profile !== null ? (profile as string) : "",
   };
 };
 
@@ -66,6 +69,9 @@ const authSlice = createSlice({
 
       state.fullName = action.payload.fullName;
       localStorage.setItem("fullName", action.payload.fullName);
+
+      state.profile = action.payload.profile;
+      localStorage.setItem("profile", action.payload.profile);
     },
     removeAuth(state) {
       state.accessToken = "";
@@ -76,6 +82,8 @@ const authSlice = createSlice({
       localStorage.setItem("username", "");
       state.fullName = "";
       localStorage.setItem("fullName", "");
+      state.profile = "";
+      localStorage.setItem("profile", "");
     },
   },
 });

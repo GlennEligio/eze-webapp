@@ -65,6 +65,7 @@ const Login = () => {
           username: authResp.username,
           accountType: authResp.accountType,
           fullName: authResp.fullName,
+          profile: authResp.profile,
         })
       );
       navigate("/");
