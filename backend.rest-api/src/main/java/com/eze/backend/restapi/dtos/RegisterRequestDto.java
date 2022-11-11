@@ -20,7 +20,7 @@ public class RegisterRequestDto {
     private String fullName;
     @NotBlank(message = "Email can't be blank")
     private String email;
-    @URL(message = "Profile image url must be a valid url",protocol = "http")
+    @URL(message = "Profile image url must be a valid url", regexp = "^(http|https)://.*")
     private String profile;
 
     public Account createAccount() {

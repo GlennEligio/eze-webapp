@@ -34,7 +34,7 @@ public class Account implements Serializable {
     private String password;
     @Enumerated(EnumType.ORDINAL)
     private AccountType type;
-    @URL(message = "Profile image url must be a valid url",protocol = "http")
+    @URL(message = "Profile image url must be a valid url", regexp = "^(http|https)://.*")
     private String profile;
     private LocalDateTime createdAt;
     private Boolean active;

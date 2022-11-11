@@ -17,6 +17,7 @@ import {
   validatePattern,
   validatePhMobileNumber,
   validatePositive,
+  validateUrl,
 } from "../../../validation/validations";
 import RequestStatusMessage from "../Other/RequestStatusMessage";
 
@@ -97,6 +98,15 @@ const UpdateStudentModal: FC<UpdateStudentModalProps> = (props) => {
     errorMessage: contactNumberErrorMessage,
     set: setContactNumber,
   } = useInput(validatePhMobileNumber("Contact number"), "", InputType.TEXT);
+  const {
+    value: profile,
+    hasError: profileInputHasError,
+    isValid: profileIsValid,
+    valueChangeHandler: profileChangeHandler,
+    inputBlurHandler: profileBlurHandler,
+    set: setProfile,
+    errorMessage: profileErrorMessage,
+  } = useInput(validateUrl("Profile image url"), "", InputType.TEXT);
 
   // add hidden.bs.modal eventHandler to Modal at Component Mount
   useEffect(() => {
@@ -158,6 +168,9 @@ const UpdateStudentModal: FC<UpdateStudentModalProps> = (props) => {
         ? student.selectedStudent.yearLevel.toString()
         : ""
     );
+    setProfile(
+      student.selectedStudent.profile ? student.selectedStudent.profile : ""
+    );
   }, [student.selectedStudent]);
 
   // Prepopulate the yearLevels state and the value of yearAndSection and yearNumber state
@@ -206,6 +219,7 @@ const UpdateStudentModal: FC<UpdateStudentModalProps> = (props) => {
       email,
       guardian,
       guardianNumber,
+      profile,
     };
 
     if (
@@ -213,7 +227,8 @@ const UpdateStudentModal: FC<UpdateStudentModalProps> = (props) => {
       !contactNumberIsValid ||
       !fullNameIsValid ||
       !yearAndSectionIsValid ||
-      !yearNumberIsValid
+      !yearNumberIsValid ||
+      !profileIsValid
     ) {
       console.log("Invalid student");
       return;
@@ -372,6 +387,23 @@ const UpdateStudentModal: FC<UpdateStudentModalProps> = (props) => {
                   />
                   <label htmlFor="updateStudentContactNumber">
                     Contact Number
+                  </label>
+                </div>
+              </div>
+              {/** Profile image url input */}
+              <div className={profileInputHasError ? "invalid" : ""}>
+                {profileInputHasError && <span>{profileErrorMessage}</span>}
+                <div className="form-floating mb-3">
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="updateStudentProfile"
+                    onChange={profileChangeHandler}
+                    onBlur={profileBlurHandler}
+                    value={profile}
+                  />
+                  <label htmlFor="updateStudentProfile">
+                    Profile image url
                   </label>
                 </div>
               </div>

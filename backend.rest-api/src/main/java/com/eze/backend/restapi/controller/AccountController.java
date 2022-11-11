@@ -106,12 +106,12 @@ public class AccountController {
     }
 
     @PostMapping("/accounts")
-    public ResponseEntity<Account> createAccount(@RequestBody Account account) {
+    public ResponseEntity<Account> createAccount(@Valid @RequestBody Account account) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.create(account));
     }
 
     @PutMapping("/accounts/{username}")
-    public ResponseEntity<Account> updateAccount(@RequestBody Account account,
+    public ResponseEntity<Account> updateAccount(@Valid @RequestBody Account account,
                                                  @PathVariable("username") String username) {
         return ResponseEntity.ok(service.update(account, username));
     }

@@ -5,6 +5,7 @@ import com.eze.backend.restapi.dtos.StudentListDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.URL;
 import org.springframework.lang.NonNull;
 
 import javax.persistence.*;
@@ -56,7 +57,8 @@ public class Student implements Serializable {
     @NotNull(message="Year level must be present")
     @Valid
     private YearLevel yearLevel;
-    private byte[] image;
+    @URL(message = "Profile image url must be a valid url", regexp = "^(http|https)://.*")
+    private String profile;
     private Boolean deleteFlag;
 
     @OneToMany(mappedBy = "borrower")
@@ -70,14 +72,12 @@ public class Student implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Student student = (Student) o;
-        return Objects.equals(id, student.id) && Objects.equals(studentNumber, student.studentNumber) && Objects.equals(fullName, student.fullName) && Objects.equals(yearAndSection, student.yearAndSection) && Objects.equals(contactNumber, student.contactNumber) && Objects.equals(birthday, student.birthday) && Objects.equals(address, student.address) && Objects.equals(email, student.email) && Objects.equals(guardian, student.guardian) && Objects.equals(guardianNumber, student.guardianNumber) && Objects.equals(yearLevel, student.yearLevel) && Arrays.equals(image, student.image) && Objects.equals(deleteFlag, student.deleteFlag);
+        return Objects.equals(id, student.id) && Objects.equals(studentNumber, student.studentNumber) && Objects.equals(fullName, student.fullName) && Objects.equals(yearAndSection, student.yearAndSection) && Objects.equals(contactNumber, student.contactNumber) && Objects.equals(birthday, student.birthday) && Objects.equals(address, student.address) && Objects.equals(email, student.email) && Objects.equals(guardian, student.guardian) && Objects.equals(guardianNumber, student.guardianNumber) && Objects.equals(yearLevel, student.yearLevel) && Objects.equals(profile, student.profile) && Objects.equals(deleteFlag, student.deleteFlag);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(id, studentNumber, fullName, yearAndSection, contactNumber, birthday, address, email, guardian, guardianNumber, yearLevel, deleteFlag);
-        result = 31 * result + Arrays.hashCode(image);
-        return result;
+        return Objects.hash(id, studentNumber, fullName, yearAndSection, contactNumber, birthday, address, email, guardian, guardianNumber, yearLevel, profile, deleteFlag);
     }
 
     public void update(@NonNull Student newStudent) {
@@ -114,6 +114,9 @@ public class Student implements Serializable {
         if(newStudent.getDeleteFlag() != null) {
             this.setDeleteFlag(newStudent.getDeleteFlag());
         }
+        if(newStudent.getProfile() != null) {
+            this.setProfile(newStudent.getProfile());
+        }
     }
 
     public static StudentListDto toStudentListDto(Student student) {
@@ -127,7 +130,8 @@ public class Student implements Serializable {
                 student.getEmail(),
                 student.getGuardian(),
                 student.getGuardianNumber(),
-                student.getYearLevel().getYearNumber());
+                student.getYearLevel().getYearNumber(),
+                student.getProfile());
     }
 
     public static StudentDto toStudentDto(Student student) {
@@ -141,7 +145,8 @@ public class Student implements Serializable {
                 student.getEmail(),
                 student.getGuardian(),
                 student.getGuardianNumber(),
-                YearLevel.toYearLevelDto(student.getYearLevel()));
+                YearLevel.toYearLevelDto(student.getYearLevel()),
+                student.getProfile());
     }
 
     public static Student toStudent(StudentDto dto) {
@@ -156,6 +161,7 @@ public class Student implements Serializable {
         student.setGuardian(dto.getGuardian());
         student.setGuardianNumber(dto.getGuardianNumber());
         student.setYearLevel(YearLevel.toYearLevel(dto.getYearLevel()));
+        student.setProfile(dto.getProfile() );
         return student;
     }
 }

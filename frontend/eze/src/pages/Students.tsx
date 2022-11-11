@@ -344,6 +344,7 @@ const Students = () => {
                     <th>Full Name</th>
                     <th>Year and Section</th>
                     <th>Contact Number</th>
+                    <th>Profile image url</th>
                     <th>Birthday</th>
                     <th>Address</th>
                     <th>Email</th>

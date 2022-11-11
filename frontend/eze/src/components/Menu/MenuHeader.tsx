@@ -1,5 +1,5 @@
 import { FC, useCallback, useEffect, useState } from "react";
-import { blob } from "stream/consumers";
+import validator from "validator";
 
 interface MenuHeaderProps {
   type: string;
@@ -15,16 +15,16 @@ const MenuHeader: FC<MenuHeaderProps> = (props) => {
 
   useEffect(() => {
     // prevents sending request to localhost
-    if (
-      !props.imageUrl.startsWith("http://") &&
-      !props.imageUrl.startsWith("https://")
-    ) {
+    if (!validator.isURL(props.imageUrl, { protocols: ["http", "https"] })) {
       return;
     }
+
     fetch(props.imageUrl)
       .then((response) => {
-        console.log(response);
-        if (response.ok) {
+        if (
+          response.ok &&
+          response.headers.get("Content-type")?.startsWith("image")
+        ) {
           setImage(props.imageUrl);
         } else {
           setImage("");

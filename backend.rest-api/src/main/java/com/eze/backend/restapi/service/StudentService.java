@@ -147,7 +147,7 @@ public class StudentService implements IService<Student>, IExcelService<Student>
 
     @Override
     public ByteArrayInputStream listToExcel(List<Student> students) {
-        List<String> columnName = List.of("ID", "Student number", "Full name", "Year and section", "Contact number", "Birthday", "Address", "Email", "Guardian", "Guardian number", "Year level", "Delete Flag");
+        List<String> columnName = List.of("ID", "Student number", "Full name", "Year and section", "Contact number", "Birthday", "Address", "Email", "Guardian", "Guardian number", "Year level", "Delete Flag", "Profile image url");
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("Students");
 
@@ -167,6 +167,7 @@ public class StudentService implements IService<Student>, IExcelService<Student>
                 dataRow.createCell(3).setCellValue(student.getYearAndSection());
                 dataRow.createCell(4).setCellValue(student.getContactNumber());
                 dataRow.createCell(11).setCellValue(students.get(i).getDeleteFlag());
+                dataRow.createCell(12).setCellValue(students.get(i).getProfile());
 
                 // Nullable properties check
                 if(student.getBirthday() != null) dataRow.createCell(5).setCellValue(student.getBirthday());
@@ -218,6 +219,7 @@ public class StudentService implements IService<Student>, IExcelService<Student>
                 student.setYearLevel(yl);
 
                 student.setDeleteFlag(row.getCell(11).getBooleanCellValue());
+                student.setProfile(row.getCell(12).getStringCellValue());
                 students.add(student);
             }
             return students;

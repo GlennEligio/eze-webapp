@@ -17,6 +17,16 @@ const StudentItem: FC<StudentItemProps> = (props) => {
       <td>{props.student.fullName}</td>
       <td>{props.student.yearAndSection}</td>
       <td>{props.student.contactNumber}</td>
+      <td
+        style={{
+          textOverflow: "ellipsis",
+          overflow: "hidden",
+          whiteSpace: "nowrap",
+          maxWidth: "15rem",
+        }}
+      >
+        <span>{props.student.profile}</span>
+      </td>
       <td>{props.student.birthday}</td>
       <td>{props.student.address}</td>
       <td>{props.student.email}</td>
