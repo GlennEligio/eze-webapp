@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: eze-backend-spring
+  datasource:
+    url: jdbc:mysql://localhost:3306/eze-database
+    password: P4ssw0rd
+    username: root
+    platform: mysql
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+server:
+  port: 8080
+
+eze:
+  secret-key: somerandomstring
