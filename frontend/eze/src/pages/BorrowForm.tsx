@@ -24,6 +24,7 @@ function BorrowForm() {
   const [professorContactNumber, setProfessorContactNumber] = useState("");
   const [equipmentBarcode, setEquipmentBarcode] = useState("");
   const [studentName, setStudentName] = useState("");
+  const [profile, setProfile] = useState("");
   const [yearAndSection, setYearAndSection] = useState("");
   const [student, setStudent] = useState<StudentFull>();
   const [professor, setProfessor] = useState<Professor>();
@@ -105,6 +106,24 @@ function BorrowForm() {
       setStudent(studentData);
       setStudentName(studentData.fullName);
       setYearAndSection(studentData.yearAndSection.sectionName);
+      if (
+        validator.isURL(studentData.profile, { protocols: ["http", "https"] })
+      ) {
+        fetch(studentData.profile)
+          .then((response) => {
+            if (
+              response.ok &&
+              response.headers.get("Content-type")?.startsWith("image")
+            ) {
+              setProfile(studentData.profile);
+            } else {
+              setProfile("");
+            }
+          })
+          .catch(() => {
+            setProfile("");
+          });
+      }
     }
   }, [
     studentData,
@@ -289,7 +308,9 @@ function BorrowForm() {
             <div className="col-3 d-flex">
               <img
                 className="border border-1 border-dark img-fluid"
-                src="/img/icons8_user_filled_100px_2.png"
+                src={
+                  !!profile ? profile : "/img/icons8_user_filled_100px_2.png"
+                }
                 alt="Default borrower"
               />
             </div>

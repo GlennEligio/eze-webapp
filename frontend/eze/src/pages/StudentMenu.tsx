@@ -37,6 +37,7 @@ const StudentMenu = () => {
           key={auth.accessToken}
           data-bs-target="#menuOffCanvas"
           data-bs-toggle="offcanvas"
+          imageUrl={auth.profile}
         />
       </div>
       {/* <!-- Main --> */}

@@ -117,6 +117,7 @@ const Accounts: FC = () => {
                       <th>Type</th>
                       <th>Created at</th>
                       <th>Active</th>
+                      <th>Profile</th>
                     </tr>
                   </thead>
                   <tbody>

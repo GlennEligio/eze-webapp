@@ -14,10 +14,12 @@ public class EzeUserDetails implements UserDetails {
 
     private final Account account;
     private String fullName;
+    private String profile;
 
     public EzeUserDetails(Account account) {
         this.account = account;
         this.fullName = account.getFullName();
+        this.profile = account.getProfile();
     }
 
     @Override

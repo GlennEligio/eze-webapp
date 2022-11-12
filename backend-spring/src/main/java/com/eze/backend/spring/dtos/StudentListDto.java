@@ -19,17 +19,18 @@ public class StudentListDto{
     private String guardian;
     private String guardianNumber;
     private Integer yearLevel;
+    private String profile;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         StudentListDto that = (StudentListDto) o;
-        return Objects.equals(id, that.id) && Objects.equals(studentNumber, that.studentNumber) && Objects.equals(fullName, that.fullName) && Objects.equals(yearAndSection, that.yearAndSection) && Objects.equals(contactNumber, that.contactNumber) && Objects.equals(birthday, that.birthday) && Objects.equals(address, that.address) && Objects.equals(email, that.email) && Objects.equals(guardian, that.guardian) && Objects.equals(guardianNumber, that.guardianNumber) && Objects.equals(yearLevel, that.yearLevel);
+        return Objects.equals(id, that.id) && Objects.equals(studentNumber, that.studentNumber) && Objects.equals(fullName, that.fullName) && Objects.equals(yearAndSection, that.yearAndSection) && Objects.equals(contactNumber, that.contactNumber) && Objects.equals(birthday, that.birthday) && Objects.equals(address, that.address) && Objects.equals(email, that.email) && Objects.equals(guardian, that.guardian) && Objects.equals(guardianNumber, that.guardianNumber) && Objects.equals(yearLevel, that.yearLevel) && Objects.equals(profile, that.profile);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, studentNumber, fullName, yearAndSection, contactNumber, birthday, address, email, guardian, guardianNumber, yearLevel);
+        return Objects.hash(id, studentNumber, fullName, yearAndSection, contactNumber, birthday, address, email, guardian, guardianNumber, yearLevel, profile);
     }
 }

@@ -48,6 +48,7 @@ function AdminMenu() {
           key={auth.accessToken}
           data-bs-toggle="offcanvas"
           data-bs-target="#menuOffCanvas"
+          imageUrl={auth.profile}
         />
       </div>
       <div className="row">

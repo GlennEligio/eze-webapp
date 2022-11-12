@@ -114,3 +114,21 @@ export const validateNotUndefined = (inputName: string) => {
     };
   };
 };
+
+export const validateUrl = (inputName: string) => {
+  return (inputValue: any) => {
+    let errorMessage = "";
+    let valueIsValid = true;
+
+    if (!validator.isURL(inputValue, { protocols: ["http", "https"] })) {
+      errorMessage = `${inputName} must be a valid URL, starts with http or https`;
+      console.log(errorMessage);
+      valueIsValid = false;
+    }
+
+    return {
+      valueIsValid,
+      errorMessage,
+    };
+  };
+};

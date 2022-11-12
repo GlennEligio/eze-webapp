@@ -16,6 +16,7 @@ import {
   validatePattern,
   validatePhMobileNumber,
   validatePositive,
+  validateUrl,
 } from "../../../validation/validations";
 import RequestStatusMessage from "../Other/RequestStatusMessage";
 
@@ -75,7 +76,6 @@ const AddStudentModal: FC<AddStudentModalProps> = (props) => {
     isValid: yearAndSectionIsValid,
     valueChangeHandler: yearAndSectionChangeHandler,
     inputBlurHandler: yearAndSectionBlurHandler,
-    reset: resetYearAndSection,
     errorMessage: yearAndSectionErrorMessage,
     set: setYearAndSection,
   } = useInput(validateNotEmpty("Year and section"), "", InputType.SELECT);
@@ -85,7 +85,6 @@ const AddStudentModal: FC<AddStudentModalProps> = (props) => {
     isValid: yearNumberIsValid,
     valueChangeHandler: yearNumberChangeHandler,
     inputBlurHandler: yearNumberBlurHandler,
-    reset: resetYearNumber,
     errorMessage: yearNumberErrorMessage,
     set: setYearNumber,
   } = useInput(validatePositive("Year level"), "", InputType.SELECT);
@@ -98,6 +97,15 @@ const AddStudentModal: FC<AddStudentModalProps> = (props) => {
     reset: resetContactNumber,
     errorMessage: contactNumberErrorMessage,
   } = useInput(validatePhMobileNumber("Contact number"), "", InputType.TEXT);
+  const {
+    value: profile,
+    hasError: profileInputHasError,
+    isValid: profileIsValid,
+    valueChangeHandler: profileChangeHandler,
+    inputBlurHandler: profileBlurHandler,
+    reset: resetProfileInput,
+    errorMessage: profileErrorMessage,
+  } = useInput(validateUrl("Profile image url"), "", InputType.TEXT);
 
   // add hidden.bs.modal eventHandler to Modal at Component Mount
   useEffect(() => {
@@ -112,6 +120,7 @@ const AddStudentModal: FC<AddStudentModalProps> = (props) => {
         setEmail("");
         setGuardian("");
         setGuardianNumber("");
+        resetProfileInput();
       });
     }
   }, []);
@@ -171,6 +180,7 @@ const AddStudentModal: FC<AddStudentModalProps> = (props) => {
       email,
       guardian,
       guardianNumber,
+      profile,
     };
 
     if (
@@ -178,7 +188,8 @@ const AddStudentModal: FC<AddStudentModalProps> = (props) => {
       !fullNameIsValid ||
       !yearAndSectionIsValid ||
       !contactNumberIsValid ||
-      !yearNumberIsValid
+      !yearNumberIsValid ||
+      !profileIsValid
     ) {
       console.log("Invalid student");
       return;
@@ -196,6 +207,7 @@ const AddStudentModal: FC<AddStudentModalProps> = (props) => {
     resetStudentNumber();
     resetContactNumber();
     resetFullName();
+    resetProfileInput();
     setAddress("");
     setBirthday("");
     setEmail("");
@@ -346,6 +358,21 @@ const AddStudentModal: FC<AddStudentModalProps> = (props) => {
                   <label htmlFor="newStudentContactNumber">
                     Contact Number
                   </label>
+                </div>
+              </div>
+              {/** Profile image url input */}
+              <div className={profileInputHasError ? "invalid" : ""}>
+                {profileInputHasError && <span>{profileErrorMessage}</span>}
+                <div className="form-floating mb-3">
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="newStudentProfile"
+                    onChange={profileChangeHandler}
+                    onBlur={profileBlurHandler}
+                    value={profile}
+                  />
+                  <label htmlFor="newStudentProfile">Profile image url</label>
                 </div>
               </div>
               {/** Birthday */}

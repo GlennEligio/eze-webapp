@@ -2,6 +2,7 @@ package com.eze.backend.spring.dtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import org.hibernate.validator.constraints.URL;
 
 
 import javax.validation.Valid;
@@ -32,4 +33,6 @@ public class StudentDto {
     @NotNull(message="Year level must be present")
     @Valid
     private YearLevelDto yearLevel;
+    @URL(message = "Profile image url must be a valid url", regexp = "^(http|https)://.*")
+    private String profile;
 }

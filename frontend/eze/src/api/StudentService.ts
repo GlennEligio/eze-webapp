@@ -12,6 +12,7 @@ export interface Student {
   guardian: string;
   guardianNumber: string;
   yearLevel: number;
+  profile: string;
 }
 
 export interface StudentFull {
@@ -33,6 +34,7 @@ export interface StudentFull {
     yearNumber: number;
     yearName: string;
   };
+  profile: string;
 }
 
 export interface CreateUpdateStudentDto {
@@ -50,6 +52,7 @@ export interface CreateUpdateStudentDto {
   yearLevel: {
     yearNumber: number;
   };
+  profile: string;
 }
 
 const BACKEND_URI = "http://localhost:8080";

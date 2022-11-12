@@ -12,6 +12,8 @@ import { accountActions } from "../../../store/accountSlice";
 import {
   validateContains,
   validateNotEmpty,
+  validatePattern,
+  validateUrl,
 } from "../../../validation/validations";
 import useInput, { InputType } from "../../../hooks/useInput";
 import RequestStatusMessage from "../Other/RequestStatusMessage";
@@ -74,6 +76,15 @@ const AddAccountModal = () => {
     AccountType.STUDENT_ASSISTANT,
     InputType.SELECT
   );
+  const {
+    value: profile,
+    hasError: profileInputHasError,
+    isValid: profileIsValid,
+    valueChangeHandler: profileChangeHandler,
+    inputBlurHandler: profileBlurHandler,
+    reset: resetProfileInput,
+    errorMessage: profileErrorMessage,
+  } = useInput(validateUrl("Profile image url"), "", InputType.TEXT);
 
   // Add Account in Redux after successful request
   useEffect(() => {
@@ -92,13 +103,15 @@ const AddAccountModal = () => {
       password,
       type,
       username,
+      profile,
     };
 
     if (
       !usernameIsValid ||
       !passwordIsValid ||
       !typeIsValid ||
-      !fullNameIsValid
+      !fullNameIsValid ||
+      !profileIsValid
     ) {
       console.log("Invalid account");
       return;
@@ -114,6 +127,7 @@ const AddAccountModal = () => {
     createAccount(requestConf);
     resetFullNameInput();
     resetPasswordInput();
+    resetProfileInput();
     resetTypeInput();
     resetUsernameInput();
     setActive(true);
@@ -129,6 +143,9 @@ const AddAccountModal = () => {
         resetTypeInput();
         resetUsernameInput();
         resetFullNameInput();
+        setActive(true);
+        setEmail("");
+        resetProfileInput();
       });
     }
   }, [modal.current]);
@@ -142,7 +159,7 @@ const AddAccountModal = () => {
       aria-hidden="true"
       ref={modal}
     >
-      <div className="modal-dialog modal-dialog-centered">
+      <div className="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div className="modal-content">
           <div className="modal-header">
             <h1 className="modal-title fs-5" id="accounttModalLabel">
@@ -248,6 +265,20 @@ const AddAccountModal = () => {
                   value={email}
                 />
                 <label htmlFor="newAccountFullname">Email</label>
+              </div>
+              <div className={profileInputHasError ? "invalid" : ""}>
+                {profileInputHasError && <span>{profileErrorMessage}</span>}
+                <div className="form-floating mb-3">
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="newAccountProfile"
+                    onChange={profileChangeHandler}
+                    onBlur={profileBlurHandler}
+                    value={profile}
+                  />
+                  <label htmlFor="newAccountProfile">Profile url</label>
+                </div>
               </div>
               <div className="modal-footer">
                 <button

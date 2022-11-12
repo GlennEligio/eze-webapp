@@ -23,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.Objects;
@@ -53,7 +54,7 @@ public class AccountController {
         final String refreshToken = jwtUtil.generateRefreshToken(userDetails);
         log.info("Authentication success with jwt: " + accessToken);
         log.info("Full name {}", userDetails.getFullName());
-        return ResponseEntity.ok(new LoginResponseDto(userDetails.getUsername(), userDetails.getAuthorities().stream().findFirst().get().toString(), userDetails.getFullName(), accessToken, refreshToken));
+        return ResponseEntity.ok(new LoginResponseDto(userDetails.getUsername(), userDetails.getAuthorities().stream().findFirst().get().toString(), userDetails.getFullName(), accessToken, refreshToken, userDetails.getProfile()));
     }
 
     @PostMapping("/accounts/register")
@@ -66,7 +67,7 @@ public class AccountController {
         String accessToken = jwtUtil.generateToken(userDetails);
         String refreshToken = jwtUtil.generateRefreshToken(userDetails);
         log.info("Generated access token {}, and refresh token {}", accessToken, refreshToken);
-        return ResponseEntity.ok(new LoginResponseDto(userDetails.getUsername(), userDetails.getAuthorities().stream().findFirst().get().toString(), userDetails.getFullName(), accessToken, refreshToken));
+        return ResponseEntity.ok(new LoginResponseDto(userDetails.getUsername(), userDetails.getAuthorities().stream().findFirst().get().toString(), userDetails.getFullName(), accessToken, refreshToken, userDetails.getProfile()));
     }
 
     @PostMapping("/accounts/upload")
@@ -105,12 +106,12 @@ public class AccountController {
     }
 
     @PostMapping("/accounts")
-    public ResponseEntity<Account> createAccount(@RequestBody Account account) {
+    public ResponseEntity<Account> createAccount(@Valid @RequestBody Account account) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.create(account));
     }
 
     @PutMapping("/accounts/{username}")
-    public ResponseEntity<Account> updateAccount(@RequestBody Account account,
+    public ResponseEntity<Account> updateAccount(@Valid @RequestBody Account account,
                                                  @PathVariable("username") String username) {
         return ResponseEntity.ok(service.update(account, username));
     }

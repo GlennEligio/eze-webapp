@@ -20,7 +20,8 @@ const AccountItem: FC<AccountItemProps> = (props) => {
       <td>{props.account.email}</td>
       <td>{props.account.type}</td>
       <td>{props.account.createdAt}</td>
-      <td>{props.account.active ? "YES" : "NOD"}</td>
+      <td>{props.account.active ? "YES" : "NO"}</td>
+      <td>{props.account.profile}</td>
     </tr>
   );
 };
