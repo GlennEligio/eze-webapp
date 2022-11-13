@@ -17,6 +17,6 @@ public interface YearSectionRepository extends JpaRepository<YearSection, Long> 
 
     //Soft delete.
     @Query("UPDATE YearSection ys SET ys.deleteFlag=true WHERE ys.sectionName=?1")
-    @Modifying
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     void softDelete(String sectionName);
 }

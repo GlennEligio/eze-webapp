@@ -17,6 +17,6 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 
     //Soft delete.
     @Query("UPDATE Transaction t SET t.deleteFlag=true WHERE t.txCode=?1")
-    @Modifying
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     void softDelete(String txCode);
 }

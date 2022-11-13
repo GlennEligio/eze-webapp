@@ -54,6 +54,17 @@ public class Equipment implements Serializable {
     @JsonIgnore
     private List<Transaction> transactions;
 
+    public Equipment(String equipmentCode, String name, String barcode, EqStatus status, LocalDateTime defectiveSince, Boolean isDuplicable, Boolean isBorrowed, Boolean deleteFlag) {
+        this.equipmentCode = equipmentCode;
+        this.name = name;
+        this.barcode = barcode;
+        this.status = status;
+        this.defectiveSince = defectiveSince;
+        this.isDuplicable = isDuplicable;
+        this.isBorrowed = isBorrowed;
+        this.deleteFlag = deleteFlag;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

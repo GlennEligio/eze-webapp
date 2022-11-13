@@ -10,14 +10,12 @@ import java.util.Optional;
 
 public interface AccountRepository extends JpaRepository<Account, Long> {
     Optional<Account> findByUsername(String username);
-//    @Query("SELECT a FROM Account a WHERE a.username LIKE CONCAT('%', :username, '%')")
-//    Account findAccountsByUsername(String username);
 
     @Query( "SELECT a FROM Account a WHERE a.deleteFlag=false")
     List<Account> findAllNotDeleted();
 
     //Soft delete.
     @Query("UPDATE Account a SET a.deleteFlag=true WHERE a.username=?1")
-    @Modifying
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     void softDelete(String username);
 }

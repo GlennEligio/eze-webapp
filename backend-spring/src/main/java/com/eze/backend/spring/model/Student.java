@@ -66,6 +66,20 @@ public class Student implements Serializable {
 //    @OneToOne(mappedBy = "student")
 //    private StudentFingerprint studentFingerprint;
 
+    public Student(String studentNumber, String fullName, YearSection yearAndSection, String contactNumber, String birthday, String address, String email, String guardian, String guardianNumber, YearLevel yearLevel, String profile, Boolean deleteFlag) {
+        this.studentNumber = studentNumber;
+        this.fullName = fullName;
+        this.yearAndSection = yearAndSection;
+        this.contactNumber = contactNumber;
+        this.birthday = birthday;
+        this.address = address;
+        this.email = email;
+        this.guardian = guardian;
+        this.guardianNumber = guardianNumber;
+        this.yearLevel = yearLevel;
+        this.profile = profile;
+        this.deleteFlag = deleteFlag;
+    }
 
     @Override
     public boolean equals(Object o) {

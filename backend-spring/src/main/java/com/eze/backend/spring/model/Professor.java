@@ -38,6 +38,12 @@ public class Professor implements Serializable {
     @OneToMany(mappedBy = "professor")
     private List<Transaction> transactions;
 
+    public Professor(String name, String contactNumber, Boolean deleteFlag) {
+        this.name = name;
+        this.contactNumber = contactNumber;
+        this.deleteFlag = deleteFlag;
+    }
+
     public void update(Professor newProf) {
         if(newProf.getContactNumber() != null) {
             this.contactNumber = newProf.getContactNumber();

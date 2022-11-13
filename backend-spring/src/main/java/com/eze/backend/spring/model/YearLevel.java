@@ -35,6 +35,12 @@ public class YearLevel implements Serializable {
     @OneToMany(fetch = FetchType.EAGER, mappedBy = "yearLevel", targetEntity = YearSection.class)
     private List<YearSection> yearSections;
 
+    public YearLevel(Integer yearNumber, String yearName, Boolean deleteFlag) {
+        this.yearNumber = yearNumber;
+        this.yearName = yearName;
+        this.deleteFlag = deleteFlag;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

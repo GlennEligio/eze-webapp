@@ -30,6 +30,12 @@ public class YearSection implements Serializable {
     @Valid
     private YearLevel yearLevel;
 
+    public YearSection(String sectionName, Boolean deleteFlag, YearLevel yearLevel) {
+        this.sectionName = sectionName;
+        this.deleteFlag = deleteFlag;
+        this.yearLevel = yearLevel;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

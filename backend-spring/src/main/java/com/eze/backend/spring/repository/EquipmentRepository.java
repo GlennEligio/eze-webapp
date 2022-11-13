@@ -12,13 +12,12 @@ public interface EquipmentRepository extends JpaRepository<Equipment, Long> {
 
     Optional<Equipment> findByEquipmentCode(String equipmentCode);
     Optional<Equipment> findByBarcode(String barcode);
-    Optional<Equipment> findByName(String name);
 
     @Query( "SELECT e FROM Equipment e WHERE e.deleteFlag=false")
     List<Equipment> findAllNotDeleted();
 
     //Soft delete.
     @Query("UPDATE Equipment e SET e.deleteFlag=true WHERE e.equipmentCode=?1")
-    @Modifying
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
     void softDelete(String equipmentCode);
 }

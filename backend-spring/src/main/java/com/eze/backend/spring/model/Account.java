@@ -41,6 +41,18 @@ public class Account implements Serializable {
 //    private AccountFingerprint accountFingerprint;
 
 
+    public Account(String fullName, String username, String email, String password, AccountType type, String profile, LocalDateTime createdAt, Boolean active, Boolean deleteFlag) {
+        this.fullName = fullName;
+        this.username = username;
+        this.email = email;
+        this.password = password;
+        this.type = type;
+        this.profile = profile;
+        this.createdAt = createdAt;
+        this.active = active;
+        this.deleteFlag = deleteFlag;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

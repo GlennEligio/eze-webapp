@@ -17,6 +17,6 @@ public interface ProfessorRepository extends JpaRepository<Professor, Long> {
 
     //Soft delete.
     @Query("UPDATE Professor p SET p.deleteFlag=true WHERE p.name=?1")
-    @Modifying
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     void softDelete(String name);
 }

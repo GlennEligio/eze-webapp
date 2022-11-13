@@ -16,6 +16,6 @@ public interface YearLevelRepository extends JpaRepository<YearLevel, Long> {
 
     //Soft delete.
     @Query("UPDATE YearLevel yl SET yl.deleteFlag=true WHERE yl.yearNumber=?1")
-    @Modifying
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
     void softDelete(Integer yearNumber);
 }

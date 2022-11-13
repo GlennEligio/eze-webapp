@@ -75,6 +75,18 @@ public class Transaction implements Serializable {
     private TxStatus status;
     private Boolean deleteFlag;
 
+    public Transaction(String txCode, List<Equipment> equipments, List<Equipment> equipmentsHist, Student borrower, Professor professor, LocalDateTime borrowedAt, LocalDateTime returnedAt, TxStatus status, Boolean deleteFlag) {
+        this.txCode = txCode;
+        this.equipments = equipments;
+        this.equipmentsHist = equipmentsHist;
+        this.borrower = borrower;
+        this.professor = professor;
+        this.borrowedAt = borrowedAt;
+        this.returnedAt = returnedAt;
+        this.status = status;
+        this.deleteFlag = deleteFlag;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

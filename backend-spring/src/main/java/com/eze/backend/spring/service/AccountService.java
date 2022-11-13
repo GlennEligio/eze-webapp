@@ -37,10 +37,12 @@ public class AccountService implements IService<Account>, IExcelService<Account>
 
     private final AccountRepository repository;
     private final PasswordEncoder passwordEncoder;
+    private final ITimeStampProvider timeStampProvider;
 
-    public AccountService(AccountRepository repository, @Lazy PasswordEncoder passwordEncoder) {
+    public AccountService(AccountRepository repository, @Lazy PasswordEncoder passwordEncoder, ITimeStampProvider timeStampProvider) {
         this.repository = repository;
         this.passwordEncoder = passwordEncoder;
+        this.timeStampProvider = timeStampProvider;
     }
 
     @Override
@@ -70,7 +72,7 @@ public class AccountService implements IService<Account>, IExcelService<Account>
                 throw new ApiException(alreadyExist(account.getUsername()), HttpStatus.BAD_REQUEST);
             }
             account.setPassword(passwordEncoder.encode(account.getPassword()));
-            account.setCreatedAt(LocalDateTime.now());
+            account.setCreatedAt(timeStampProvider.getNow());
             account.setActive(true);
             account.setDeleteFlag(false);
             return repository.save(account);
@@ -100,10 +102,10 @@ public class AccountService implements IService<Account>, IExcelService<Account>
     public void softDelete(Serializable username) {
         log.info("Soft deleting account: {}", username);
         Optional<Account> accountOptional = repository.findByUsername(username.toString());
-        if(accountOptional.isEmpty()) {
+        if (accountOptional.isEmpty()) {
             throw new ApiException(notFound(username), HttpStatus.NOT_FOUND);
         }
-        if(accountOptional.get().getDeleteFlag()) {
+        if (accountOptional.get().getDeleteFlag()) {
             throw new ApiException("Account is already soft deleted", HttpStatus.BAD_REQUEST);
         }
         repository.softDelete(accountOptional.get().getUsername());
@@ -123,16 +125,16 @@ public class AccountService implements IService<Account>, IExcelService<Account>
     @Transactional
     public int addOrUpdate(@Valid List<Account> accounts, boolean overwrite) {
         int itemsAffected = 0;
-        for (Account account: accounts) {
+        for (Account account : accounts) {
             Optional<Account> accOp = repository.findByUsername(account.getUsername());
-            if(accOp.isEmpty()){
+            if (accOp.isEmpty()) {
                 repository.save(account);
                 itemsAffected++;
-            }else{
-                if(overwrite){
+            } else {
+                if (overwrite) {
                     Account oldAcc = accOp.get();
                     account.setId(oldAcc.getId());
-                    if(!oldAcc.equals(account)) {
+                    if (!oldAcc.equals(account)) {
                         oldAcc.update(account);
                         repository.save(oldAcc);
                         itemsAffected++;
@@ -154,8 +156,8 @@ public class AccountService implements IService<Account>, IExcelService<Account>
 
     @Override
     public ByteArrayInputStream listToExcel(List<Account> accounts) {
-        List<String> columns = List.of("ID", "Full name", "Username", "Email", "Type", "Created At", "Is Active", "Profile url" ,"Delete Flag");
-        try (Workbook workbook = new XSSFWorkbook()){
+        List<String> columns = List.of("ID", "Full name", "Username", "Email", "Type", "Created At", "Is Active", "Profile url", "Delete Flag");
+        try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("Accounts");
 
             // Creating header row
@@ -166,8 +168,8 @@ public class AccountService implements IService<Account>, IExcelService<Account>
             }
 
             // Populating the excel file
-            for(int i = 0; i < accounts.size(); i++) {
-                Row dataRow = sheet.createRow(i+1);
+            for (int i = 0; i < accounts.size(); i++) {
+                Row dataRow = sheet.createRow(i + 1);
                 dataRow.createCell(0).setCellValue(accounts.get(i).getId());
                 dataRow.createCell(1).setCellValue(accounts.get(i).getFullName());
                 dataRow.createCell(2).setCellValue(accounts.get(i).getUsername());
@@ -180,7 +182,7 @@ public class AccountService implements IService<Account>, IExcelService<Account>
             }
 
             // Making size of the columns auto resize to fit data
-            for(int i=0; i < columns.size(); i++) {
+            for (int i = 0; i < columns.size(); i++) {
                 sheet.autoSizeColumn(i);
             }
 
@@ -194,7 +196,7 @@ public class AccountService implements IService<Account>, IExcelService<Account>
 
     @Override
     public List<Account> excelToList(MultipartFile file) {
-        try(Workbook workbook = new XSSFWorkbook(file.getInputStream());){
+        try (Workbook workbook = new XSSFWorkbook(file.getInputStream());) {
             List<Account> accounts = new ArrayList<>();
             Sheet sheet = workbook.getSheetAt(0);
             for (int i = 1; i < sheet.getPhysicalNumberOfRows(); i++) {
@@ -213,7 +215,7 @@ public class AccountService implements IService<Account>, IExcelService<Account>
                 accounts.add(account);
             }
             return accounts;
-        }catch (IOException ex){
+        } catch (IOException ex) {
             throw new ApiException("Something went wrong when importing accounts", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
