@@ -4,6 +4,7 @@ import com.eze.backend.spring.enums.EqStatus;
 import com.eze.backend.spring.exception.ApiException;
 import com.eze.backend.spring.model.Equipment;
 import com.eze.backend.spring.repository.EquipmentRepository;
+import com.eze.backend.spring.util.ObjectIdGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -29,8 +30,13 @@ import java.util.*;
 @Slf4j
 public class EquipmentService implements IService<Equipment>, IExcelService<Equipment>{
 
-    @Autowired
     private EquipmentRepository repository;
+    private ObjectIdGenerator idGenerator;
+
+    public EquipmentService(EquipmentRepository repository, ObjectIdGenerator idGenerator) {
+        this.repository = repository;
+        this.idGenerator = idGenerator;
+    }
 
     @Override
     public List<Equipment> getAll() {
@@ -54,7 +60,7 @@ public class EquipmentService implements IService<Equipment>, IExcelService<Equi
     public Equipment create(Equipment equipment) {
         log.info("Creating equipment {}", equipment);
         if(equipment.getBarcode() != null) {
-            log.info("Equipment has barcode");
+            log.info("Equipment has barcode, checking if theres a duplicate");
             Optional<Equipment> optionalEquipment = repository.findByBarcode(equipment.getBarcode());
             if(optionalEquipment.isPresent()) {
                 log.info("Duplicate equipment with same barcode");
@@ -62,15 +68,19 @@ public class EquipmentService implements IService<Equipment>, IExcelService<Equi
             }
         }
         if(equipment.getEquipmentCode() != null) {
+            log.info("Equipment has equipment code, checking if theres a duplicate");
             Optional<Equipment> optionalEquipment = repository.findByEquipmentCode(equipment.getEquipmentCode());
             if(optionalEquipment.isPresent()) {
                 throw new ApiException(alreadyExist(equipment.getEquipmentCode()), HttpStatus.BAD_REQUEST);
             }
         }
-        equipment.setEquipmentCode(new ObjectId().toHexString());
+        equipment.setEquipmentCode(idGenerator.createId());
         equipment.setIsBorrowed(false);
         equipment.setDeleteFlag(false);
-        return repository.save(equipment);
+        log.info(equipment.toString());
+        Equipment savedEq = repository.save(equipment);
+        log.info(savedEq.toString());
+        return savedEq;
     }
 
     @Override

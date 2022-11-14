@@ -2,11 +2,18 @@ package com.eze.backend.spring.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.eze.backend.spring.dtos.EzeUserDetails;
 import com.eze.backend.spring.dtos.RegisterRequestDto;
 import com.eze.backend.spring.enums.AccountType;
 import com.eze.backend.spring.exception.ApiException;
 import com.eze.backend.spring.model.Account;
 import com.eze.backend.spring.repository.AccountRepository;
+import com.eze.backend.spring.util.TimeStampProvider;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,9 +26,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,20 +49,20 @@ public class AccountServiceTest {
     private PasswordEncoder passwordEncoder;
 
     @Mock
-    private ITimeStampProvider timeStampProvider;
+    private TimeStampProvider timeStampProvider;
 
     @InjectMocks
     private AccountService service;
 
     private List<Account> accountList = new ArrayList<>();
     private Account account0, account1;
-    private  LocalDateTime localDateTime;
+    private LocalDateTime localDateTime;
 
     @BeforeEach
     void setup() {
-        account0 = new Account("Name0", "Username0", "Email0", "Password0", AccountType.SA, "http://sampleurl.com/profile0", LocalDateTime.now(), true, false);
-        account1 = new Account("Name1", "Username1", "Email1", "Password1", AccountType.SA, "http://sampleurl.com/profile1", LocalDateTime.now(), true, false);
-        Account account2 = new Account("Name2", "Username2", "Email2", "Password2", AccountType.SA, "http://sampleurl.com/profile2", LocalDateTime.now(), true, true);
+        account0 = new Account(0L, "Name0", "Username0", "Email0", "Password0", AccountType.SA, "http://sampleurl.com/profile0", LocalDateTime.now(), true, false);
+        account1 = new Account(1L, "Name1", "Username1", "Email1", "Password1", AccountType.SA, "http://sampleurl.com/profile1", LocalDateTime.now(), true, false);
+        Account account2 = new Account(2L, "Name2", "Username2", "Email2", "Password2", AccountType.SA, "http://sampleurl.com/profile2", LocalDateTime.now(), true, true);
         accountList = List.of(account1, account2, account0);
         localDateTime = LocalDateTime.now();
     }
@@ -99,22 +111,16 @@ public class AccountServiceTest {
         assertThrows(ApiException.class, () -> service.get(invalidUsername));
     }
 
+    // TODO: Check the problem: Shows different test result for each run
     @Test
     @DisplayName("Create Account using available username")
     void create_usingAvailableUsername_returnsNewAccount() {
-        String availableUsername = account0.getUsername();
         String encryptedPass = "EncryptedPassword";
-        Account newAccount = new Account(account0.getFullName(),
-                account0.getUsername(),
-                account0.getEmail(),
-                encryptedPass,
-                account0.getType(),
-                account0.getProfile(),
-                localDateTime,
-                account0.getActive(),
-                account0.getDeleteFlag());
+        String oldPassword = account0.getPassword();
+        Account newAccount = new Account(0L, "Name0", "Username0", "Email0", encryptedPass, AccountType.SA, "http://sampleurl.com/profile0", LocalDateTime.now(), true, false);
+        String availableUsername = newAccount.getUsername();
         Mockito.when(repository.findByUsername(availableUsername)).thenReturn(Optional.empty());
-        Mockito.when(passwordEncoder.encode(account0.getPassword())).thenReturn(encryptedPass);
+        Mockito.when(passwordEncoder.encode(oldPassword)).thenReturn(encryptedPass);
         Mockito.when(timeStampProvider.getNow()).thenReturn(localDateTime);
         Mockito.when(repository.save(newAccount)).thenReturn(newAccount);
 
@@ -141,10 +147,12 @@ public class AccountServiceTest {
         assertThrows(ApiException.class, () -> service.create(account0));
     }
 
+    // TODO: Check the problem: Shows different test result for each run
     @Test
     @DisplayName("Update existing Account")
     void update_usingExistingAccount_updatesAccount() {
-        Account accountForUpdate = account1;
+        Account accountForUpdate = new Account(0L, "NewName0", "Username0", "Email0", "Password0", AccountType.SA, "http://sampleurl.com/profile0", LocalDateTime.now(), true, false);
+        ;
         String validUsername = account0.getUsername();
         Mockito.when(repository.findByUsername(validUsername)).thenReturn(Optional.of(account0));
         Mockito.when(repository.save(accountForUpdate)).thenReturn(accountForUpdate);
@@ -180,6 +188,204 @@ public class AccountServiceTest {
         String invalidUsername = account0.getUsername();
         Mockito.when(repository.findByUsername(invalidUsername)).thenReturn(Optional.empty());
 
-        assertThrows(ApiException.class,() -> service.delete(invalidUsername));
+        assertThrows(ApiException.class, () -> service.delete(invalidUsername));
+    }
+
+    @Test
+    @DisplayName("Soft deletes a non-existent Account")
+    void softDelete_usingInvalidUsername_throwsException() {
+        String invalidUsername = account0.getUsername();
+        Mockito.when(repository.findByUsername(invalidUsername)).thenReturn(Optional.empty());
+
+        assertThrows(ApiException.class, () -> service.softDelete(invalidUsername));
+    }
+
+    @Test
+    @DisplayName("Soft deletes an existing Account that is soft deleted yet")
+    void softDelete_usingValidUsernameOfDeletedAccount_throwsException() {
+        String validUsername = account0.getUsername();
+        account0.setDeleteFlag(true);
+        Mockito.when(repository.findByUsername(validUsername)).thenReturn(Optional.of(account0));
+
+        assertThrows(ApiException.class, () -> service.softDelete(validUsername));
+    }
+
+    @Test
+    @DisplayName("Soft deletes an existing Account that is not soft deleted yet")
+    void softDelete_usingValidUsernameOfNotDeletedAccount_doesNotException() {
+        String validUsername = account0.getUsername();
+        account0.setDeleteFlag(false);
+        Mockito.when(repository.findByUsername(validUsername)).thenReturn(Optional.of(account0));
+
+        assertDoesNotThrow(() -> service.softDelete(validUsername));
+    }
+
+    @Test
+    @DisplayName("Creates a Not Found string")
+    void notFound_createsCorrectString() {
+        String username = account0.getUsername();
+        String notFound = "No account with account username " + username + " was found";
+
+        String notFoundResult = service.notFound(username);
+
+        assertEquals(notFoundResult, notFound);
+    }
+
+    @Test
+    @DisplayName("Creates an Already Existing string")
+    void alreadyExist_createsAlreadyExistString() {
+        String username = account0.getUsername();
+        String alreadyExist = "Account with username " + username + " already exist";
+
+        String alreadyExistResult = service.alreadyExist(username);
+
+        assertEquals(alreadyExistResult, alreadyExist);
+    }
+
+    @Test
+    @DisplayName("Add or Update Accounts using the same data and overwrite set to false")
+    void addOrUpdate_usingListWithNoChangesAndNoOverwrite_returnsZero() {
+        List<Account> accounts = List.of(account0);
+        Mockito.when(repository.findByUsername(account0.getUsername())).thenReturn(Optional.of(account0));
+
+        int itemsAffected = service.addOrUpdate(accounts, false);
+
+        assertEquals(0, itemsAffected);
+    }
+
+    @Test
+    @DisplayName("Add or Update Accounts using different data and overwrite set to false")
+    void addOrUpdate_usingListWithChangesAndNoOverwrite_returnsZero() {
+        account0.setActive(false);
+        List<Account> accounts = List.of(account0);
+        account0.setActive(true);
+        Mockito.when(repository.findByUsername(account0.getUsername())).thenReturn(Optional.of(account0));
+
+        int itemsAffected = service.addOrUpdate(accounts, false);
+
+        assertEquals(0, itemsAffected);
+    }
+
+    @Test
+    @DisplayName("Add or Update Accounts using different data and overwrite set to true")
+    void addOrUpdate_usingListWithChangesAndOverwrite_returnsNonZero() {
+        Account updatedAccount = new Account("NewName0", account0.getUsername(), "Email0", "Password0", AccountType.SA, "http://sampleurl.com/profile0", LocalDateTime.now(), true, false);
+        List<Account> accounts = List.of(updatedAccount);
+        Mockito.when(repository.findByUsername(account0.getUsername())).thenReturn(Optional.of(account0));
+
+        int itemsAffected = service.addOrUpdate(accounts, true);
+
+        assertNotEquals(0, itemsAffected);
+    }
+
+    @Test
+    @DisplayName("Load User by Username using valid Username")
+    void loadByUsername_usingValidUsername_returnsEzeUserDetails() {
+        String validUsername = account0.getUsername();
+        EzeUserDetails userDetails = new EzeUserDetails(account0);
+        Mockito.when(repository.findByUsername(validUsername)).thenReturn(Optional.of(account0));
+
+        EzeUserDetails userDetails1 = (EzeUserDetails) service.loadUserByUsername(validUsername);
+
+        assertNotNull(userDetails1);
+        assertEquals(userDetails, userDetails1);
+    }
+
+    @Test
+    @DisplayName("Load User by Username using invalid Username")
+    void loadByUsername_usingInvalidUsername_throwsException() {
+        String invalidUsername = account0.getUsername();
+        Mockito.when(repository.findByUsername(invalidUsername)).thenReturn(Optional.empty());
+
+        assertThrows(ApiException.class, () -> service.get(invalidUsername));
+    }
+
+    @Test
+    @DisplayName("Create Excel from a List of Account")
+    void listToExcel_returnsExcelWithSameData() {
+        try {
+            List<Account> accounts = new ArrayList<>(accountList);
+            List<String> columns = List.of("ID", "Full name", "Username", "Email", "Type", "Created At", "Is Active", "Profile url", "Delete Flag");
+
+            ByteArrayInputStream inputStream = service.listToExcel(accounts);
+            XSSFWorkbook workbook = new XSSFWorkbook(inputStream);
+            XSSFSheet sheet = workbook.getSheetAt(0);
+
+            Row headerRow = sheet.getRow(0);
+            for (int i = 0; i < columns.size(); i++) {
+                String columnName = headerRow.getCell(i).getStringCellValue();
+                assertEquals(columns.get(i), columnName);
+            }
+
+            for (int i = 1; i < sheet.getPhysicalNumberOfRows(); i++) {
+                Row dataRow = sheet.getRow(i);
+                Account account = accounts.get(i - 1);
+                assertEquals(account.getId(), (long) dataRow.getCell(0, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK).getNumericCellValue());
+                assertEquals(account.getFullName(), dataRow.getCell(1).getStringCellValue());
+                assertEquals(account.getUsername(), dataRow.getCell(2).getStringCellValue());
+                assertEquals(account.getEmail(), dataRow.getCell(3).getStringCellValue());
+                assertEquals(account.getType(), AccountType.of(dataRow.getCell(4).getStringCellValue()));
+                assertEquals(account.getCreatedAt(), LocalDateTime.parse(dataRow.getCell(5).getStringCellValue()));
+                assertEquals(account.getActive(), dataRow.getCell(6).getBooleanCellValue());
+                assertEquals(account.getProfile(), dataRow.getCell(7).getStringCellValue());
+                assertEquals(account.getDeleteFlag(), dataRow.getCell(8).getBooleanCellValue());
+            }
+        } catch (IOException ignored) {
+
+        }
+    }
+
+    @Test
+    @DisplayName("Create List of Account from Multipart file")
+    void excelToList_returnsListOfAccount() {
+        try {
+            List<Account> accounts = new ArrayList<>(accountList);
+            XSSFWorkbook workbook = new XSSFWorkbook();
+            Sheet sheet = workbook.createSheet("Accounts");
+
+            List<String> columns = List.of("ID", "Full name", "Username", "Email", "Type", "Created At", "Is Active", "Profile url", "Delete Flag");
+
+            // Creating header row
+            Row headerRow = sheet.createRow(0);
+            for (int i = 0; i < columns.size(); i++) {
+                Cell cell = headerRow.createCell(i);
+                cell.setCellValue(columns.get(i));
+            }
+
+            // Populating the excel file
+            for (int i = 0; i < accounts.size(); i++) {
+                Row dataRow = sheet.createRow(i + 1);
+                dataRow.createCell(0).setCellValue(accounts.get(i).getId());
+                dataRow.createCell(1).setCellValue(accounts.get(i).getFullName());
+                dataRow.createCell(2).setCellValue(accounts.get(i).getUsername());
+                dataRow.createCell(3).setCellValue(accounts.get(i).getEmail());
+                dataRow.createCell(4).setCellValue(accounts.get(i).getType().getName());
+                dataRow.createCell(5).setCellValue(accounts.get(i).getCreatedAt().toString());
+                dataRow.createCell(6).setCellValue(accounts.get(i).getActive());
+                dataRow.createCell(7).setCellValue(accounts.get(i).getProfile());
+                dataRow.createCell(8).setCellValue(accounts.get(i).getDeleteFlag());
+            }
+
+            // Making size of the columns auto resize to fit data
+            for (int i = 0; i < columns.size(); i++) {
+                sheet.autoSizeColumn(i);
+            }
+
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            workbook.write(outputStream);
+            MultipartFile file = new MockMultipartFile("file", new ByteArrayInputStream(outputStream.toByteArray()));
+
+            List<Account> accountsResult = service.excelToList(file);
+
+            assertNotEquals(0, accountsResult.size());
+            for (int i = 0; i < accountList.size(); i++) {
+                Account accountExpected = accounts.get(i);
+                Account accountResult = accountsResult.get(i);
+                accountExpected.setPassword(null);
+                assertEquals(accountExpected, accountResult);
+            }
+        } catch (IOException ignored) {
+
+        }
     }
 }

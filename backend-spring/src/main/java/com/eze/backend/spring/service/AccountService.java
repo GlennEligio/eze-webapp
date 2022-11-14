@@ -5,6 +5,7 @@ import com.eze.backend.spring.enums.AccountType;
 import com.eze.backend.spring.exception.ApiException;
 import com.eze.backend.spring.model.Account;
 import com.eze.backend.spring.repository.AccountRepository;
+import com.eze.backend.spring.util.TimeStampProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -37,9 +38,9 @@ public class AccountService implements IService<Account>, IExcelService<Account>
 
     private final AccountRepository repository;
     private final PasswordEncoder passwordEncoder;
-    private final ITimeStampProvider timeStampProvider;
+    private final TimeStampProvider timeStampProvider;
 
-    public AccountService(AccountRepository repository, @Lazy PasswordEncoder passwordEncoder, ITimeStampProvider timeStampProvider) {
+    public AccountService(AccountRepository repository, PasswordEncoder passwordEncoder, TimeStampProvider timeStampProvider) {
         this.repository = repository;
         this.passwordEncoder = passwordEncoder;
         this.timeStampProvider = timeStampProvider;
@@ -75,6 +76,7 @@ public class AccountService implements IService<Account>, IExcelService<Account>
             account.setCreatedAt(timeStampProvider.getNow());
             account.setActive(true);
             account.setDeleteFlag(false);
+            log.info(account.toString());
             return repository.save(account);
         }
         throw new ApiException("No username found in Account to create", HttpStatus.BAD_REQUEST);
@@ -196,7 +198,9 @@ public class AccountService implements IService<Account>, IExcelService<Account>
 
     @Override
     public List<Account> excelToList(MultipartFile file) {
-        try (Workbook workbook = new XSSFWorkbook(file.getInputStream());) {
+        log.info(file.getName());
+        log.info(file.getContentType());
+        try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
             List<Account> accounts = new ArrayList<>();
             Sheet sheet = workbook.getSheetAt(0);
             for (int i = 1; i < sheet.getPhysicalNumberOfRows(); i++) {
