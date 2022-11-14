@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import com.eze.backend.spring.enums.EqStatus;
 import com.eze.backend.spring.enums.TxStatus;
 import com.eze.backend.spring.model.*;
+import com.eze.backend.spring.repository.TransactionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

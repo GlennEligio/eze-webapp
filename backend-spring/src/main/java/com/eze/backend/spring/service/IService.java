@@ -14,5 +14,6 @@ public interface IService<T> {
     void softDelete(Serializable id);
     String notFound(Serializable id);
     String alreadyExist(Serializable id);
+    // TODO: Refactor so that its two method, addAll and updateAll, to remove boolean args
     int addOrUpdate(List<T> entities, boolean overwrite);
 }

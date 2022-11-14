@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.eze.backend.spring.enums.AccountType;
 import com.eze.backend.spring.model.Account;
+import com.eze.backend.spring.repository.AccountRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

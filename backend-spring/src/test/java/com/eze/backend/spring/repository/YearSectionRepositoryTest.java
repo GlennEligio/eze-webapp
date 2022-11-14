@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.eze.backend.spring.model.YearLevel;
 import com.eze.backend.spring.model.YearSection;
+import com.eze.backend.spring.repository.YearSectionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

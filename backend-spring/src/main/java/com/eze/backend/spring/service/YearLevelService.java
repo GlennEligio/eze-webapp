@@ -59,25 +59,29 @@ public class YearLevelService implements IService<YearLevel>, IExcelService<Year
         log.info("Creating YearLevel {}", yearLevel);
         Optional<YearLevel> opYL = repository.findByYearNumber(yearLevel.getYearNumber());
         if(opYL.isPresent()) throw new ApiException(alreadyExist(yearLevel.getYearNumber()), HttpStatus.BAD_REQUEST);
-        RuleBasedNumberFormat nf = new RuleBasedNumberFormat(Locale.US, RuleBasedNumberFormat.SPELLOUT);
-        String yearName = nf.format(yearLevel.getYearNumber(), "%spellout-ordinal");
-        String firstLetter = yearName.substring(0,1).toUpperCase();
-        String remainingLetters = yearName.substring(1,yearName.length());
-        yearLevel.setYearName(firstLetter + remainingLetters);
+        String yearName = createYearName(yearLevel.getYearNumber());
+        yearLevel.setYearName(yearName);
         yearLevel.setYearSections(new ArrayList<>());
         yearLevel.setDeleteFlag(false);
         return repository.save(yearLevel);
     }
 
-    // Rarely used, most likely
+    public String createYearName(Integer yearNumber) {
+        RuleBasedNumberFormat nf = new RuleBasedNumberFormat(Locale.US, RuleBasedNumberFormat.SPELLOUT);
+        String yearName = nf.format(yearNumber, "%spellout-ordinal");
+        String firstLetter = yearName.substring(0,1).toUpperCase();
+        String remainingLetters = yearName.substring(1);
+        return firstLetter + remainingLetters;
+    }
+
+    // WILL NOT BE USED
     @Override
     public YearLevel update(YearLevel yearLevel, Serializable yearNumber) {
         log.info("Updating YearLevel {} with yearNumber {}", yearLevel, yearNumber);
         YearLevel yearLevel1 = repository.findByYearNumber(Integer.parseInt(yearNumber.toString()))
                 .orElseThrow(() -> new ApiException(notFound(yearNumber), HttpStatus.NOT_FOUND));
-        yearLevel1.setYearNumber(yearLevel1.getYearNumber());
-        RuleBasedNumberFormat nf = new RuleBasedNumberFormat(Locale.US, RuleBasedNumberFormat.SPELLOUT);
-        yearLevel1.setYearName(nf.format(yearLevel1.getYearNumber(), "%spellout-ordinal"));
+        yearLevel1.setYearNumber(yearLevel.getYearNumber());
+        yearLevel1.setYearName(createYearName(yearLevel.getYearNumber()));
         yearLevel1.setDeleteFlag(yearLevel.getDeleteFlag());
         return repository.save(yearLevel1);
     }

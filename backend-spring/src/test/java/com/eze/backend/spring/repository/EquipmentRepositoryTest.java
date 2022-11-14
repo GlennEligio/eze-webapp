@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.eze.backend.spring.enums.EqStatus;
 import com.eze.backend.spring.model.Equipment;
+import com.eze.backend.spring.repository.EquipmentRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
