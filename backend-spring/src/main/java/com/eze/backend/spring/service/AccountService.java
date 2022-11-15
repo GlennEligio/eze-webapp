@@ -40,7 +40,7 @@ public class AccountService implements IService<Account>, IExcelService<Account>
     private final PasswordEncoder passwordEncoder;
     private final TimeStampProvider timeStampProvider;
 
-    public AccountService(AccountRepository repository, PasswordEncoder passwordEncoder, TimeStampProvider timeStampProvider) {
+    public AccountService(AccountRepository repository, @Lazy PasswordEncoder passwordEncoder, TimeStampProvider timeStampProvider) {
         this.repository = repository;
         this.passwordEncoder = passwordEncoder;
         this.timeStampProvider = timeStampProvider;
