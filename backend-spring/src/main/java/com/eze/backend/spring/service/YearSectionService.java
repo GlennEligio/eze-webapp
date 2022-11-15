@@ -55,8 +55,14 @@ public class YearSectionService implements IService<YearSection>, IExcelService<
     @Override
     public YearSection create(YearSection yearSection) {
         log.info("Creating YearSection {}", yearSection);
-        if(yearSection.getYearLevel() == null && yearSection.getYearLevel().getYearNumber() == null) {
-            throw new ApiException("YearSection must have YearLevel with correct yearName", HttpStatus.BAD_REQUEST);
+        if(yearSection.getSectionName() != null) {
+            Optional<YearSection> yearSection1 = repository.findBySectionName(yearSection.getSectionName());
+            if(yearSection1.isPresent()) {
+                throw new ApiException(alreadyExist(yearSection.getSectionName()), HttpStatus.BAD_REQUEST);
+            }
+        }
+        if(null == yearSection.getYearLevel()) {
+            throw new ApiException("YearSection must have YearLevel", HttpStatus.BAD_REQUEST);
         }
         YearLevel yearLevel = ylService.get(yearSection.getYearLevel().getYearNumber());
         yearSection.setYearLevel(yearLevel);
@@ -64,7 +70,7 @@ public class YearSectionService implements IService<YearSection>, IExcelService<
         return repository.save(yearSection);
     }
 
-    // Will not be used most likely
+    // Will not be used in FRE
     @Override
     public YearSection update(YearSection yearSection, Serializable sectionName) {
         log.info("Updating YearSection with sectionName {} and year level {}", sectionName, yearSection.getYearLevel().getYearNumber());
@@ -110,6 +116,7 @@ public class YearSectionService implements IService<YearSection>, IExcelService<
     }
 
     @Override
+    @Transactional
     public int addOrUpdate(@Valid List<YearSection> yearSections, boolean overwrite) {
         int itemsAffected = 0;
         for (YearSection yearSection: yearSections) {
@@ -121,8 +128,11 @@ public class YearSectionService implements IService<YearSection>, IExcelService<
                 if(overwrite){
                     YearSection yearSection1 = yearSectionOptional.get();
                     yearSection.setId(yearSection1.getId());
+                    log.info(yearSection1.toString());
+                    log.info(yearSection.toString());
                     if(!yearSection1.equals(yearSection)) {
                         update(yearSection, yearSection1.getSectionName());
+                        itemsAffected++;
                     }
                 }
             }

@@ -74,7 +74,7 @@ public class YearLevelService implements IService<YearLevel>, IExcelService<Year
         return firstLetter + remainingLetters;
     }
 
-    // WILL NOT BE USED
+    // WILL NOT BE USED MOST LIKELY, EXCEPT UPDATE DELETE FLAG
     @Override
     public YearLevel update(YearLevel yearLevel, Serializable yearNumber) {
         log.info("Updating YearLevel {} with yearNumber {}", yearLevel, yearNumber);
@@ -134,6 +134,7 @@ public class YearLevelService implements IService<YearLevel>, IExcelService<Year
                     yl.setId(oldYl.getId());
                     if(!oldYl.equals(yl)) {
                         update(yl, yl.getYearNumber());
+                        itemsAffected++;
                     }
                 }
             }
