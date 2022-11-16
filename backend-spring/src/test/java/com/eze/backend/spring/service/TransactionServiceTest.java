@@ -10,6 +10,11 @@ import com.eze.backend.spring.repository.TransactionRepository;
 import com.eze.backend.spring.util.ObjectIdGenerator;
 import com.eze.backend.spring.util.TimeStampProvider;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -19,11 +24,17 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.LongStream;
 
 @ExtendWith(MockitoExtension.class)
 @Slf4j
@@ -62,13 +73,14 @@ public class TransactionServiceTest {
         timeStamp = LocalDateTime.now();
         yearLevel = new YearLevel(1, "First", false);
         yearSection = new YearSection("SectionName1", false, yearLevel);
-        student = new Student("2015-00129-MN-01", "FullName1", yearSection, "09062560571", "Birthday1", "Address1", "Email1", "Guardian1", "GuardianNumber1", yearLevel, "https://sampleprofile1.com", true);
+        student = new Student("2015-00129-MN-01", "FullName1", yearSection, "09062560571", "Birthday1", "Address1", "Email1", "Guardian1", "GuardianNumber1", yearLevel, "https://sampleprofile1.com", false);
+        Student student2 = new Student("2015-00129-MN-02", "FullName2", yearSection, "09062560571", "Birthday2", "Address2", "Email2", "Guardian2", "GuardianNumber2", yearLevel, "https://sampleprofile2.com", false);
         professor = new Professor("Name1", "+639062560574", true);
         eq0 = new Equipment("EqCode0", "Name0", "Barcode0", EqStatus.GOOD, LocalDateTime.now(), false, false, false);
         eq1 = new Equipment("EqCode1", "Name1", "Barcode1", EqStatus.GOOD, LocalDateTime.now(), true, false, false);
 
         tx0 = new Transaction(txCode0, List.of(eq0, eq1), List.of(eq0, eq1), student, professor, timeStamp, null, TxStatus.PENDING, false);
-        tx1 = new Transaction(txCode1, List.of(eq0, eq1), List.of(eq0, eq1), student, professor, timeStamp, null, TxStatus.PENDING, true);
+        tx1 = new Transaction(txCode1, List.of(eq0, eq1), List.of(eq0, eq1), student2, professor, timeStamp, null, TxStatus.PENDING, true);
         transactionList = List.of(tx1, tx0);
     }
 
@@ -330,5 +342,162 @@ public class TransactionServiceTest {
         List<Equipment> equipment = List.of(eq0, eq1);
 
         assertThrows(ApiException.class, () -> service.checkEqAlreadyBorrowed(equipment));
+    }
+
+    @Test
+    @DisplayName("Return Equipment where no transaction matches with given professor, borrower, and equipment barcodes")
+    void returnEquipments_withNoTransactionsMatch_throwsException() {
+        // make eq0 borrowed and non-duplicable
+        List<String> validBarcodes = List.of(eq0.getBarcode(), eq1.getBarcode());
+        String invalidProfessorName = "Invalid Professor Name";
+        String invalidStudentName = "Invalid Student Name";
+        Mockito.when(equipmentService.getByBarcode(eq0.getBarcode())).thenReturn(eq0);
+        Mockito.when(equipmentService.getByBarcode(eq1.getBarcode())).thenReturn(eq1);
+
+        assertThrows(ApiException.class, () -> service.returnEquipments(invalidStudentName, invalidProfessorName, validBarcodes));
+    }
+
+    @Test
+    @DisplayName("Return Equipment where a transaction matches with given prof, student, and barcodes")
+    void returnEquipments_withMatchingTransaction_updatesTransaction() {
+        // make eq0 borrowed and non-duplicable
+        Equipment returnedEq0 = new Equipment("EqCode0", "Name0", "Barcode0", EqStatus.GOOD, eq0.getDefectiveSince(), false, false, false);
+        eq0.setIsBorrowed(true);
+        eq0.setIsDuplicable(false);
+        List<String> barcodes = List.of(eq0.getBarcode(), eq1.getBarcode());
+        Transaction updatedTx0 = new Transaction(txCode0, new ArrayList<>(), List.of(returnedEq0, eq1), student, professor, timeStamp, timeStamp, TxStatus.PENDING, false);
+        Mockito.when(equipmentService.getByBarcode(eq0.getBarcode())).thenReturn(eq0);
+        Mockito.when(equipmentService.getByBarcode(eq1.getBarcode())).thenReturn(eq1);
+        Mockito.when(timeStampProvider.getNow()).thenReturn(timeStamp);
+        Mockito.when(repository.findAll()).thenReturn(transactionList);
+        Mockito.when(repository.save(updatedTx0)).thenReturn(updatedTx0);
+
+        Transaction transactionResult = service.returnEquipments(tx0.getBorrower().getStudentNumber(), tx0.getProfessor().getName(), barcodes);
+
+        assertNotNull(transactionResult);
+        assertEquals(updatedTx0, transactionResult);
+    }
+
+    @Test
+    @DisplayName("Create Excel from a List of Transactions")
+    void listToExcel_returnsExcelWithSameData() {
+        try {
+            List<Transaction> transactions = List.of(tx0, tx1);
+            List<String> columns = List.of("Transaction Code", "Equipment", "Borrower", "Year and Section", "Professor", "Borrowed At", "Returned At", "Status", "Is Returned", "Delete flag");
+
+            ByteArrayInputStream inputStream = service.listToExcel(transactions);
+            XSSFWorkbook workbook = new XSSFWorkbook(inputStream);
+            XSSFSheet sheet = workbook.getSheetAt(0);
+
+            Row headerRow = sheet.getRow(0);
+            for (int i = 0; i < columns.size(); i++) {
+                String columnName = headerRow.getCell(i).getStringCellValue();
+                assertEquals(columns.get(i), columnName);
+            }
+
+            for (int i = 1; i < sheet.getPhysicalNumberOfRows(); i++) {
+                Row row = sheet.getRow(i);
+                Transaction transaction = transactions.get(i-1);
+                assertEquals(transaction.getTxCode(), row.getCell(0).getStringCellValue());
+
+                String eqCode = row.getCell(1).getStringCellValue();
+                Boolean eqIncludedInPending = row.getCell(8).getBooleanCellValue();
+                assertNotEquals(0, transaction.getEquipmentsHist().stream().filter(e -> e.getEquipmentCode().equals(eqCode)).count());
+                assertEquals(eqIncludedInPending, transaction.getEquipments().stream().anyMatch(e -> e.getEquipmentCode().equals(eqCode)));
+
+                String studentNumber = row.getCell(2).getStringCellValue();
+                assertEquals(transaction.getBorrower().getStudentNumber(), studentNumber);
+
+                // get the professor of this transaction
+                String professorName = row.getCell(4).getStringCellValue();
+                assertEquals(transaction.getProfessor().getName(), professorName);
+
+                // get the borrowed at info
+                String borrowedAt = row.getCell(5).getStringCellValue();
+                assertEquals(transaction.getBorrowedAt().toString(), borrowedAt);
+
+                // get the returned at info if its present
+                String returnedAt = row.getCell(6, Row.MissingCellPolicy.CREATE_NULL_AS_BLANK).getStringCellValue();
+                if (returnedAt != null && !returnedAt.equals("")) {
+                    assertEquals(transaction.getReturnedAt().toString(), returnedAt);
+                }
+
+                // get the status info if its present
+                String status = row.getCell(7).getStringCellValue();
+                assertEquals(transaction.getStatus().getName(), status);
+
+                // get the isDeleteFlag
+                Boolean deleteFlag = row.getCell(9).getBooleanCellValue();
+                assertEquals(transaction.getDeleteFlag(), deleteFlag);
+
+            }
+        } catch (IOException ignored) {
+
+        }
+    }
+
+    @Test
+    @DisplayName("Create List of YearSection from Multipart file")
+    void excelToList_returnsListOfAccount() {
+        try {
+            List<Transaction> transactionsExpected = new ArrayList<>(transactionList);
+            XSSFWorkbook workbook = new XSSFWorkbook();
+            Sheet sheet = workbook.createSheet("Transactions");
+
+            List<String> columns = List.of("Transaction Code", "Equipment", "Borrower", "Year and Section", "Professor", "Borrowed At", "Returned At", "Status", "Is Returned", "Delete flag");
+
+            // Creating header row
+            Row headerRow = sheet.createRow(0);
+            for (int i = 0; i < columns.size(); i++) {
+                Cell cell = headerRow.createCell(i);
+                cell.setCellValue(columns.get(i));
+            }
+
+            // Populating the Excel file with data
+            int counter = 0;
+            for (Transaction transaction : transactionsExpected) {
+                // Create transaction data row per equipment, will cause redundancy
+                for (int j = 0; j < transaction.getEquipmentsHist().size(); j++) {
+                    Equipment equipment = transaction.getEquipmentsHist().get(j);
+                    Row dataRow = sheet.createRow(counter + 1);
+
+                    dataRow.createCell(0).setCellValue(transaction.getTxCode());
+                    dataRow.createCell(1).setCellValue(equipment.getEquipmentCode());
+                    dataRow.createCell(2).setCellValue(transaction.getBorrower().getStudentNumber());
+                    dataRow.createCell(3).setCellValue(transaction.getBorrower().getYearAndSection().getSectionName());
+                    dataRow.createCell(4).setCellValue(transaction.getProfessor().getName());
+                    dataRow.createCell(5).setCellValue(transaction.getBorrowedAt().toString());
+                    if (transaction.getReturnedAt() != null) {
+                        dataRow.createCell(6).setCellValue(transaction.getReturnedAt().toString());
+                    }
+                    dataRow.createCell(7).setCellValue(transaction.getStatus().getName());
+
+                    // Checks if the equipment is still in current Equipment list of Transaction
+                    dataRow.createCell(8).setCellValue(transaction.getEquipments().contains(equipment));
+                    dataRow.createCell(9).setCellValue(transaction.getDeleteFlag());
+                    counter++;
+                }
+            }
+
+            // Making size of the columns auto resize to fit data
+            for (int i = 0; i < columns.size(); i++) {
+                sheet.autoSizeColumn(i);
+            }
+
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            workbook.write(outputStream);
+            MultipartFile file = new MockMultipartFile("file", new ByteArrayInputStream(outputStream.toByteArray()));
+
+            List<Transaction> transactionsResult = service.excelToList(file);
+
+            assertNotEquals(0, transactionsResult.size());
+            for (int i = 0; i < transactionsResult.size(); i++) {
+                Transaction transactionExpected = transactionsExpected.get(i);
+                Transaction transactionResult = transactionsResult.get(i);
+                assertEquals(transactionExpected, transactionResult);
+            }
+        } catch (IOException ignored) {
+
+        }
     }
 }

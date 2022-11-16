@@ -126,7 +126,7 @@ public class TransactionService implements IService<Transaction>, IExcelService<
                     .toList();
 
             checkEqAlreadyBorrowed(eqs);
-            transaction.setEquipments(eqs);
+            transaction.setEquipments(new ArrayList<>(eqs.stream().filter(e -> !e.getIsDuplicable()).toList()));
         }
 
         if (transaction.getProfessor() != null) {
@@ -231,7 +231,7 @@ public class TransactionService implements IService<Transaction>, IExcelService<
         }
         log.info("Equipments found: {}", eqs.stream().map(Equipment::toEquipmentDto).toList());
         // Filter transactions so only those that match the borrower, professor, and contains all equipments from list of barcodes
-        Transaction transactionMatch = getTransactionMatch(borrower, professor, equipmentsBarcode, eqs);
+        Transaction transactionMatch = getTransactionMatch(txRepo.findAll(), borrower, professor, equipmentsBarcode, eqs);
 
         log.info("Got the matching transaction {}", Transaction.toTransactionListDto(transactionMatch));
         // Filter new transaction equipments so that only those that is NOT included in equipments return is left
@@ -251,23 +251,27 @@ public class TransactionService implements IService<Transaction>, IExcelService<
         transactionMatch.setEquipments(newEqs);
         log.info("Updated the transaction equipments");
         // Change the returnedAt value if newEqs is empty
-        if (newEqs.isEmpty()) transactionMatch.setReturnedAt(LocalDateTime.now());
+        if (newEqs.isEmpty()) transactionMatch.setReturnedAt(timeStampProvider.getNow());
         log.info("Update the transaction returnedAt value");
         log.info("New transaction {}", Transaction.toTransactionDto(transactionMatch));
         return txRepo.save(transactionMatch);
     }
 
-    private Transaction getTransactionMatch(String borrower, String professor, List<String> equipmentsBarcode, List<Equipment> eqs) {
-        return getAll().stream()
-                .filter(t -> t.getBorrower().getStudentNumber().equalsIgnoreCase(borrower)
-                        && t.getProfessor().getName().equalsIgnoreCase(professor)
-                        && t.getReturnedAt() == null)
+    public Transaction getTransactionMatch(List<Transaction> transactions, String borrower, String professor, List<String> equipmentsBarcode, List<Equipment> eqs) {
+        return transactions.stream()
+                .filter(t -> t.getBorrower().getStudentNumber().equalsIgnoreCase(borrower))
+//                .peek(t -> log.info("Transaction with same borrower {}", t))
+                .filter(t -> t.getProfessor().getName().equalsIgnoreCase(professor))
+//                .peek(t -> log.info("Transaction with same professor {}", t))
+                .filter(t -> t.getReturnedAt() == null)
+//                .peek(t -> log.info("Transaction with no returned yet {}", t))
                 .filter(t -> t.getEquipments().containsAll(eqs))
+//                .peek(t -> log.info("Transaction whose equipments contains all given eqs {}", t))
                 .findFirst()
                 .orElseThrow(() -> new ApiException(String.format("No transaction found that matches the following: Borrower %s, Professor %s, Barcodes %s", borrower, professor, equipmentsBarcode), HttpStatus.NOT_FOUND));
     }
 
-    public void returnAllEquipments(Transaction transaction) {
+    private void returnAllEquipments(Transaction transaction) {
         // Extract equipments in the transaction and set isBorrowed to false
         List<Equipment> equipment = transaction.getEquipments().stream()
                 .filter(e -> !e.getIsDuplicable())

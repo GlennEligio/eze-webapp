@@ -15,8 +15,8 @@ public enum TxStatus {
         return name;
     }
 
-    public static EqStatus of(String name){
-        return Stream.of(EqStatus.values())
+    public static TxStatus of(String name){
+        return Stream.of(TxStatus.values())
                 .filter(s -> s.getName().equals(name))
                 .findFirst()
                 .orElseThrow(IllegalArgumentException::new);
