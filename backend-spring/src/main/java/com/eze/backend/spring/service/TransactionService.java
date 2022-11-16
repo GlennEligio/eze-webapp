@@ -4,12 +4,13 @@ import com.eze.backend.spring.enums.TxStatus;
 import com.eze.backend.spring.exception.ApiException;
 import com.eze.backend.spring.model.*;
 import com.eze.backend.spring.repository.TransactionRepository;
+import com.eze.backend.spring.util.ObjectIdGenerator;
+import com.eze.backend.spring.util.TimeStampProvider;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.bson.types.ObjectId;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -31,16 +32,16 @@ public class TransactionService implements IService<Transaction>, IExcelService<
     private final EquipmentService eqService;
     private final ProfessorService profService;
     private final StudentService studentService;
-    private final YearSectionService ysService;
-    private final YearLevelService ylService;
+    private final ObjectIdGenerator idGenerator;
+    private final TimeStampProvider timeStampProvider;
 
-    public TransactionService(TransactionRepository txRepo, EquipmentService eqService, ProfessorService profService, StudentService studentService, YearSectionService ysService, YearLevelService ylService) {
+    public TransactionService(TransactionRepository txRepo, EquipmentService eqService, ProfessorService profService, StudentService studentService, ObjectIdGenerator idGenerator, TimeStampProvider timeStampProvider) {
         this.txRepo = txRepo;
         this.eqService = eqService;
         this.profService = profService;
         this.studentService = studentService;
-        this.ysService = ysService;
-        this.ylService = ylService;
+        this.idGenerator = idGenerator;
+        this.timeStampProvider = timeStampProvider;
     }
 
     @Override
@@ -101,14 +102,15 @@ public class TransactionService implements IService<Transaction>, IExcelService<
         transaction.setBorrower(studentService.get(studentNumber));
 
         // Set the transaction code
-        transaction.setTxCode(new ObjectId().toHexString());
+        transaction.setTxCode(idGenerator.createId());
 
         // Set deleteFlag to false
         transaction.setDeleteFlag(false);
 
         // Add borrowed at in case its null
-        if (transaction.getBorrowedAt() == null) transaction.setBorrowedAt(LocalDateTime.now());
+        if (transaction.getBorrowedAt() == null) transaction.setBorrowedAt(timeStampProvider.getNow());
 
+        log.info(transaction.toString());
         return txRepo.save(transaction);
     }
 
@@ -147,11 +149,11 @@ public class TransactionService implements IService<Transaction>, IExcelService<
     public void delete(Serializable code) {
         log.info("Deleting transaction with {}", code);
         Optional<Transaction> transactionOptional = txRepo.findByTxCode(code.toString());
-        if(transactionOptional.isEmpty()) {
+        if (transactionOptional.isEmpty()) {
             throw new ApiException(notFound(code), HttpStatus.NOT_FOUND);
         }
         Transaction transaction = transactionOptional.get();
-        if(Boolean.TRUE.equals(transaction.getDeleteFlag())) {
+        if (Boolean.TRUE.equals(transaction.getDeleteFlag())) {
             throw new ApiException("Transaction is already soft deleted", HttpStatus.BAD_REQUEST);
         }
         returnAllEquipments(transaction);
@@ -163,6 +165,9 @@ public class TransactionService implements IService<Transaction>, IExcelService<
     public void softDelete(Serializable code) {
         log.info("Soft deleting transaction with {}", code);
         Transaction transaction = txRepo.findByTxCode(code.toString()).orElseThrow(() -> new ApiException(notFound(code), HttpStatus.NOT_FOUND));
+        if (transaction.getDeleteFlag()) {
+            throw new ApiException("Transaction is already soft deleted", HttpStatus.BAD_REQUEST);
+        }
         returnAllEquipments(transaction);
         txRepo.softDelete(transaction.getTxCode());
     }
@@ -201,14 +206,7 @@ public class TransactionService implements IService<Transaction>, IExcelService<
         return itemsAffected;
     }
 
-    private String eqBorrowed(List<Equipment> equipments) {
-        String equipmentIds = equipments.stream()
-                .map(Equipment::getEquipmentCode)
-                .reduce("", (ids, eqId) -> ids + ", " + eqId);
-        return "The following equipments is already borrowed: " + equipmentIds;
-    }
-
-    private void checkEqAlreadyBorrowed(List<Equipment> equipments) {
+    public void checkEqAlreadyBorrowed(List<Equipment> equipments) {
         // Check if any equipments is not duplicable and is already borrowed
         List<Equipment> eqAlreadyBorrowed = equipments.parallelStream()
                 .filter(eq -> !eq.getIsDuplicable())
@@ -217,7 +215,10 @@ public class TransactionService implements IService<Transaction>, IExcelService<
 
         // If there is such equipment, list them and show them in response error
         if (!eqAlreadyBorrowed.isEmpty()) {
-            throw new ApiException(eqBorrowed(eqAlreadyBorrowed), HttpStatus.BAD_REQUEST);
+            String eqCodes = equipments.stream()
+                    .map(Equipment::getEquipmentCode)
+                    .reduce("", (ids, eqId) -> ids + ", " + eqId);
+            throw new ApiException("The following items is already borrowed: " + eqCodes, HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -230,13 +231,7 @@ public class TransactionService implements IService<Transaction>, IExcelService<
         }
         log.info("Equipments found: {}", eqs.stream().map(Equipment::toEquipmentDto).toList());
         // Filter transactions so only those that match the borrower, professor, and contains all equipments from list of barcodes
-        Transaction transactionMatch = getAll().stream()
-                .filter(t -> t.getBorrower().getStudentNumber().equalsIgnoreCase(borrower)
-                        && t.getProfessor().getName().equalsIgnoreCase(professor)
-                        && t.getReturnedAt() == null)
-                .filter(t -> t.getEquipments().containsAll(eqs))
-                .findFirst()
-                .orElseThrow(() -> new ApiException(String.format("No transaction found that matches the following: Borrower %s, Professor %s, Barcodes %s", borrower, professor, equipmentsBarcode), HttpStatus.NOT_FOUND));
+        Transaction transactionMatch = getTransactionMatch(borrower, professor, equipmentsBarcode, eqs);
 
         log.info("Got the matching transaction {}", Transaction.toTransactionListDto(transactionMatch));
         // Filter new transaction equipments so that only those that is NOT included in equipments return is left
@@ -260,6 +255,16 @@ public class TransactionService implements IService<Transaction>, IExcelService<
         log.info("Update the transaction returnedAt value");
         log.info("New transaction {}", Transaction.toTransactionDto(transactionMatch));
         return txRepo.save(transactionMatch);
+    }
+
+    private Transaction getTransactionMatch(String borrower, String professor, List<String> equipmentsBarcode, List<Equipment> eqs) {
+        return getAll().stream()
+                .filter(t -> t.getBorrower().getStudentNumber().equalsIgnoreCase(borrower)
+                        && t.getProfessor().getName().equalsIgnoreCase(professor)
+                        && t.getReturnedAt() == null)
+                .filter(t -> t.getEquipments().containsAll(eqs))
+                .findFirst()
+                .orElseThrow(() -> new ApiException(String.format("No transaction found that matches the following: Borrower %s, Professor %s, Barcodes %s", borrower, professor, equipmentsBarcode), HttpStatus.NOT_FOUND));
     }
 
     public void returnAllEquipments(Transaction transaction) {
