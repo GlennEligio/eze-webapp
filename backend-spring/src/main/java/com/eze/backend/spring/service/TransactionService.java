@@ -366,7 +366,9 @@ public class TransactionService implements IService<Transaction>, IExcelService<
 
                     // add the equipment is eq if isReturned is false
                     Boolean isReturned = row.getCell(8).getBooleanCellValue();
-                    if (!isReturned) {
+
+                    // Add to equipments as well if its not returned yet and is not duplicable
+                    if (!equipment.getIsDuplicable() && !isReturned) {
                         transaction.setEquipments(new ArrayList<>(List.of(equipment)));
                     } else {
                         transaction.setEquipments(new ArrayList<>());
@@ -402,22 +404,26 @@ public class TransactionService implements IService<Transaction>, IExcelService<
                     transactionMap.put(transactionCode, transaction);
                 } else {
                     Transaction transaction = transactionMap.get(transactionCode);
-
                     // add the equipment
                     String eqCode = row.getCell(1).getStringCellValue();
-                    boolean isReturned = row.getCell(8).getBooleanCellValue();
+                    Boolean isReturned = row.getCell(8).getBooleanCellValue();
                     Equipment equipment = eqService.get(eqCode);
 
                     List<Equipment> equipmentsHist = transaction.getEquipmentsHist();
                     List<Equipment> equipments = transaction.getEquipments();
                     equipmentsHist.add(equipment);
                     // Add to equipments as well if its not returned yet
-                    if (!isReturned) equipments.add(equipment);
-                    transaction.setEquipmentsHist(equipments);
+                    if (!isReturned && !equipment.getIsDuplicable()) {
+                        equipments.add(equipment);
+                    }
+                    transaction.setEquipments(equipments);
+                    transaction.setEquipmentsHist(equipmentsHist);
+                    transactionMap.put(transaction.getTxCode(), transaction);
                 }
             }
 
-            return transactionMap.values().stream().toList();
+            List<Transaction> transactions = transactionMap.values().stream().toList();
+            return transactions;
         } catch (Exception ex) {
             ex.printStackTrace();
             throw new ApiException("Something went wrong when converting Excel file to Transactions", HttpStatus.INTERNAL_SERVER_ERROR);

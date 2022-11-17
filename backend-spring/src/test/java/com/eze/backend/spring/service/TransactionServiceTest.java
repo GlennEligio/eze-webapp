@@ -32,6 +32,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.LongStream;
@@ -56,7 +57,7 @@ public class TransactionServiceTest {
     @InjectMocks
     private TransactionService service;
 
-    private Student student;
+    private Student student, student2;
     private YearLevel yearLevel;
     private YearSection yearSection;
     private Professor professor;
@@ -74,7 +75,7 @@ public class TransactionServiceTest {
         yearLevel = new YearLevel(1, "First", false);
         yearSection = new YearSection("SectionName1", false, yearLevel);
         student = new Student("2015-00129-MN-01", "FullName1", yearSection, "09062560571", "Birthday1", "Address1", "Email1", "Guardian1", "GuardianNumber1", yearLevel, "https://sampleprofile1.com", false);
-        Student student2 = new Student("2015-00129-MN-02", "FullName2", yearSection, "09062560571", "Birthday2", "Address2", "Email2", "Guardian2", "GuardianNumber2", yearLevel, "https://sampleprofile2.com", false);
+        student2 = new Student("2015-00129-MN-02", "FullName2", yearSection, "09062560571", "Birthday2", "Address2", "Email2", "Guardian2", "GuardianNumber2", yearLevel, "https://sampleprofile2.com", false);
         professor = new Professor("Name1", "+639062560574", true);
         eq0 = new Equipment("EqCode0", "Name0", "Barcode0", EqStatus.GOOD, LocalDateTime.now(), false, false, false);
         eq1 = new Equipment("EqCode1", "Name1", "Barcode1", EqStatus.GOOD, LocalDateTime.now(), true, false, false);
@@ -395,10 +396,17 @@ public class TransactionServiceTest {
                 assertEquals(columns.get(i), columnName);
             }
 
+            int counter = 0;
             for (int i = 1; i < sheet.getPhysicalNumberOfRows(); i++) {
                 Row row = sheet.getRow(i);
-                Transaction transaction = transactions.get(i-1);
-                assertEquals(transaction.getTxCode(), row.getCell(0).getStringCellValue());
+                Transaction transaction = transactions.get(counter);
+                String txCode = row.getCell(0).getStringCellValue();
+                // check if the row doesn't match the current transaction
+                if(!transaction.getTxCode().equalsIgnoreCase(txCode)) {
+                    counter++;
+                    transaction = transactions.get(counter);
+                }
+                assertEquals(transaction.getTxCode(), txCode);
 
                 String eqCode = row.getCell(1).getStringCellValue();
                 Boolean eqIncludedInPending = row.getCell(8).getBooleanCellValue();
@@ -439,8 +447,18 @@ public class TransactionServiceTest {
     @Test
     @DisplayName("Create List of YearSection from Multipart file")
     void excelToList_returnsListOfAccount() {
+        Mockito.when(equipmentService.get(eq0.getEquipmentCode())).thenReturn(eq0);
+        Mockito.when(equipmentService.get(eq1.getEquipmentCode())).thenReturn(eq1);
+        Mockito.when(studentService.get(student.getStudentNumber())).thenReturn(student);
+        Mockito.when(studentService.get(student2.getStudentNumber())).thenReturn(student2);
+        Mockito.when(professorService.get(professor.getName())).thenReturn(professor);
         try {
-            List<Transaction> transactionsExpected = new ArrayList<>(transactionList);
+            // remove duplicable eqs and returned equipments (isBorrowed is false)
+            tx0.setEquipments(new ArrayList<>());
+            tx0.setEquipmentsHist(List.of(eq0, eq1));
+            tx1.setEquipments(new ArrayList<>());
+            tx1.setEquipmentsHist(List.of(eq0, eq1));
+            List<Transaction> transactionsExpected = List.of(tx0, tx1);
             XSSFWorkbook workbook = new XSSFWorkbook();
             Sheet sheet = workbook.createSheet("Transactions");
 
@@ -458,11 +476,11 @@ public class TransactionServiceTest {
             for (Transaction transaction : transactionsExpected) {
                 // Create transaction data row per equipment, will cause redundancy
                 for (int j = 0; j < transaction.getEquipmentsHist().size(); j++) {
-                    Equipment equipment = transaction.getEquipmentsHist().get(j);
+                    Equipment equipmentHist = transaction.getEquipmentsHist().get(j);
                     Row dataRow = sheet.createRow(counter + 1);
 
                     dataRow.createCell(0).setCellValue(transaction.getTxCode());
-                    dataRow.createCell(1).setCellValue(equipment.getEquipmentCode());
+                    dataRow.createCell(1).setCellValue(equipmentHist.getEquipmentCode());
                     dataRow.createCell(2).setCellValue(transaction.getBorrower().getStudentNumber());
                     dataRow.createCell(3).setCellValue(transaction.getBorrower().getYearAndSection().getSectionName());
                     dataRow.createCell(4).setCellValue(transaction.getProfessor().getName());
@@ -473,7 +491,7 @@ public class TransactionServiceTest {
                     dataRow.createCell(7).setCellValue(transaction.getStatus().getName());
 
                     // Checks if the equipment is still in current Equipment list of Transaction
-                    dataRow.createCell(8).setCellValue(transaction.getEquipments().contains(equipment));
+                    dataRow.createCell(8).setCellValue(!transaction.getEquipments().contains(equipmentHist));
                     dataRow.createCell(9).setCellValue(transaction.getDeleteFlag());
                     counter++;
                 }
@@ -491,10 +509,23 @@ public class TransactionServiceTest {
             List<Transaction> transactionsResult = service.excelToList(file);
 
             assertNotEquals(0, transactionsResult.size());
+
+            // Sort the transactions first
+            transactionsResult = transactionsResult.stream().sorted(Comparator.comparing(Transaction::getTxCode)).toList();
+            transactionsExpected = transactionsExpected.stream().sorted(Comparator.comparing(Transaction::getTxCode)).toList();
             for (int i = 0; i < transactionsResult.size(); i++) {
                 Transaction transactionExpected = transactionsExpected.get(i);
                 Transaction transactionResult = transactionsResult.get(i);
-                assertEquals(transactionExpected, transactionResult);
+                assertEquals(transactionExpected.getTxCode(), transactionResult.getTxCode());
+                assertEquals(transactionExpected.getBorrower(), transactionResult.getBorrower());
+                assertEquals(transactionExpected.getEquipments(), transactionResult.getEquipments());
+                assertEquals(transactionExpected.getEquipmentsHist(), transactionResult.getEquipmentsHist());
+                assertEquals(transactionExpected.getReturnedAt(), transactionResult.getReturnedAt());
+                assertEquals(transactionExpected.getBorrowedAt(), transactionResult.getBorrowedAt());
+                assertEquals(transactionExpected.getProfessor(), transactionResult.getProfessor());
+                assertEquals(transactionExpected.getDeleteFlag(), transactionResult.getDeleteFlag());
+                assertEquals(transactionExpected.getStatus(), transactionResult.getStatus());
+                assertEquals(transactionExpected.getId(), transactionResult.getId());
             }
         } catch (IOException ignored) {
 
