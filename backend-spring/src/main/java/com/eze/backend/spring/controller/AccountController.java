@@ -48,7 +48,7 @@ public class AccountController {
         log.info("Account with username {} is trying to log in", loginRequestDto.getUsername());
         EzeUserDetails userDetails = (EzeUserDetails) service.loadUserByUsername(loginRequestDto.getUsername());
         if(!passwordEncoder.matches(loginRequestDto.getPassword(), userDetails.getPassword())) {
-            throw new BadCredentialsException("Incorrect credentials");
+            throw new ApiException("Incorrect credentials", HttpStatus.UNAUTHORIZED);
         }
         final String accessToken = jwtUtil.generateToken(userDetails);
         final String refreshToken = jwtUtil.generateRefreshToken(userDetails);

@@ -151,7 +151,7 @@ public class AccountService implements IService<Account>, IExcelService<Account>
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         log.info("Loading account with username {}", username);
         Account account = repository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("No account found with username " + username));
+                .orElseThrow(() -> new ApiException("No account found with username " + username, HttpStatus.UNAUTHORIZED));
         log.info("Account found: {}", account);
         return new EzeUserDetails(account);
     }
