@@ -20,6 +20,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.io.ByteArrayInputStream;
@@ -72,12 +73,14 @@ public class AccountController {
 
     @PostMapping("/accounts/upload")
     public ResponseEntity<Object> upload(@RequestParam(required = false, defaultValue = "false") Boolean overwrite,
-                                         @RequestParam MultipartFile file) {
+                                         @RequestParam MultipartFile file,
+                                         HttpServletRequest request) {
         log.info("Preparing Excel for Item Database update");
         if(!Objects.equals(file.getContentType(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")){
             throw new ApiException("Can only upload .xlsx files", HttpStatus.BAD_REQUEST);
         }
         List<Account> accounts = service.excelToList(file);
+        log.info("Got the accounts {}", accounts);
         int itemsAffected = service.addOrUpdate(accounts, overwrite);
         log.info("Updated {} item database using the excel file", itemsAffected);
         ObjectMapper mapper = new ObjectMapper();

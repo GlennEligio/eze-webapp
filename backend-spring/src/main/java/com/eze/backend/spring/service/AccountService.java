@@ -198,8 +198,6 @@ public class AccountService implements IService<Account>, IExcelService<Account>
 
     @Override
     public List<Account> excelToList(MultipartFile file) {
-        log.info(file.getName());
-        log.info(file.getContentType());
         try (Workbook workbook = new XSSFWorkbook(file.getInputStream())) {
             List<Account> accounts = new ArrayList<>();
             Sheet sheet = workbook.getSheetAt(0);
