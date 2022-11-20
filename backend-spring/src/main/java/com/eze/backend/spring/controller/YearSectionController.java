@@ -3,6 +3,7 @@ package com.eze.backend.spring.controller;
 import com.eze.backend.spring.dtos.YearSectionDto;
 import com.eze.backend.spring.dtos.YearSectionWithYearLevelDto;
 import com.eze.backend.spring.exception.ApiException;
+import com.eze.backend.spring.model.YearLevel;
 import com.eze.backend.spring.model.YearSection;
 import com.eze.backend.spring.service.YearSectionService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -32,7 +33,8 @@ public class YearSectionController {
 
     @GetMapping("/yearSections")
     public ResponseEntity<List<YearSectionDto>> getYearSections() {
-        return ResponseEntity.ok(service.getAllNotDeleted().stream().map(YearSection::toYearSectionDto).toList());
+        List<YearSectionDto> yearSectionDtoList = service.getAllNotDeleted().stream().map(YearSection::toYearSectionDto).toList();
+        return ResponseEntity.ok(yearSectionDtoList);
     }
 
     @GetMapping("/yearSections/download")
@@ -51,30 +53,40 @@ public class YearSectionController {
         if(!Objects.equals(file.getContentType(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")){
             throw new ApiException("Can only upload .xlsx files", HttpStatus.BAD_REQUEST);
         }
-        List<YearSection> yearLevels = service.excelToList(file);
+        List<YearSection> yearSections = service.excelToList(file);
         log.info("Got the yearSections from excel");
-        int itemsAffected = service.addOrUpdate(yearLevels, overwrite);
+        int itemsAffected = service.addOrUpdate(yearSections, overwrite);
         log.info("Successfully updated {} yearSections database using the excel file", itemsAffected);
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode objectNode = mapper.createObjectNode();
-        objectNode.put("Year sections Affected", itemsAffected);
+        // TODO: Edit the FRE to read the correct property in response
+        objectNode.put("Items Affected", itemsAffected);
         return ResponseEntity.ok(objectNode);
     }
 
     @GetMapping("/yearSections/{sectionName}")
     public ResponseEntity<YearSectionWithYearLevelDto> getYearSection(@PathVariable("sectionName") String sectionName) {
-        return ResponseEntity.ok(YearSection.toYearSectionWithYearLevelDto(service.get(sectionName)));
+        YearSection yearSection = service.get(sectionName);
+        YearSectionWithYearLevelDto yearSectionWithYearLevelDto = YearSection.toYearSectionWithYearLevelDto(yearSection);
+        return ResponseEntity.ok(yearSectionWithYearLevelDto);
     }
 
     @PostMapping("/yearSections")
     public ResponseEntity<YearSectionWithYearLevelDto> createYearSection(@Valid @RequestBody YearSectionWithYearLevelDto dto) {
-        return ResponseEntity.ok(YearSection.toYearSectionWithYearLevelDto(service.create(YearSection.toYearSection(dto))));
+        YearSection ysToCreate = YearSection.toYearSection(dto);
+        YearSection newYearSection = service.create(ysToCreate);
+        YearSectionWithYearLevelDto yearSectionWithYearLevelDto = YearSection.toYearSectionWithYearLevelDto(newYearSection);
+        log.info(yearSectionWithYearLevelDto.toString());
+        return ResponseEntity.status(HttpStatus.CREATED).body(yearSectionWithYearLevelDto);
     }
 
     @PutMapping("/yearSections/{sectionName}")
     public ResponseEntity<YearSectionWithYearLevelDto> updateYearSection(@Valid @RequestBody YearSectionWithYearLevelDto dto,
                                                          @PathVariable("sectionName") String sectionName) {
-        return ResponseEntity.ok(YearSection.toYearSectionWithYearLevelDto(service.update(YearSection.toYearSection(dto), sectionName)));
+        YearSection yearSectionForUpdate = YearSection.toYearSection(dto);
+        YearSection updatedYearSection = service.update(yearSectionForUpdate, sectionName);
+        YearSectionWithYearLevelDto yearSectionWithYearLevelDto = YearSection.toYearSectionWithYearLevelDto(updatedYearSection);
+        return ResponseEntity.ok(yearSectionWithYearLevelDto);
     }
 
     @DeleteMapping("/yearSections/{sectionName}")

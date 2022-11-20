@@ -1,16 +1,20 @@
 package com.eze.backend.spring.controller;
 
+import com.eze.backend.spring.dtos.YearLevelDto;
 import com.eze.backend.spring.dtos.YearLevelWithSectionsDto;
+import com.eze.backend.spring.exception.ApiException;
 import com.eze.backend.spring.model.YearLevel;
 import com.eze.backend.spring.model.YearSection;
 import com.eze.backend.spring.service.YearLevelService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.json.JSONArray;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
@@ -18,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -26,7 +31,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -34,8 +38,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -140,7 +142,7 @@ public class YearLevelControllerTest {
         MockMultipartFile multipartFile = createMultipartFile(yearLevelList, incorrectFileContentType);
 
         mockMvc.perform(multipart(HttpMethod.POST, "/api/v1/yearLevels/upload")
-                .file(multipartFile))
+                        .file(multipartFile))
                 .andExpect(status().isBadRequest());
     }
 
@@ -149,10 +151,17 @@ public class YearLevelControllerTest {
     @WithMockUser(authorities = "STUDENT_ASSISTANT")
     void upload_usingValidAuthAndCorrectContentType_returns200Ok() throws Exception {
         MockMultipartFile multipartFile = createMultipartFile(yearLevelList, EXCEL_CONTENT_TYPE);
+        when(service.excelToList(multipartFile)).thenReturn(yearLevelList);
+        when(service.addOrUpdate(yearLevelList, false)).thenReturn(0);
+        ObjectNode response = mapper.createObjectNode();
+        response.put("Items Affected", 0);
+        String responseJson = mapper.writeValueAsString(response);
 
+        assert multipartFile != null;
         mockMvc.perform(multipart(HttpMethod.POST, "/api/v1/yearLevels/upload")
-                .file(multipartFile))
-                .andExpect(status().isOk());
+                        .file(multipartFile))
+                .andExpect(status().isOk())
+                .andExpect(content().json(responseJson));
     }
 
     @Test
@@ -166,12 +175,152 @@ public class YearLevelControllerTest {
     @Test
     @DisplayName("Get non existent YearLevel using valid Auth")
     @WithMockUser(authorities = "STUDENT_ASSISTANT")
-    void getYearLevel_usingNonExistentYearLevelAndValidAuth_returns404NotFound() {
+    void getYearLevel_usingNonExistentYearLevelAndValidAuth_returns404NotFound() throws Exception {
         Integer invalidYearNumber = yearLevel1.getYearNumber();
-        
+        doThrow(new ApiException("YearLevel not found", HttpStatus.NOT_FOUND)).when(service).get(invalidYearNumber);
+
+        mockMvc.perform(get("/api/v1/yearLevels/" + invalidYearNumber))
+                .andExpect(status().isNotFound());
     }
 
-    private MockMultipartFile createMultipartFile (List<YearLevel> yearLevels, String contentType) {
+    @Test
+    @DisplayName("Get existing YearLevel using valid Auth")
+    @WithMockUser(authorities = "STUDENT_ASSISTANT")
+    void getYearLevel_usingExistingYearLevelAndValidAuth_returns200OK() throws Exception {
+        Integer validYearNumber = yearLevel1.getYearNumber();
+        YearLevelWithSectionsDto yearLevelWithSectionsDto = YearLevel.toYearLevelWithSectionsDto(yearLevel1);
+        when(service.get(validYearNumber)).thenReturn(yearLevel1);
+        String responseJson = mapper.writeValueAsString(yearLevelWithSectionsDto);
+
+        mockMvc.perform(get("/api/v1/yearLevels/" + validYearNumber))
+                .andExpect(content().json(responseJson))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("Create YearLevel using invalid Auth")
+    void createYearLevel_usingInvalidAUth_returns403Forbidden() throws Exception {
+        mockMvc.perform(post("/api/v1/yearLevels")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(yearLevel1)))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("Create YearLevel with taken YearNumber using valid Auth")
+    @WithMockUser(authorities = "STUDENT_ASSISTANT")
+    void createYearLevel_usingValidAuthAndTakenYearNumber_returns400BadRequest() throws Exception {
+        YearLevelDto yearLevelDto = new YearLevelDto(yearLevel1.getId(), yearLevel1.getYearNumber(), yearLevel1.getYearName());
+        YearLevel yearLevel = YearLevel.toYearLevel(yearLevelDto);
+        when(service.create(yearLevel)).thenThrow(new ApiException("YearLevel already exist", HttpStatus.BAD_REQUEST));
+
+        mockMvc.perform(post("/api/v1/yearLevels")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(mapper.writeValueAsString(yearLevel1)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("Create YearLevel with available YearNumber using valid Auth")
+    @WithMockUser(authorities = "STUDENT_ASSISTANT")
+    void createYearLevel_usingValidAuthAndAvailableYearNumber_returns201Created() throws Exception {
+        YearLevelDto yearLevelDto = new YearLevelDto(yearLevel1.getId(), yearLevel1.getYearNumber(), yearLevel1.getYearName());
+        YearLevel yearLevel = YearLevel.toYearLevel(yearLevelDto);
+        YearLevel newYearLevel = YearLevel.toYearLevel(yearLevelDto);
+        newYearLevel.setYearSections(new ArrayList<>());
+        newYearLevel.setId(0L);
+        YearLevelDto yearLevelDtoResponse = YearLevel.toYearLevelDto(newYearLevel);
+
+        when(service.create(yearLevel)).thenReturn(newYearLevel);
+        String requestJson = mapper.writeValueAsString(yearLevelDto);
+        String responseJson = mapper.writeValueAsString(yearLevelDtoResponse);
+        log.info(responseJson);
+
+        mockMvc.perform(post("/api/v1/yearLevels")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestJson))
+                .andExpect(status().isCreated())
+                .andExpect(content().json(responseJson));
+    }
+
+    @Test
+    @DisplayName("Update YearLevel with invalid Auth")
+    void updateYearLevel_usingInvalidAuth_returns403Forbidden() throws Exception {
+        YearLevelDto yearLevelDto = YearLevel.toYearLevelDto(yearLevel1);
+        String responseJson = mapper.writeValueAsString(yearLevelDto);
+        Integer validYearNumber = yearLevel1.getYearNumber();
+        mockMvc.perform(put("/api/v1/yearLevels/" + validYearNumber)
+                        .content(responseJson)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("Update non existent YearLevel with valid Auth")
+    @WithMockUser(authorities = "STUDENT_ASSISTANT")
+    void updateYearLevel_usingValidAuthAndInvalidYearNumber_returns404NotFound() throws Exception {
+        YearLevelDto yearLevelDto = YearLevel.toYearLevelDto(yearLevel1);
+        YearLevel yearLevelForUpdate = YearLevel.toYearLevel(yearLevelDto);
+        when(service.update(yearLevelForUpdate, yearLevelForUpdate.getYearNumber())).thenThrow(new ApiException("YearLevel not found", HttpStatus.NOT_FOUND));
+        String requestJson = mapper.writeValueAsString(yearLevelDto);
+
+        mockMvc.perform(put("/api/v1/yearLevels/" + yearLevel1.getYearNumber())
+                        .content(requestJson)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+
+    }
+
+    @Test
+    @DisplayName("Update existing YearLevel with valid Auth")
+    @WithMockUser(authorities = "STUDENT_ASSISTANT")
+    void updateYearLevel_usingValidAuthAndValidYearNumber_returns200OK() throws Exception {
+        YearLevelDto yearLevelDto = YearLevel.toYearLevelDto(yearLevel1);
+        YearLevel yearLevelForUpdate = YearLevel.toYearLevel(yearLevelDto);
+        yearLevelForUpdate.setYearSections(new ArrayList<>());
+        YearLevelWithSectionsDto yearLevelWithSectionsDto = YearLevel.toYearLevelWithSectionsDto(yearLevelForUpdate);
+        when(service.update(yearLevelForUpdate, yearLevelForUpdate.getYearNumber())).thenReturn(yearLevelForUpdate);
+        String requestJson = mapper.writeValueAsString(yearLevelDto);
+        String responseJson = mapper.writeValueAsString(yearLevelWithSectionsDto);
+
+        mockMvc.perform(put("/api/v1/yearLevels/" + yearLevelDto.getYearNumber())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestJson))
+                .andExpect(status().isOk())
+                .andExpect(content().json(responseJson));
+    }
+
+    @Test
+    @DisplayName("Delete YearLevel using invalid Auth")
+    void deleteYearLevel_usingInvalidAuth_returns403Forbidden() throws Exception {
+        Integer validYearNumber = yearLevel1.getYearNumber();
+        mockMvc.perform(delete("/api/v1/yearLevels/" + validYearNumber))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("Delete existing YearLevel using valid Auth")
+    @WithMockUser(authorities = "STUDENT_ASSISTANT")
+    void deleteYearLevel_usingValidAuthAndValidYearNumber_returns200OK() throws Exception {
+        Integer validYearNumber = yearLevel1.getYearNumber();
+        doNothing().when(service).delete(validYearNumber);
+
+        mockMvc.perform(delete("/api/v1/yearLevels/" + validYearNumber))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("Delete non existent YearLevel using invalid Auth")
+    @WithMockUser(authorities = "STUDENT_ASSISTANT")
+    void deleteYearLevel_usingValidAuthAndInvalidYearNumber_returns404NotFound() throws Exception {
+        Integer invalidYearNumber = yearLevel1.getYearNumber();
+        doThrow(new ApiException("No Yearlevel exist", HttpStatus.NOT_FOUND)).when(service).softDelete(invalidYearNumber);
+
+        mockMvc.perform(delete("/api/v1/yearLevels/" + invalidYearNumber))
+                .andExpect(status().isNotFound());
+    }
+
+    private MockMultipartFile createMultipartFile(List<YearLevel> yearLevels, String contentType) {
         try {
             XSSFWorkbook workbook = new XSSFWorkbook();
             Sheet sheet = workbook.createSheet("Year Levels");
@@ -186,8 +335,8 @@ public class YearLevelControllerTest {
             }
 
             // Populating the Excel file with data
-            for(int i=0; i < yearLevels.size(); i++) {
-                Row dataRow = sheet.createRow(i+1);
+            for (int i = 0; i < yearLevels.size(); i++) {
+                Row dataRow = sheet.createRow(i + 1);
                 YearLevel yl = yearLevels.get(i);
                 dataRow.createCell(0).setCellValue(yl.getYearNumber());
                 dataRow.createCell(1).setCellValue(yl.getYearName());

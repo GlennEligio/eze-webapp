@@ -4,6 +4,7 @@ import com.eze.backend.spring.dtos.YearLevelDto;
 import com.eze.backend.spring.dtos.YearLevelWithSectionsDto;
 import com.eze.backend.spring.exception.ApiException;
 import com.eze.backend.spring.model.YearLevel;
+import com.eze.backend.spring.repository.YearLevelRepository;
 import com.eze.backend.spring.service.YearLevelService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -57,28 +58,35 @@ public class YearLevelController {
         log.info("Successfully updated {} yearLevels database using the excel file", itemsAffected);
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode objectNode = mapper.createObjectNode();
-        objectNode.put("Year levels Affected", itemsAffected);
+        objectNode.put("Items Affected", itemsAffected);
         return ResponseEntity.ok(objectNode);
     }
 
     @GetMapping("/yearLevels/{yearNumber}")
-    public ResponseEntity<YearLevelWithSectionsDto> getYearLevel(@PathVariable("yearNumber") String yearNumber) {
-        return ResponseEntity.ok(YearLevel.toYearLevelWithSectionsDto(service.get(yearNumber)));
+    public ResponseEntity<YearLevelWithSectionsDto> getYearLevel(@PathVariable("yearNumber") Integer yearNumber) {
+        YearLevel yearLevel = service.get(yearNumber);
+        YearLevelWithSectionsDto yearLevelWithSectionsDto = YearLevel.toYearLevelWithSectionsDto(yearLevel);
+        return ResponseEntity.ok(yearLevelWithSectionsDto);
     }
 
     @PostMapping("/yearLevels")
     public ResponseEntity<YearLevelDto> createYearLevel(@Valid @RequestBody YearLevelDto dto) {
-        return ResponseEntity.ok(YearLevel.toYearLevelDto(service.create(YearLevel.toYearLevel(dto))));
+        YearLevel yearLevel = service.create(YearLevel.toYearLevel(dto));
+        YearLevelDto yearLevelDto = YearLevel.toYearLevelDto(yearLevel);
+        return ResponseEntity.status(HttpStatus.CREATED).body(yearLevelDto);
     }
 
     @PutMapping("/yearLevels/{yearNumber}")
     public ResponseEntity<YearLevelWithSectionsDto> updateYearLevel(@Valid @RequestBody YearLevelDto dto,
-                                                     @PathVariable("yearNumber") String yearNumber) {
-        return ResponseEntity.ok(YearLevel.toYearLevelWithSectionsDto(service.update(YearLevel.toYearLevel(dto), yearNumber)));
+                                                     @PathVariable("yearNumber") Integer yearNumber) {
+        YearLevel yearLevel = YearLevel.toYearLevel(dto);
+        YearLevel updatedYearLevel = service.update(yearLevel, yearNumber);
+        YearLevelWithSectionsDto yearLevelWithSectionsDto = YearLevel.toYearLevelWithSectionsDto(updatedYearLevel);
+        return ResponseEntity.ok(yearLevelWithSectionsDto);
     }
 
     @DeleteMapping("/yearLevels/{yearNumber}")
-    public ResponseEntity<Object> deleteYearLevel(@PathVariable("yearNumber") String yearNumber) {
+    public ResponseEntity<Object> deleteYearLevel(@PathVariable("yearNumber") Integer yearNumber) {
         service.softDelete(yearNumber);
         return ResponseEntity.ok().build();
     }
