@@ -38,10 +38,14 @@ public class EquipmentController {
     @GetMapping("/equipments/{code}")
     public ResponseEntity<EquipmentDto> getEquipment(@PathVariable("code") String code,
                                                      @RequestParam(required = false, defaultValue = "eqCode") String query) {
-        if(query.equalsIgnoreCase("barcode")) {
-            return ResponseEntity.ok(Equipment.toEquipmentDto(equipmentService.getByBarcode(code)));
+        Equipment equipment = null;
+        if (query.equalsIgnoreCase("barcode")) {
+            equipment = equipmentService.getByBarcode(code);
+        } else {
+            equipment = equipmentService.get(code);
         }
-        return ResponseEntity.ok(Equipment.toEquipmentDto(equipmentService.get(code)));
+        EquipmentDto dto = Equipment.toEquipmentDto(equipment);
+        return ResponseEntity.ok(dto);
     }
 
     @GetMapping("/equipments/download")
@@ -57,7 +61,7 @@ public class EquipmentController {
     public ResponseEntity<Object> upload(@RequestParam(required = false, defaultValue = "false") Boolean overwrite,
                                          @RequestParam MultipartFile file) {
         log.info("Preparing Excel for Equipment Database update");
-        if(!Objects.equals(file.getContentType(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")){
+        if (!Objects.equals(file.getContentType(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")) {
             throw new ApiException("Can only upload .xlsx files", HttpStatus.BAD_REQUEST);
         }
         List<Equipment> equipments = equipmentService.excelToList(file);
@@ -66,7 +70,7 @@ public class EquipmentController {
         log.info("Successfully updated {} equipments database using the excel file", itemsAffected);
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode objectNode = mapper.createObjectNode();
-        objectNode.put("Equipments Affected", itemsAffected);
+        objectNode.put("Items Affected", itemsAffected);
         return ResponseEntity.ok(objectNode);
     }
 

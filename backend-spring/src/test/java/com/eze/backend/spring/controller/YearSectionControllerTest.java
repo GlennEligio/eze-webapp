@@ -152,6 +152,17 @@ public class YearSectionControllerTest {
     }
 
     @Test
+    @DisplayName("Upload YearSection with valid Auth using incorrect Content type")
+    @WithMockUser(authorities = "STUDENT_ASSISTANT")
+    void upload_withValidAuthAndInvalidContentType_returns400BadRequest() throws Exception {
+        MockMultipartFile multipartFile = createMultipartFile(yearSectionList, INCORRECT_CONTENT_TYPE);
+
+        mockMvc.perform(multipart(HttpMethod.POST, "/api/v1/yearSections/upload")
+                        .file(multipartFile))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
     @DisplayName("Get YearSection using invalid Auth")
     void getYearSection_withInvalidAuth_returns403Forbidden() throws Exception {
         mockMvc.perform(get("/api/v1/yearSections/" + ys0.getSectionName()))
