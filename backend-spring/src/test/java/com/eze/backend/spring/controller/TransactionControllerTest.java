@@ -7,6 +7,7 @@ import com.eze.backend.spring.model.*;
 import com.eze.backend.spring.service.TransactionService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -18,6 +19,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpMethod;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
@@ -82,7 +84,7 @@ public class TransactionControllerTest {
     void setup() {
         txCode0 = new ObjectId().toHexString();
         txCode1 = new ObjectId().toHexString();
-        timeStamp = LocalDateTime.now();
+        timeStamp = LocalDateTime.of(2022, Month.DECEMBER, 21, 12, 45);
         timeStamp2 = LocalDateTime.of(2022, Month.APRIL, 24, 12, 45);
         yearLevel = new YearLevel(1, "First", false);
         yearSection = new YearSection("SectionName1", false, yearLevel);
@@ -122,9 +124,9 @@ public class TransactionControllerTest {
         String responseJson = mapper.writeValueAsString(transactionListDtosResponse);
 
         mockMvc.perform(get("/api/v1/transactions")
-                .param("complete", completeParam)
-                .param("historical", historicalParam)
-                .param("returned", returnedParam))
+                        .param("complete", completeParam)
+                        .param("historical", historicalParam)
+                        .param("returned", returnedParam))
                 .andExpect(status().isOk())
                 .andExpect(content().json(responseJson));
     }
@@ -153,8 +155,8 @@ public class TransactionControllerTest {
     @DisplayName("Get all Transaction with from and to date range using valid Auth")
     @WithMockUser(authorities = "STUDENT_ASSISTANT")
     void getTransactions_withFromAndToParamsUsingValidAuth_returns200OKWithTransactionsWithinDateRange() throws Exception {
-        LocalDateTime fromDate = LocalDateTime.of(2022, Month.APRIL, 22, 22,12, 45);
-        LocalDateTime toDate = LocalDateTime.of(2022, Month.APRIL,27 , 22,12, 45);
+        LocalDateTime fromDate = LocalDateTime.of(2022, Month.APRIL, 22, 22, 12, 45);
+        LocalDateTime toDate = LocalDateTime.of(2022, Month.APRIL, 27, 22, 12, 45);
         List<Transaction> transactionsDateRange = transactionList.stream().filter(t -> t.getBorrowedAt().isAfter(fromDate) && t.getBorrowedAt().isBefore(toDate)).toList();
         List<TransactionListDto> transactionListDtoResponse = transactionsDateRange.stream().map(Transaction::toTransactionListDto).toList();
         when(service.getAll()).thenReturn(transactionList);
@@ -238,6 +240,85 @@ public class TransactionControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().json(responseJson));
     }
+
+    @Test
+    @DisplayName("Download Transactions using invalid Auth")
+    void download_usingInvalidAuth_returns403Forbidden() throws Exception {
+        mockMvc.perform(get("/api/v1/transactions/download"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("Download Transactions without from and to dates using valid Auth")
+    @WithMockUser(authorities = "STUDENT_ASSISTANT")
+    void download_usingValidAuthWithoutToAndFromDates_returns200OK() throws Exception {
+        MockMultipartFile multipartFile = createMultipartFile(transactionList, CORRECT_CONTENT_TYPE);
+        when(service.getAll()).thenReturn(transactionList);
+        when(service.listToExcel(transactionList)).thenReturn(new ByteArrayInputStream(multipartFile.getBytes()));
+
+        mockMvc.perform(get("/api/v1/transactions/download"))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Content-Disposition", "attachment; filename=transactions.xlsx"));
+    }
+
+    @Test
+    @DisplayName("Download Transactions with from and to dates using valid Auth")
+    @WithMockUser(authorities = "STUDENT_ASSISTANT")
+    void download_usingValidAuthWithToAndFromDates_returns200OK() throws Exception {
+        // timeStamp variable date is between from and to dates
+        LocalDateTime fromDate = LocalDateTime.of(2022, Month.DECEMBER, 20, 12, 45, 45);
+        LocalDateTime toDate = LocalDateTime.of(2022, Month.DECEMBER, 23, 12, 45, 45);
+        MockMultipartFile multipartFile = createMultipartFile(transactionList, CORRECT_CONTENT_TYPE);
+        List<Transaction> transactionsFiltered = transactionList.stream().filter(t -> t.getBorrowedAt().isAfter(fromDate) && t.getBorrowedAt().isBefore(toDate)).toList();
+        when(service.getAll()).thenReturn(transactionList);
+        when(service.listToExcel(transactionsFiltered)).thenReturn(new ByteArrayInputStream(multipartFile.getBytes()));
+
+        mockMvc.perform(get("/api/v1/transactions/download")
+                        .param("fromDate", fromDate.toString())
+                        .param("toDate", toDate.toString()))
+                .andExpect(status().isOk())
+                .andExpect(header().string("Content-Disposition", "attachment; filename=transactions(" + fromDate + "-" + toDate + ").xlsx"));
+    }
+
+    @Test
+    @DisplayName("Upload Transactions using invalid Auth")
+    void upload_usingInvalidAuth_returns403Forbidden() throws Exception {
+        MockMultipartFile multipartFile = createMultipartFile(transactionList, CORRECT_CONTENT_TYPE);
+
+        mockMvc.perform(multipart(HttpMethod.POST, "/api/v1/transactions/upload")
+                .file(multipartFile))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("Upload Transactions with incorrect file content type using valid Auth")
+    @WithMockUser(authorities = "STUDENT_ASSISTANT")
+    void upload_withIncorrectFileContentTypeUsingValidAuth_returns400BadRequest() throws Exception {
+        MockMultipartFile multipartFile = createMultipartFile(transactionList, INCORRECT_CONTENT_TYPE);
+
+        mockMvc.perform(multipart(HttpMethod.POST, "/api/v1/transactions/upload")
+                .file(multipartFile))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("Upload Transactions with correct file content type using valid Auth")
+    @WithMockUser(authorities = "STUDENT_ASSISTANT")
+    void upload_withCorrectFileContentTypeUsingValidAuth_returns200OK() throws Exception {
+        MockMultipartFile multipartFile = createMultipartFile(transactionList, CORRECT_CONTENT_TYPE);
+        when(service.excelToList(multipartFile)).thenReturn(transactionList);
+        when(service.addOrUpdate(transactionList, false)).thenReturn(0);
+        ObjectNode response = mapper.createObjectNode();
+        response.put("Items Affected", 0);
+        String responseJson = mapper.writeValueAsString(response);
+
+        mockMvc.perform(multipart(HttpMethod.POST, "/api/v1/transactions/upload")
+                        .file(multipartFile))
+                .andExpect(status().isOk())
+                .andExpect(content().json(responseJson));
+    }
+
+
 
     public MockMultipartFile createMultipartFile(List<Transaction> transactions, String contentType) {
         try {

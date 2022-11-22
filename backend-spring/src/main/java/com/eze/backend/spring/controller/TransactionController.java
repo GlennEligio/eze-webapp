@@ -1,8 +1,6 @@
 package com.eze.backend.spring.controller;
 
-import com.eze.backend.spring.dtos.CreateUpdateTransactionDto;
-import com.eze.backend.spring.dtos.TransactionDto;
-import com.eze.backend.spring.dtos.TransactionListDto;
+import com.eze.backend.spring.dtos.*;
 import com.eze.backend.spring.exception.ApiException;
 import com.eze.backend.spring.model.Transaction;
 import com.eze.backend.spring.service.TransactionService;
@@ -88,14 +86,15 @@ public class TransactionController {
         log.info("Preparing Transactions list for Download");
         response.setContentType("application/octet-stream");
         response.setHeader("Content-Disposition", "attachment; filename=transactions.xlsx");
-        Stream<Transaction> transactions = service.getAllNotDeleted().stream();
+        Stream<Transaction> transactions = service.getAll().stream();
 
         // if fromDate and toDate is present, filter the transactions again
         if(fromDate != null && toDate != null) {
             transactions = transactions.filter(t -> t.getBorrowedAt().isAfter(fromDate) && t.getBorrowedAt().isBefore(toDate));
+            response.setHeader("Content-Disposition", "attachment; filename=transactions("+ fromDate + "-" + toDate +").xlsx");
         }
 
-        ByteArrayInputStream stream = service.listToExcel(transactions.collect(Collectors.toList()));
+        ByteArrayInputStream stream = service.listToExcel(transactions.toList());
         IOUtils.copy(stream, response.getOutputStream());
     }
 
@@ -112,7 +111,7 @@ public class TransactionController {
         log.info("Successfully updated {} transactions database using the excel file", itemsAffected);
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode objectNode = mapper.createObjectNode();
-        objectNode.put("Transactions Affected", itemsAffected);
+        objectNode.put("Items Affected", itemsAffected);
         return ResponseEntity.ok(objectNode);
     }
 
@@ -120,18 +119,23 @@ public class TransactionController {
     public ResponseEntity<Object> getTransaction(@PathVariable("code") String code,
                                                  @RequestParam(required = false, defaultValue = "false") boolean complete,
                                                  @RequestParam(required = false, defaultValue = "false") boolean historical) {
+        Transaction transaction = service.get(code);
         // condition statements for complete details and historical data
         if(Boolean.TRUE.equals(complete)) {
             if(Boolean.TRUE.equals(historical)) {
-                return ResponseEntity.ok(Transaction.toTransactionHistDto(service.get(code)));
+                TransactionHistDto dto = Transaction.toTransactionHistDto(transaction);
+                return ResponseEntity.ok(dto);
             } else {
-                return ResponseEntity.ok(Transaction.toTransactionDto(service.get(code)));
+                TransactionDto dto = Transaction.toTransactionDto(transaction);
+                return ResponseEntity.ok(dto);
             }
         } else {
             if(Boolean.TRUE.equals(historical)) {
-                return ResponseEntity.ok(Transaction.toTransactionHistListDto(service.get(code)));
+                TransactionHistListDto dto = Transaction.toTransactionHistListDto(transaction);
+                return ResponseEntity.ok(dto);
             } else {
-                return ResponseEntity.ok(Transaction.toTransactionListDto(service.get(code)));
+                TransactionListDto dto = Transaction.toTransactionListDto(transaction);
+                return ResponseEntity.ok(dto);
             }
         }
     }
