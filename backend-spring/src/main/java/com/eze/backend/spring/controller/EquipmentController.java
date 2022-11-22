@@ -76,15 +76,19 @@ public class EquipmentController {
 
     @PostMapping("/equipments")
     public ResponseEntity<EquipmentDto> createEquipment(@Valid @RequestBody EquipmentDto equipmentDto) {
-        Equipment newEq = equipmentService.create(Equipment.toEquipment(equipmentDto));
-        return ResponseEntity.created(URI.create("/equipments/" + newEq.getId())).body(Equipment.toEquipmentDto(newEq));
+        Equipment eqToCreate = Equipment.toEquipment(equipmentDto);
+        Equipment newEq = equipmentService.create(eqToCreate);
+        EquipmentDto responseDto = Equipment.toEquipmentDto(newEq);
+        return ResponseEntity.created(URI.create("/api/v1/equipments/" + newEq.getId())).body(responseDto);
     }
 
     @PutMapping("/equipments/{code}")
     public ResponseEntity<EquipmentDto> updateEquipment(@PathVariable("code") String code,
                                                         @Valid @RequestBody EquipmentDto dto) {
-        Equipment newEq = equipmentService.update(Equipment.toEquipment(dto), code);
-        return ResponseEntity.ok(Equipment.toEquipmentDto(newEq));
+        Equipment eqToUpdate = Equipment.toEquipment(dto);
+        Equipment newEq = equipmentService.update(eqToUpdate, code);
+        EquipmentDto responseDto = Equipment.toEquipmentDto(newEq);
+        return ResponseEntity.ok(responseDto);
     }
 
     @DeleteMapping("/equipments/{code}")

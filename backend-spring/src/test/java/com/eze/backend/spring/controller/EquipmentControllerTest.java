@@ -4,12 +4,10 @@ import com.eze.backend.spring.dtos.EquipmentDto;
 import com.eze.backend.spring.enums.EqStatus;
 import com.eze.backend.spring.exception.ApiException;
 import com.eze.backend.spring.model.Equipment;
-import com.eze.backend.spring.model.YearLevel;
 import com.eze.backend.spring.service.EquipmentService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import lombok.With;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -30,7 +28,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -232,6 +229,130 @@ public class EquipmentControllerTest {
                 .file(multipartFile))
                 .andExpect(status().isOk())
                 .andExpect(content().json(responseJson));
+    }
+
+    @Test
+    @DisplayName("Create Equipments using invalid Auth")
+    void createEquipment_withInvalidAuth_returns403() throws Exception {
+        EquipmentDto eqRequest = Equipment.toEquipmentDto(eq0);
+        String requestJson = mapper.writeValueAsString(eqRequest);
+
+        mockMvc.perform(post("/api/v1/equipments")
+                        .content(requestJson)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("Create Equipments using valid Auth and available equipment code")
+    @WithMockUser(authorities = "STUDENT_ASSISTANT")
+    void createEquipment_withValidAuthAndAvailableEqCode_returns201Created() throws Exception {
+        EquipmentDto eqRequest = Equipment.toEquipmentDto(eq0);
+        Equipment eqToCreate = Equipment.toEquipment(eqRequest);
+        Equipment newEq = Equipment.toEquipment(eqRequest);
+        newEq.setId(0L);
+        EquipmentDto eqResponse = Equipment.toEquipmentDto(newEq);
+        when(service.create(eqToCreate)).thenReturn(newEq);
+        String requestJson = mapper.writeValueAsString(eqRequest);
+        String responseJson = mapper.writeValueAsString(eqResponse);
+
+        mockMvc.perform(post("/api/v1/equipments")
+                .content(requestJson)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isCreated())
+                .andExpect(content().json(responseJson));
+    }
+
+    @Test
+    @DisplayName("Create Equipments using valid Auth and taken equipment code")
+    @WithMockUser(authorities = "STUDENT_ASSISTANT")
+    void createEquipment_withValidAuthAndTakenEqCode_returns400BadRequest() throws Exception {
+        EquipmentDto eqRequest = Equipment.toEquipmentDto(eq0);
+        Equipment eqToCreate = Equipment.toEquipment(eqRequest);
+        when(service.create(eqToCreate)).thenThrow(new ApiException("Equipment code is already taken", HttpStatus.BAD_REQUEST));
+        String requestJson = mapper.writeValueAsString(eqRequest);
+
+        mockMvc.perform(post("/api/v1/equipments")
+                        .content(requestJson)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("Update Equipment with invalid Auth")
+    void updateEquipment_withInvalidAuth_returns403Forbidden() throws Exception {
+        EquipmentDto equipmentRequest = Equipment.toEquipmentDto(eq0);
+        String validEqCode = eq0.getEquipmentCode();
+
+        mockMvc.perform(put("/api/v1/equipments/" + validEqCode))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("Update non existent Equipment with valid Auth")
+    @WithMockUser(authorities = "STUDENT_ASSISTANT")
+    void updateEquipment_withValidAuthAndInvalidEqCode_returns404NotFound() throws Exception {
+        EquipmentDto equipmentRequest = Equipment.toEquipmentDto(eq0);
+        String invalidEqCode = eq0.getEquipmentCode();
+        Equipment equipmentForUpdate = Equipment.toEquipment(equipmentRequest);
+        String requestJson = mapper.writeValueAsString(equipmentForUpdate);
+        when(service.update(equipmentForUpdate, invalidEqCode)).thenThrow(new ApiException("Equipment not found", HttpStatus.NOT_FOUND));
+
+        mockMvc.perform(put("/api/v1/equipments/" + invalidEqCode)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestJson))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("Update existent Equipment with valid Auth")
+    @WithMockUser(authorities = "STUDENT_ASSISTANT")
+    void updateEquipment_withValidAuthAndValidEqCode_returns200OK() throws Exception {
+        EquipmentDto equipmentRequest = Equipment.toEquipmentDto(eq0);
+        String validEqCode = eq0.getEquipmentCode();
+        Equipment equipmentForUpdate = Equipment.toEquipment(equipmentRequest);
+        Equipment updatedEquipment = Equipment.toEquipment(equipmentRequest);
+        updatedEquipment.setName("NewName0");
+        EquipmentDto equipmentResponse = Equipment.toEquipmentDto(updatedEquipment);
+        when(service.update(equipmentForUpdate, validEqCode)).thenReturn(updatedEquipment);
+        String requestJson = mapper.writeValueAsString(equipmentForUpdate);
+        String responseJson = mapper.writeValueAsString(equipmentResponse);
+
+        mockMvc.perform(put("/api/v1/equipments/" + validEqCode)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestJson))
+                .andExpect(status().isOk())
+                .andExpect(content().json(responseJson));
+    }
+
+    @Test
+    @DisplayName("Delete Equipment using invalid Auth")
+    void deleteEquipment_withInvalidAuth_returns403Forbidden() throws Exception {
+        String validEqCode = eq0.getEquipmentCode();
+        mockMvc.perform(delete("/api/v1/equipments/" + validEqCode))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("Delete non existent Equipment using valid Auth")
+    @WithMockUser(authorities = "STUDENT_ASSISTANT")
+    void deleteEquipment_withValidAuthAndInvalidEqCode_returns404NotFound() throws Exception {
+        String invalidEqCode = eq0.getEquipmentCode();
+        doThrow(new ApiException("Equipment not found", HttpStatus.NOT_FOUND)).when(service).softDelete(invalidEqCode);
+
+        mockMvc.perform(delete("/api/v1/equipments/" + invalidEqCode))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("Delete existing Equipment using valid Auth")
+    @WithMockUser(authorities = "STUDENT_ASSISTANT")
+    void deleteEquipment_withValidAuthAndValidEqCode_returns200OK() throws Exception {
+        String validEqCode = eq0.getEquipmentCode();
+        doNothing().when(service).softDelete(validEqCode);
+
+        mockMvc.perform(delete("/api/v1/equipments/" + validEqCode))
+                .andExpect(status().isOk());
     }
 
     public MockMultipartFile createMultipartFile(List<Equipment> equipments, String contentType) {

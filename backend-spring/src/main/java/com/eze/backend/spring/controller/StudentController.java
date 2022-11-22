@@ -32,7 +32,9 @@ public class StudentController {
 
     @GetMapping("/students")
     public ResponseEntity<List<StudentListDto>> getStudents() {
-        return ResponseEntity.ok(service.getAllNotDeleted().stream().map(Student::toStudentListDto).toList());
+        List<Student> students = service.getAllNotDeleted();
+        List<StudentListDto> studentListDtos = students.stream().map(Student::toStudentListDto).toList();
+        return ResponseEntity.ok(studentListDtos);
     }
 
     @GetMapping("/students/download")
@@ -57,36 +59,45 @@ public class StudentController {
         log.info("Updated {} students database using the excel file", itemsAffected);
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode objectNode = mapper.createObjectNode();
-        objectNode.put("Students Affected", itemsAffected);
+        objectNode.put("Items Affected", itemsAffected);
         return ResponseEntity.ok(objectNode);
     }
 
     @GetMapping("/students/{studentNo}")
     public ResponseEntity<Object> getStudent(@PathVariable("studentNo") String studentNo,
                                                  @RequestParam(required = false, defaultValue = "true") boolean complete) {
+        Student student = service.get(studentNo);
         if(complete) {
-            return ResponseEntity.ok(Student.toStudentDto(service.get(studentNo)));
+            return ResponseEntity.ok(Student.toStudentDto(student));
         }
-        return ResponseEntity.ok(Student.toStudentListDto(service.get(studentNo)));
+        return ResponseEntity.ok(Student.toStudentListDto(student));
     }
 
     @PostMapping("/students")
     public ResponseEntity<Object> createStudent(@Valid @RequestBody StudentDto dto,
                                                     @RequestParam(required = false, defaultValue = "true") boolean complete) {
+        Student studentToCreate = Student.toStudent(dto);
+        Student studentCreated = service.create(studentToCreate);
         if(complete){
-            return ResponseEntity.status(HttpStatus.CREATED).body(Student.toStudentDto(service.create(Student.toStudent(dto))));
+            StudentDto studentDto = Student.toStudentDto(studentCreated);
+            return ResponseEntity.status(HttpStatus.CREATED).body(studentDto);
         }
-        return ResponseEntity.status(HttpStatus.CREATED).body(Student.toStudentListDto(service.create(Student.toStudent(dto))));
+        StudentListDto studentListDto = Student.toStudentListDto(studentCreated);
+        return ResponseEntity.status(HttpStatus.CREATED).body(studentListDto);
     }
 
     @PutMapping("/students/{studentNo}")
     public ResponseEntity<Object> updateStudent(@Valid @RequestBody StudentDto dto,
                                                  @PathVariable("studentNo") String studentNo,
                                                     @RequestParam(required = false, defaultValue = "true") boolean complete) {
+        Student studentForUpdate = Student.toStudent(dto);
+        Student updatedStudent = service.update(studentForUpdate, studentNo);
         if(complete) {
-            return ResponseEntity.ok(Student.toStudentDto(service.update(Student.toStudent(dto), studentNo)));
+            StudentDto studentDto = Student.toStudentDto(updatedStudent);
+            return ResponseEntity.ok(studentDto);
         }
-        return ResponseEntity.ok(Student.toStudentListDto(service.update(Student.toStudent(dto), studentNo)));
+        StudentListDto studentListDto = Student.toStudentListDto(updatedStudent);
+        return ResponseEntity.ok(studentListDto);
     }
 
     @DeleteMapping("/students/{studentNo}")
