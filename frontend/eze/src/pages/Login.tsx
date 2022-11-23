@@ -9,20 +9,6 @@ import { LoginResponseDto } from "../api/AccountService";
 import { validateNotEmpty } from "../validation/validations";
 
 const Login = () => {
-  const validateUserPass = (input: string) => {
-    let errorMessage = "";
-    let valueIsValid = true;
-
-    if (input.trim() === "") {
-      errorMessage = "Please enter an input";
-      valueIsValid = false;
-    }
-
-    return {
-      valueIsValid,
-      errorMessage,
-    };
-  };
   const {
     sendRequest: login,
     data,

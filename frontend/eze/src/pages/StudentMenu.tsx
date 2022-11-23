@@ -1,30 +1,40 @@
 import { useSelector } from "react-redux";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { MouseEventHandler, useEffect } from "react";
+import { MouseEventHandler, useEffect, useState } from "react";
 import { IRootState } from "../store";
 import { authActions } from "../store/authSlice";
 import EzeMenuButton from "../components/Menu/EzeMenuButton";
 import MenuHeader from "../components/Menu/MenuHeader";
 import MenuClock from "../components/Menu/MenuClock";
+import { ControlledMenu, MenuItem, useMenuState } from "@szhsin/react-menu";
+import MenuOffcanvas from "../components/Menu/MenuOffcanvas";
+import { YearLevel } from "../api/YearLevelService";
 
 const StudentMenu = () => {
   const auth = useSelector((state: IRootState) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [menuProps, toggleMenu] = useMenuState({ transition: true });
+  const [anchorPoint, setAnchorPoint] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     if (
       !!auth.accessToken &&
-      ["SADMIN", "USER", "ADMIN"].includes(auth.accountType)
+      ["SADMIN", "STUDENT_ASSISTANT", "ADMIN"].includes(auth.accountType)
     )
       return;
     navigate("/unauthorized");
   }, [auth.accessToken, auth.accountType, navigate]);
 
-  const logout: MouseEventHandler = (event) => {
+  const logout = () => {
     dispatch(authActions.removeAuth());
-    navigate("/login");
+  };
+
+  const transactionClickHandler: MouseEventHandler = (e) => {
+    e.preventDefault();
+    setAnchorPoint({ x: e.clientX, y: e.clientY });
+    toggleMenu(true);
   };
 
   return (
@@ -50,12 +60,27 @@ const StudentMenu = () => {
                 {/* <!--Faculty--> */}
                 <div className="row gx-0 flex-grow-1">
                   <EzeMenuButton
+                    onContextMenu={transactionClickHandler}
                     backgroundColor="#41d696"
-                    destPage="/borrow"
                     imageLoc="/img/resized_add.jpg"
                     title="Add Transaction"
                     key={"Add Transaction"}
-                  />
+                  >
+                    <ControlledMenu
+                      {...menuProps}
+                      anchorPoint={anchorPoint}
+                      direction="right"
+                      onClose={() => toggleMenu(false)}
+                      menuClassName={"eze-menu"}
+                    >
+                      <MenuItem onClick={() => navigate("/borrow")}>
+                        Borrow
+                      </MenuItem>
+                      <MenuItem onClick={() => navigate("/return")}>
+                        Return
+                      </MenuItem>
+                    </ControlledMenu>
+                  </EzeMenuButton>
                 </div>
                 {/* <!-- Inventory --> */}
                 <div className="row gx-0 gy-1 flex-grow-1 mt-1">
@@ -71,7 +96,7 @@ const StudentMenu = () => {
                 <div className="row gx-0 gy-1 flex-grow-1 mt-1">
                   <EzeMenuButton
                     backgroundColor="#662d91"
-                    destPage="/schedules"
+                    destPage="/"
                     imageLoc="./img/Calendar.png"
                     title="Schedule"
                     key={"Schedule"}
@@ -84,7 +109,7 @@ const StudentMenu = () => {
                 <div className="row gx-0 flex-grow-1">
                   <EzeMenuButton
                     backgroundColor="#48ac3f"
-                    destPage="/transactions"
+                    destPage="/history"
                     imageLoc="/img/Sync Center.png"
                     title="Transactions"
                     key={"Transactions"}
@@ -104,7 +129,7 @@ const StudentMenu = () => {
                 <div className="row gx-0 gy-1 flex-grow-1 mt-1">
                   <EzeMenuButton
                     backgroundColor="#d24826"
-                    destPage="/borrow"
+                    destPage="/"
                     imageLoc="/img/camera2.png"
                     title="Camera"
                     key={"Camera"}
@@ -130,6 +155,9 @@ const StudentMenu = () => {
       {/* <div className="row">
         <MenuFooter onClick={logout} />
       </div> */}
+      <div>
+        <MenuOffcanvas onLogoutClick={logout} />
+      </div>
     </div>
   );
 };

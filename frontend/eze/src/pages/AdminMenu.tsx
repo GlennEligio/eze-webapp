@@ -8,12 +8,7 @@ import EzeMenuButton from "../components/Menu/EzeMenuButton";
 import MenuHeader from "../components/Menu/MenuHeader";
 import MenuClock from "../components/Menu/MenuClock";
 import MenuOffcanvas from "../components/Menu/MenuOffcanvas";
-import {
-  ClickEvent,
-  ControlledMenu,
-  MenuItem,
-  useMenuState,
-} from "@szhsin/react-menu";
+import { ControlledMenu, MenuItem, useMenuState } from "@szhsin/react-menu";
 
 function AdminMenu() {
   const auth = useSelector((state: IRootState) => state.auth);

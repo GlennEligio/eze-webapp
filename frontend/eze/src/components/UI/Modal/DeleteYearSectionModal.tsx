@@ -78,6 +78,8 @@ const DeleteYearSectionModal: FC<DeleteYearSectionModalProps> = (props) => {
       setYearSections(currentYearLevel.yearSections);
       if (currentYearLevel.yearSections[0]) {
         setSectionName(currentYearLevel.yearSections[0].sectionName);
+      } else {
+        setSectionName("");
       }
     }
   }, [yearNumber, props.yearLevels]);

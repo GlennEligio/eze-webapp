@@ -47,7 +47,10 @@ const AddYearLevelModal = () => {
 
   // add YearLevel in the Redux after successful request
   useEffect(() => {
-    if (requestStatus == "completed" && error === null) {
+    if (requestStatus == "completed" && error === null && data) {
+      if (!data.yearSections) {
+        data.yearSections = [];
+      }
       dispatch(yearLevelAction.addYearLevel({ newYearLevel: data }));
     }
   }, [data, requestStatus, error]);

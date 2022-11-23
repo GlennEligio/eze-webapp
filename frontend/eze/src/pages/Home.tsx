@@ -16,7 +16,7 @@ const Home = () => {
       (auth.accountType === "ADMIN" || auth.accountType === "SADMIN")
     ) {
       setHomeDisplay(<AdminMenu />);
-    } else if (!!auth.accessToken && auth.accountType === "USER") {
+    } else if (!!auth.accessToken && auth.accountType === "STUDENT_ASSISTANT") {
       setHomeDisplay(<StudentMenu />);
     } else {
       setHomeDisplay(<Navigate to="/login" />);

@@ -39,7 +39,7 @@ const MenuHeader: FC<MenuHeaderProps> = (props) => {
   }, [props.imageUrl]);
 
   const accountType =
-    props.type === "USER" ? "Student Assistant" : "Administrator";
+    props.type === "STUDENT_ASSISTANT" ? "Student Assistant" : "Administrator";
 
   return (
     <header>
