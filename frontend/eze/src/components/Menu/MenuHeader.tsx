@@ -15,6 +15,9 @@ const MenuHeader: FC<MenuHeaderProps> = (props) => {
 
   useEffect(() => {
     // prevents sending request to localhost
+    if (!props.imageUrl) {
+      return;
+    }
     if (!validator.isURL(props.imageUrl, { protocols: ["http", "https"] })) {
       return;
     }
