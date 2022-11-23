@@ -3,6 +3,7 @@ package com.eze.backend.spring.controller;
 import com.eze.backend.spring.dtos.*;
 import com.eze.backend.spring.enums.EqStatus;
 import com.eze.backend.spring.enums.TxStatus;
+import com.eze.backend.spring.exception.ApiException;
 import com.eze.backend.spring.model.*;
 import com.eze.backend.spring.service.TransactionService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -20,6 +21,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
@@ -35,7 +38,9 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -65,7 +70,6 @@ public class TransactionControllerTest {
     private Professor professor;
     private Equipment eq0, eq1, eq2;
     private Transaction tx0, tx1, tx2;
-    private String txCode0, txCode1;
     private LocalDateTime timeStamp, timeStamp2;
     private List<Transaction> transactionList;
 
@@ -82,8 +86,6 @@ public class TransactionControllerTest {
 
     @BeforeEach
     void setup() {
-        txCode0 = new ObjectId().toHexString();
-        txCode1 = new ObjectId().toHexString();
         timeStamp = LocalDateTime.of(2022, Month.DECEMBER, 21, 12, 45);
         timeStamp2 = LocalDateTime.of(2022, Month.APRIL, 24, 12, 45);
         yearLevel = new YearLevel(1, "First", false);
@@ -96,11 +98,11 @@ public class TransactionControllerTest {
         eq2 = new Equipment("EqCode2", "Name2", "Barcode2", EqStatus.GOOD, null, false, false, false);
 
         // all items returned
-        tx0 = new Transaction(txCode0, new ArrayList<>(), List.of(eq0, eq1), student, professor, timeStamp, null, TxStatus.PENDING, false);
+        tx0 = new Transaction(new ObjectId().toHexString(), new ArrayList<>(), List.of(eq0, eq1), student, professor, timeStamp, null, TxStatus.PENDING, false);
         // eq0 is not returned yet
-        tx1 = new Transaction(txCode1, List.of(eq0), List.of(eq0, eq1), student2, professor, timeStamp, null, TxStatus.PENDING, false);
+        tx1 = new Transaction(new ObjectId().toHexString(), List.of(eq0), List.of(eq0, eq1), student2, professor, timeStamp, null, TxStatus.PENDING, false);
         // eq2 is not returned yet
-        tx2 = new Transaction(txCode1, List.of(eq2), List.of(eq1, eq2), student2, professor, timeStamp2, null, TxStatus.PENDING, false);
+        tx2 = new Transaction(new ObjectId().toHexString(), List.of(eq2), List.of(eq1, eq2), student2, professor, timeStamp2, null, TxStatus.PENDING, false);
         transactionList = List.of(tx0, tx1, tx2);
     }
 
@@ -318,6 +320,370 @@ public class TransactionControllerTest {
                 .andExpect(content().json(responseJson));
     }
 
+    @Test
+    @DisplayName("Get Transaction using invalid Auth")
+    void getTransaction_usingInvalidAuth_returns403Forbidden() throws Exception {
+        String validTxCode = tx0.getTxCode();
+
+        mockMvc.perform(get("/api/v1/transactions/" + validTxCode))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("Get Transaction with invalid TxCode using valid Auth")
+    @WithMockUser(authorities = "STUDENT_ASSISTANT")
+    void getTransaction_withInvalidTxCodeUsingValidAuth_returns404NotFound() throws Exception {
+        String invalidTxCode = tx0.getTxCode();
+        when(service.get(invalidTxCode)).thenThrow(new ApiException("Transaction not found", HttpStatus.NOT_FOUND));
+
+        mockMvc.perform(get("/api/v1/transactions/" + invalidTxCode))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("Get historical Transaction with complete equipment info using valid Auth")
+    @WithMockUser(authorities = "STUDENT_ASSISTANT")
+    void getTransaction_withParamsHistoricalTrueCompleteTrueUsingValidAuth_returns200OkWithHistoricalAndCompleteTransaction() throws Exception {
+        String validTxCode = tx0.getTxCode();
+        when(service.get(validTxCode)).thenReturn(tx0);
+        TransactionHistDto dtoResponse = Transaction.toTransactionHistDto(tx0);
+        String responseJson = mapper.writeValueAsString(dtoResponse);
+        String complete = "true";
+        String historical = "true";
+
+        mockMvc.perform(get("/api/v1/transactions/" + validTxCode)
+                        .param("complete", complete)
+                        .param("historical", historical))
+                .andExpect(status().isOk())
+                .andExpect(content().json(responseJson));
+    }
+
+    @Test
+    @DisplayName("Get historical Transaction with incomplete equipment info using valid Auth")
+    @WithMockUser(authorities = "STUDENT_ASSISTANT")
+    void getTransaction_withParamsHistoricalTrueCompleteFalseUsingValidAuth_returns200OkWithHistoricalAndIncompleteTransaction() throws Exception {
+        String validTxCode = tx0.getTxCode();
+        when(service.get(validTxCode)).thenReturn(tx0);
+        TransactionHistListDto dtoResponse = Transaction.toTransactionHistListDto(tx0);
+        String responseJson = mapper.writeValueAsString(dtoResponse);
+        String complete = "false";
+        String historical = "true";
+
+        mockMvc.perform(get("/api/v1/transactions/" + validTxCode)
+                        .param("complete", complete)
+                        .param("historical", historical))
+                .andExpect(status().isOk())
+                .andExpect(content().json(responseJson));
+    }
+
+    @Test
+    @DisplayName("Get non-historical Transaction with complete equipment info using valid Auth")
+    @WithMockUser(authorities = "STUDENT_ASSISTANT")
+    void getTransaction_withParamsHistoricalFalseCompleteTrueUsingValidAuth_returns200OkWithNonHistoricalAndCompleteTransaction() throws Exception {
+        String validTxCode = tx0.getTxCode();
+        when(service.get(validTxCode)).thenReturn(tx0);
+        TransactionDto dtoResponse = Transaction.toTransactionDto(tx0);
+        String responseJson = mapper.writeValueAsString(dtoResponse);
+        String complete = "true";
+        String historical = "false";
+
+        mockMvc.perform(get("/api/v1/transactions/" + validTxCode)
+                        .param("complete", complete)
+                        .param("historical", historical))
+                .andExpect(status().isOk())
+                .andExpect(content().json(responseJson));
+    }
+
+    @Test
+    @DisplayName("Get non-historical Transaction with incomplete equipment info using valid Auth")
+    @WithMockUser(authorities = "STUDENT_ASSISTANT")
+    void getTransaction_withParamsHistoricalFalseCompleteFalseUsingValidAuth_returns200OkWithNonHistoricalAndIncompleteTransaction() throws Exception {
+        String validTxCode = tx0.getTxCode();
+        when(service.get(validTxCode)).thenReturn(tx0);
+        TransactionListDto dtoResponse = Transaction.toTransactionListDto(tx0);
+        String responseJson = mapper.writeValueAsString(dtoResponse);
+        String complete = "false";
+        String historical = "false";
+
+        mockMvc.perform(get("/api/v1/transactions/" + validTxCode)
+                        .param("complete", complete)
+                        .param("historical", historical))
+                .andExpect(status().isOk())
+                .andExpect(content().json(responseJson));
+    }
+
+    @Test
+    @DisplayName("Create Transaction using invalid Auth")
+    void createTransaction_usingInvalidAuth_returns403Forbidden() throws Exception {
+        List<Equipment> equipments = List.of(eq0, eq1, eq2);
+        List<EquipmentDto> equipmentDtos = equipments.stream().map(Equipment::toEquipmentDto).toList();
+        ProfessorDto professorDto = Professor.toProfessorDto(professor);
+        StudentDto studentDto = Student.toStudentDto(student);
+        CreateUpdateTransactionDto createUpdateTransactionDto = new CreateUpdateTransactionDto(equipmentDtos, studentDto, professorDto, "PENDING");
+        String requestJson = mapper.writeValueAsString(createUpdateTransactionDto);
+
+        mockMvc.perform(post("/api/v1/transactions")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(requestJson))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("Create Transaction with malformed payload using valid Auth")
+    @WithMockUser(authorities = "STUDENT_ASSISTANT")
+    void createTransaction_withMalformedPayloadUsingInvalidAuth_returns400BadRequest() throws Exception {
+        List<Equipment> equipments = List.of(eq0, eq1, eq2);
+        List<EquipmentDto> equipmentDtos = equipments.stream().map(Equipment::toEquipmentDto).toList();
+        ProfessorDto professorDto = Professor.toProfessorDto(professor);
+        StudentDto studentDto = Student.toStudentDto(student);
+        CreateUpdateTransactionDto createUpdateTransactionDto = new CreateUpdateTransactionDto(equipmentDtos, studentDto, professorDto, "INCORRECT_STATUS");
+        String requestJson = mapper.writeValueAsString(createUpdateTransactionDto);
+
+        mockMvc.perform(post("/api/v1/transactions")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestJson))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("Create Transaction with taken txCode using valid Auth")
+    @WithMockUser(authorities = "STUDENT_ASSISTANT")
+    void createTransaction_withTakenTxCodeUsingInvalidAuth_returns400BadRequest() throws Exception {
+        List<Equipment> equipments = List.of(eq0, eq1, eq2);
+        List<EquipmentDto> equipmentDtos = equipments.stream().map(Equipment::toEquipmentDto).toList();
+        ProfessorDto professorDto = Professor.toProfessorDto(professor);
+        StudentDto studentDto = Student.toStudentDto(student);
+        CreateUpdateTransactionDto createUpdateTransactionDto = new CreateUpdateTransactionDto(equipmentDtos, studentDto, professorDto, "PENDING");
+        Transaction transactionToCreate = Transaction.toTransaction(createUpdateTransactionDto);
+        when(service.create(transactionToCreate)).thenThrow(new ApiException("Transaction code already exist", HttpStatus.BAD_REQUEST));
+        String requestJson = mapper.writeValueAsString(createUpdateTransactionDto);
+
+        mockMvc.perform(post("/api/v1/transactions")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestJson))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("Create Transaction with available txCode and complete param true using valid Auth")
+    @WithMockUser(authorities = "STUDENT_ASSISTANT")
+    void createTransaction_withAvailableTxCodeAndCompleteParamTrueUsingInvalidAuth_returns201CreatedWithCompleteTransaction() throws Exception {
+        List<Equipment> equipments = List.of(eq0, eq1, eq2);
+        List<EquipmentDto> equipmentDtos = equipments.stream().map(Equipment::toEquipmentDto).toList();
+        ProfessorDto professorDto = Professor.toProfessorDto(professor);
+        StudentDto studentDto = Student.toStudentDto(student);
+        CreateUpdateTransactionDto createUpdateTransactionDto = new CreateUpdateTransactionDto(equipmentDtos, studentDto, professorDto, "PENDING");
+        Transaction transactionToCreate = Transaction.toTransaction(createUpdateTransactionDto);
+        Transaction createdTransaction = Transaction.toTransaction(createUpdateTransactionDto);
+        createdTransaction.setTxCode(tx0.getTxCode());
+        TransactionDto dtoResponse = Transaction.toTransactionDto(createdTransaction);
+        when(service.create(transactionToCreate)).thenReturn(createdTransaction);
+        String requestJson = mapper.writeValueAsString(createUpdateTransactionDto);
+        String responseJson = mapper.writeValueAsString(dtoResponse);
+        String completeParam = "true";
+
+        mockMvc.perform(post("/api/v1/transactions")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestJson)
+                        .param("complete", completeParam))
+                .andExpect(status().isCreated())
+                .andExpect(content().json(responseJson));
+    }
+
+    @Test
+    @DisplayName("Create Transaction with available txCode and complete param false using valid Auth")
+    @WithMockUser(authorities = "STUDENT_ASSISTANT")
+    void createTransaction_withAvailableTxCodeAndCompleteParamFalseUsingInvalidAuth_returns201CreatedWithIncompleteTransaction() throws Exception {
+        List<Equipment> equipments = List.of(eq0, eq1, eq2);
+        List<EquipmentDto> equipmentDtos = equipments.stream().map(Equipment::toEquipmentDto).toList();
+        ProfessorDto professorDto = Professor.toProfessorDto(professor);
+        StudentDto studentDto = Student.toStudentDto(student);
+        CreateUpdateTransactionDto createUpdateTransactionDto = new CreateUpdateTransactionDto(equipmentDtos, studentDto, professorDto, "PENDING");
+        Transaction transactionToCreate = Transaction.toTransaction(createUpdateTransactionDto);
+        Transaction createdTransaction = Transaction.toTransaction(createUpdateTransactionDto);
+        createdTransaction.setTxCode(tx0.getTxCode());
+        TransactionListDto dtoResponse = Transaction.toTransactionListDto(createdTransaction);
+        when(service.create(transactionToCreate)).thenReturn(createdTransaction);
+        String requestJson = mapper.writeValueAsString(createUpdateTransactionDto);
+        String responseJson = mapper.writeValueAsString(dtoResponse);
+        String completeParam = "false";
+
+        mockMvc.perform(post("/api/v1/transactions")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestJson)
+                        .param("complete", completeParam))
+                .andExpect(status().isCreated())
+                .andExpect(content().json(responseJson));
+    }
+
+    @Test
+    @DisplayName("Update Transaction using invalid Auth")
+    void updateTransaction_usingInvalidAuth_returns403Forbidden() throws Exception {
+        String validTxCode = tx0.getTxCode();
+        List<Equipment> equipments = List.of(eq0, eq1, eq2);
+        List<EquipmentDto> equipmentDtos = equipments.stream().map(Equipment::toEquipmentDto).toList();
+        ProfessorDto professorDto = Professor.toProfessorDto(professor);
+        StudentDto studentDto = Student.toStudentDto(student);
+        CreateUpdateTransactionDto createUpdateTransactionDto = new CreateUpdateTransactionDto(equipmentDtos, studentDto, professorDto, "PENDING");
+        String requestJson = mapper.writeValueAsString(createUpdateTransactionDto);
+
+        mockMvc.perform(put("/api/v1/transactions")
+                        .content(requestJson)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("code", validTxCode))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("Update non-existent Transaction using valid Auth")
+    @WithMockUser(authorities = "STUDENT_ASSISTANT")
+    void updateTransaction_withInvalidTxCodeUsingValidAuth_returns404NotFound() throws Exception {
+        String validTxCode = tx0.getTxCode();
+        List<Equipment> equipments = List.of(eq0, eq1, eq2);
+        List<EquipmentDto> equipmentDtos = equipments.stream().map(Equipment::toEquipmentDto).toList();
+        ProfessorDto professorDto = Professor.toProfessorDto(professor);
+        StudentDto studentDto = Student.toStudentDto(student);
+        CreateUpdateTransactionDto createUpdateTransactionDto = new CreateUpdateTransactionDto(equipmentDtos, studentDto, professorDto, "PENDING");
+        Transaction transactionForUpdate = Transaction.toTransaction(createUpdateTransactionDto);
+        when(service.update(transactionForUpdate, validTxCode)).thenThrow(new ApiException("Transaction not found", HttpStatus.NOT_FOUND));
+        String requestJson = mapper.writeValueAsString(createUpdateTransactionDto);
+
+        mockMvc.perform(put("/api/v1/transactions")
+                        .content(requestJson)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("code", validTxCode))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("Update existing Transaction with malformed payload using valid Auth")
+    @WithMockUser(authorities = "STUDENT_ASSISTANT")
+    void updateTransaction_withValidTxCodeAndMalformedPayloadUsingValidAuth_returns400BadRequest() throws Exception {
+        String validTxCode = tx0.getTxCode();
+        List<Equipment> equipments = List.of(eq0, eq1, eq2);
+        List<EquipmentDto> equipmentDtos = equipments.stream().map(Equipment::toEquipmentDto).toList();
+        ProfessorDto professorDto = Professor.toProfessorDto(professor);
+        StudentDto studentDto = Student.toStudentDto(student);
+        CreateUpdateTransactionDto createUpdateTransactionDto = new CreateUpdateTransactionDto(equipmentDtos, studentDto, professorDto, "INVALID_STATUS_VALUE");
+        String requestJson = mapper.writeValueAsString(createUpdateTransactionDto);
+
+        mockMvc.perform(put("/api/v1/transactions")
+                        .content(requestJson)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("code", validTxCode))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("Update existing Transaction using valid Auth")
+    @WithMockUser(authorities = "STUDENT_ASSISTANT")
+    void updateTransaction_withValidTxCodeUsingValidAuth_returns200Ok() throws Exception {
+        String validTxCode = tx0.getTxCode();
+        List<Equipment> equipments = List.of(eq0, eq1, eq2);
+        List<EquipmentDto> equipmentDtos = equipments.stream().map(Equipment::toEquipmentDto).toList();
+        ProfessorDto professorDto = Professor.toProfessorDto(professor);
+        StudentDto studentDto = Student.toStudentDto(student);
+        CreateUpdateTransactionDto createUpdateTransactionDto = new CreateUpdateTransactionDto(equipmentDtos, studentDto, professorDto, "PENDING");
+        Transaction transactionForUpdate = Transaction.toTransaction(createUpdateTransactionDto);
+        Transaction updatedTransaction = Transaction.toTransaction(createUpdateTransactionDto);
+        updatedTransaction.setStatus(TxStatus.ACCEPTED);
+        TransactionDto dtoResponse = Transaction.toTransactionDto(updatedTransaction);
+        when(service.update(transactionForUpdate, validTxCode)).thenReturn(updatedTransaction);
+        String requestJson = mapper.writeValueAsString(createUpdateTransactionDto);
+        String responseJson = mapper.writeValueAsString(dtoResponse);
+
+        mockMvc.perform(put("/api/v1/transactions")
+                        .content(requestJson)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .param("code", validTxCode))
+                .andExpect(status().isOk())
+                .andExpect(content().json(responseJson));
+    }
+
+    @Test
+    @DisplayName("Deleting Transaction using invalid Auth")
+    void deleteTransaction_usingInvalidAuth_returns403Forbidden() throws Exception {
+        String validTxCode = tx0.getTxCode();
+
+        mockMvc.perform(delete("/api/v1/transactions/" + validTxCode))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("Deleting non existent Transaction using valid Auth")
+    @WithMockUser(authorities = "STUDENT_ASSISTANT")
+    void deleteTransaction_withInvalidTxCodeUsingValidAuth_returns404NotFound() throws Exception {
+        String invalidTxCode = tx0.getTxCode();
+        doThrow(new ApiException("Transaction not found", HttpStatus.NOT_FOUND)).when(service).softDelete(invalidTxCode);
+
+        mockMvc.perform(delete("/api/v1/transactions/" + invalidTxCode))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("Deleting existing Transaction using valid Auth")
+    @WithMockUser(authorities = "STUDENT_ASSISTANT")
+    void deleteTransaction_withValidTxCodeUsingValidAuth_returns200Ok() throws Exception {
+        String validTxCode = tx0.getTxCode();
+        doNothing().when(service).softDelete(validTxCode);
+
+        mockMvc.perform(delete("/api/v1/transactions/" + validTxCode))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("Returning equipments using invalid Auth")
+    void returnEquipments_usingInvalidAuth_returns403Forbidden() throws Exception {
+        String borrowerParam = student.getStudentNumber();
+        String professorParam = professor.getName();
+        String[] barcodesParam = new String[]{eq0.getBarcode()};
+
+        mockMvc.perform(put("/api/v1/transactions/return")
+                .param("borrower", borrowerParam)
+                .param("professor", professorParam)
+                .param("barcode", barcodesParam))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("Returning equipments with no transaction match using valid Auth")
+    @WithMockUser(authorities = "STUDENT_ASSISTANT")
+    void returnEquipments_withNoTransactionMatchUsingValidAuth_returns404NotFound() throws Exception {
+        String borrowerParam = student.getStudentNumber();
+        String professorParam = professor.getName();
+        String[] barcodes = new String[]{eq0.getBarcode()};
+        String barcodeParam = String.join(",", barcodes);
+        when(service.returnEquipments(borrowerParam, professorParam, Arrays.asList(barcodes))).thenThrow(new ApiException("No transaction match found", HttpStatus.NOT_FOUND));
+
+        mockMvc.perform(put("/api/v1/transactions/return")
+                        .param("borrower", borrowerParam)
+                        .param("professor", professorParam)
+                        .param("barcodes", barcodeParam))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("Returning equipments with transaction match using valid Auth")
+    @WithMockUser(authorities = "STUDENT_ASSISTANT")
+    void returnEquipments_withTransactionMatchUsingValidAuth_returns200OkWithUpdatedTransaction() throws Exception {
+        String txCode = new ObjectId().toHexString();
+        String borrowerParam = student.getStudentNumber();
+        String professorParam = professor.getName();
+        String[] barcodes = new String[]{eq0.getBarcode()};
+        String barcodesParam = String.join(",", barcodes);
+        tx1.setTxCode(txCode);
+        Transaction updatedTx1 = new Transaction(txCode, new ArrayList<>(), List.of(eq0, eq1), student2, professor, timeStamp, null, TxStatus.PENDING, false);
+        TransactionListDto transactionListDto = Transaction.toTransactionListDto(updatedTx1);
+        when(service.returnEquipments(borrowerParam, professorParam, Arrays.asList(barcodes))).thenReturn(updatedTx1);
+        String responseJson = mapper.writeValueAsString(transactionListDto);
+
+        mockMvc.perform(put("/api/v1/transactions/return")
+                        .param("borrower", borrowerParam)
+                        .param("professor", professorParam)
+                        .param("barcodes", barcodesParam))
+                .andExpect(status().isOk())
+                .andExpect(content().json(responseJson));
+    }
 
 
     public MockMultipartFile createMultipartFile(List<Transaction> transactions, String contentType) {

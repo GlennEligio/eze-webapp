@@ -143,16 +143,23 @@ public class TransactionController {
     @PostMapping("/transactions")
     public ResponseEntity<Object> createTransaction(@Valid @RequestBody CreateUpdateTransactionDto dto,
                                                     @RequestParam(required = false, defaultValue = "false") Boolean complete) {
+        Transaction transactionToCreate = Transaction.toTransaction(dto);
+        Transaction createdTransaction = service.create(transactionToCreate);
         if (Boolean.TRUE.equals(complete)) {
-            return ResponseEntity.status(HttpStatus.CREATED).body(Transaction.toTransactionDto(service.create(Transaction.toTransaction(dto))));
+            TransactionDto transactionDto = Transaction.toTransactionDto(createdTransaction);
+            return ResponseEntity.status(HttpStatus.CREATED).body(transactionDto);
         }
-        return ResponseEntity.status(HttpStatus.CREATED).body(Transaction.toTransactionListDto(service.create(Transaction.toTransaction(dto))));
+        TransactionListDto transactionListDto = Transaction.toTransactionListDto(createdTransaction);
+        return ResponseEntity.status(HttpStatus.CREATED).body(transactionListDto);
     }
 
     @PutMapping("/transactions")
     public ResponseEntity<TransactionDto> updateTransaction(@Valid @RequestBody CreateUpdateTransactionDto dto,
                                                             @RequestParam String code) {
-        return ResponseEntity.ok(Transaction.toTransactionDto(service.update(Transaction.toTransaction(dto), code)));
+        Transaction transactionForUpdate = Transaction.toTransaction(dto);
+        Transaction updatedTransaction = service.update(transactionForUpdate, code);
+        TransactionDto dtoResponse = Transaction.toTransactionDto(updatedTransaction);
+        return ResponseEntity.ok(dtoResponse);
     }
 
     @DeleteMapping("/transactions/{code}")
@@ -165,6 +172,8 @@ public class TransactionController {
     public ResponseEntity<TransactionListDto> returnEquipments(@RequestParam String borrower,
                                                                @RequestParam String professor,
                                                                @NotEmpty(message = "Barcodes can't be empty") @RequestParam String[] barcodes) {
-        return ResponseEntity.ok(Transaction.toTransactionListDto(service.returnEquipments(borrower, professor, Arrays.stream(barcodes).toList())));
+        Transaction transaction = service.returnEquipments(borrower, professor, Arrays.stream(barcodes).toList());
+        TransactionListDto transactionListDto = Transaction.toTransactionListDto(transaction);
+        return ResponseEntity.ok(transactionListDto);
     }
 }
