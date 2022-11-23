@@ -87,6 +87,7 @@ public class AccountService implements IService<Account>, IExcelService<Account>
         log.info("Updating account: {}", account);
         Account account1 = repository.findByUsername(username.toString())
                 .orElseThrow(() -> new ApiException(notFound(username), HttpStatus.NOT_FOUND));
+        account.setPassword(passwordEncoder.encode(account.getPassword()));
         account1.update(account);
         return repository.save(account1);
     }

@@ -60,11 +60,11 @@ public class AccountServiceTest {
 
     @BeforeEach
     void setup() {
-        account0 = new Account(0L, "Name0", "Username0", "Email0", "Password0", AccountType.SA, "http://sampleurl.com/profile0", LocalDateTime.now(), true, false);
-        account1 = new Account(1L, "Name1", "Username1", "Email1", "Password1", AccountType.SA, "http://sampleurl.com/profile1", LocalDateTime.now(), true, false);
-        Account account2 = new Account(2L, "Name2", "Username2", "Email2", "Password2", AccountType.SA, "http://sampleurl.com/profile2", LocalDateTime.now(), true, true);
-        accountList = List.of(account1, account2, account0);
         localDateTime = LocalDateTime.now();
+        account0 = new Account(0L, "Name0", "Username0", "Email0", "Password0", AccountType.SA, "http://sampleurl.com/profile0", localDateTime, true, false);
+        account1 = new Account(1L, "Name1", "Username1", "Email1", "Password1", AccountType.SA, "http://sampleurl.com/profile1", localDateTime, true, false);
+        Account account2 = new Account(2L, "Name2", "Username2", "Email2", "Password2", AccountType.SA, "http://sampleurl.com/profile2", localDateTime, true, true);
+        accountList = List.of(account1, account2, account0);
     }
 
     @Test
@@ -151,16 +151,18 @@ public class AccountServiceTest {
     @Test
     @DisplayName("Update existing Account")
     void update_usingExistingAccount_updatesAccount() {
-        Account accountForUpdate = new Account(0L, "NewName0", "Username0", "Email0", "Password0", AccountType.SA, "http://sampleurl.com/profile0", LocalDateTime.now(), true, false);
-        ;
+        String encodedPassword = "EncodedPassword";
+        Account accountForUpdate = new Account(null, "NewName0", "Username0", "Email0", "Password0", AccountType.SA, "http://sampleurl.com/profile0", localDateTime, true, false);
+        Account updatedAccount  = new Account(account0.getId(), "NewName0", "Username0", "Email0", encodedPassword, AccountType.SA, "http://sampleurl.com/profile0", localDateTime, true, false);
         String validUsername = account0.getUsername();
         Mockito.when(repository.findByUsername(validUsername)).thenReturn(Optional.of(account0));
-        Mockito.when(repository.save(accountForUpdate)).thenReturn(accountForUpdate);
+        Mockito.when(repository.save(updatedAccount)).thenReturn(updatedAccount);
+        Mockito.when(passwordEncoder.encode(accountForUpdate.getPassword())).thenReturn(encodedPassword);
 
-        Account updatedAccount = service.update(accountForUpdate, validUsername);
+        Account accountResult = service.update(accountForUpdate, validUsername);
 
-        assertNotNull(updatedAccount);
-        assertEquals(updatedAccount, accountForUpdate);
+        assertNotNull(accountResult);
+        assertEquals(updatedAccount, accountResult);
     }
 
     @Test

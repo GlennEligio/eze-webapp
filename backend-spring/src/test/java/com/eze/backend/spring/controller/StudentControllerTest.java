@@ -4,7 +4,6 @@ import com.eze.backend.spring.dtos.StudentDto;
 import com.eze.backend.spring.dtos.StudentListDto;
 import com.eze.backend.spring.exception.ApiException;
 import com.eze.backend.spring.model.Student;
-import com.eze.backend.spring.model.Transaction;
 import com.eze.backend.spring.model.YearLevel;
 import com.eze.backend.spring.model.YearSection;
 import com.eze.backend.spring.service.StudentService;

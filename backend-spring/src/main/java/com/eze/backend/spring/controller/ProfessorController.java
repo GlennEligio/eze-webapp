@@ -31,7 +31,9 @@ public class ProfessorController {
 
     @GetMapping("/professors")
     public ResponseEntity<List<ProfessorDto>> getProfessors() {
-        return ResponseEntity.ok(service.getAllNotDeleted().stream().map(Professor::toProfessorDto).toList());
+        List<Professor> professors = service.getAllNotDeleted();
+        List<ProfessorDto> professorDtoList = professors.stream().map(Professor::toProfessorDto).toList();
+        return ResponseEntity.ok(professorDtoList);
     }
 
     @GetMapping("/professors/download")
@@ -56,24 +58,32 @@ public class ProfessorController {
         log.info("Successfully updated {} professors database using the excel file", itemsAffected);
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode objectNode = mapper.createObjectNode();
-        objectNode.put("Professors Affected", itemsAffected);
+        objectNode.put("Items Affected", itemsAffected);
         return ResponseEntity.ok(objectNode);
     }
 
     @GetMapping("/professors/{name}")
     public ResponseEntity<ProfessorDto> getProfessor(@PathVariable("name") String name) {
-        return ResponseEntity.ok(Professor.toProfessorDto(service.get(name)));
+        Professor professor =service.get(name);
+        ProfessorDto professorDto = Professor.toProfessorDto(professor);
+        return ResponseEntity.ok(professorDto);
     }
 
     @PostMapping("/professors")
     public ResponseEntity<ProfessorDto> createProfessor(@Valid @RequestBody ProfessorDto dto) {
-        return ResponseEntity.status(201).body(Professor.toProfessorDto(service.create(Professor.toProfessor(dto))));
+        Professor professorToCreate = Professor.toProfessor(dto);
+        Professor createdProfessor = service.create(professorToCreate);
+        ProfessorDto dtoResponse = Professor.toProfessorDto(createdProfessor);
+        return ResponseEntity.status(HttpStatus.CREATED).body(dtoResponse);
     }
 
     @PutMapping("/professors/{name}")
     public ResponseEntity<ProfessorDto> updateProfessor(@Valid @RequestBody ProfessorDto dto,
                                                      @PathVariable("name") String name) {
-        return ResponseEntity.ok(Professor.toProfessorDto(service.update(Professor.toProfessor(dto), name)));
+        Professor professorForUpdate = Professor.toProfessor(dto);
+        Professor updatedProfessor = service.update(professorForUpdate, name);
+        ProfessorDto dtoResponse = Professor.toProfessorDto(updatedProfessor);
+        return ResponseEntity.ok(dtoResponse);
     }
 
     @DeleteMapping("/professors/{name}")
