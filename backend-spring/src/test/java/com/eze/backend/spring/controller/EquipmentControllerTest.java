@@ -56,7 +56,7 @@ public class EquipmentControllerTest {
 
     private MockMvc mockMvc;
     private ObjectMapper mapper;
-    private Equipment eq0, eq1;
+    private Equipment eq0, eq1, eq2;
     private List<Equipment> equipmentList;
 
     @BeforeAll
@@ -72,8 +72,9 @@ public class EquipmentControllerTest {
 
     @BeforeEach
     void setupEach() {
-        eq0 = new Equipment("EqCode0", "Name0", "Barcode0", EqStatus.GOOD, LocalDateTime.now(), true, false, false);
-        eq1 = new Equipment("EqCode01", "Name1", "Barcode1", EqStatus.GOOD, LocalDateTime.now(), true, false, true);
+        eq0 = new Equipment("EqCode0", "Name0", "Barcode0", EqStatus.GOOD, LocalDateTime.now(), false, false, false);
+        eq1 = new Equipment("EqCode1", "Name1", "Barcode1", EqStatus.GOOD, LocalDateTime.now(), true, false, true);
+        eq2 = new Equipment("EqCode2", "Name2", "Barcode2", EqStatus.GOOD, LocalDateTime.now(), false, true, true);
         equipmentList = List.of(eq0, eq1);
     }
 
@@ -93,6 +94,21 @@ public class EquipmentControllerTest {
         when(service.getAllNotDeleted()).thenReturn(eqNotDeleted);
         String responseJson = mapper.writeValueAsString(equipmentDtos);
         mockMvc.perform(get("/api/v1/equipments"))
+                .andExpect(status().isOk())
+                .andExpect(content().json(responseJson));
+    }
+
+    @Test
+    @DisplayName("Get all non-borrowed Equipments with valid Auth")
+    @WithMockUser(authorities = "STUDENT_ASSISTANT")
+    void getEquipments_withIsBorrowedParamFalseUsingValidAuth_returns200OK() throws Exception {
+        List<Equipment> eqNotDeleted = equipmentList.stream().filter(e -> !e.getDeleteFlag()).toList();
+        List<Equipment> eqNotDeletedAndNonBorrowed = equipmentList.stream().filter(e -> !e.getDeleteFlag() && !e.getIsBorrowed()).toList();
+        List<EquipmentDto> dtoResponse = eqNotDeletedAndNonBorrowed.stream().map(Equipment::toEquipmentDto).toList();
+        when(service.getAllNotDeleted()).thenReturn(eqNotDeleted);
+        String responseJson = mapper.writeValueAsString(dtoResponse);
+        mockMvc.perform(get("/api/v1/equipments")
+                        .param("isBorrowed", "false"))
                 .andExpect(status().isOk())
                 .andExpect(content().json(responseJson));
     }
