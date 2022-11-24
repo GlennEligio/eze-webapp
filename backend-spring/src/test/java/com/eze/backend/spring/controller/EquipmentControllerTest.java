@@ -238,7 +238,7 @@ public class EquipmentControllerTest {
         when(service.excelToList(multipartFile)).thenReturn(equipmentList);
         when(service.addOrUpdate(equipmentList, false)).thenReturn(0);
         ObjectNode response = mapper.createObjectNode();
-        response.put("Items Affected", 0);
+        response.put("Equipments Affected", 0);
         String responseJson = mapper.writeValueAsString(response);
 
         mockMvc.perform(multipart(HttpMethod.POST, "/api/v1/equipments/upload")

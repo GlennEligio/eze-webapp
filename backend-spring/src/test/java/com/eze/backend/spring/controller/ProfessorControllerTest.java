@@ -162,7 +162,7 @@ class ProfessorControllerTest {
         when(service.excelToList(multipartFile)).thenReturn(professorList);
         when(service.addOrUpdate(professorList, false)).thenReturn(0);
         ObjectNode response = mapper.createObjectNode();
-        response.put("Items Affected", 0);
+        response.put("Professors Affected", 0);
         String responseJson = mapper.writeValueAsString(response);
 
         mockMvc.perform(multipart(HttpMethod.POST, "/api/v1/professors/upload")

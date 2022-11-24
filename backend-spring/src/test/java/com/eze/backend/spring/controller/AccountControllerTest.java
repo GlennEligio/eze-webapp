@@ -174,7 +174,7 @@ public class AccountControllerTest {
     @WithMockUser(authorities = "STUDENT_ASSISTANT")
     void upload_usingValidFileFormat_returns200OKWithItemsAffected() throws Exception {
         ObjectNode node = mapper.createObjectNode();
-        node.put("Items Affected", 0);
+        node.put("Accounts Affected", 0);
         String itemsAffectedJson = mapper.writeValueAsString(node);
         String validContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
         multipartFile = createDummyMultipartFile(accountList, validContentType);

@@ -154,7 +154,7 @@ public class YearLevelControllerTest {
         when(service.excelToList(multipartFile)).thenReturn(yearLevelList);
         when(service.addOrUpdate(yearLevelList, false)).thenReturn(0);
         ObjectNode response = mapper.createObjectNode();
-        response.put("Items Affected", 0);
+        response.put("YearLevels Affected", 0);
         String responseJson = mapper.writeValueAsString(response);
 
         assert multipartFile != null;

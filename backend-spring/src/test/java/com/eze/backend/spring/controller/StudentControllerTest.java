@@ -160,7 +160,7 @@ public class StudentControllerTest {
         when(service.excelToList(multipartFile)).thenReturn(studentList);
         when(service.addOrUpdate(studentList, false)).thenReturn(0);
         ObjectNode response = mapper.createObjectNode();
-        response.put("Items Affected", 0);
+        response.put("Students Affected", 0);
         String responseJson = mapper.writeValueAsString(response);
 
         mockMvc.perform(multipart(HttpMethod.POST, "/api/v1/students/upload")

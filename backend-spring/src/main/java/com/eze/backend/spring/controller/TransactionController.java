@@ -100,6 +100,25 @@ public class TransactionController {
         return ResponseEntity.ok(transactionListDtos);
     }
 
+    @GetMapping("/transactions/professor/{name}")
+    public ResponseEntity<List<?>> getProfessorTransactions(@PathVariable String name,
+                                                          @RequestParam(defaultValue = "false") boolean returned,
+                                                          @RequestParam(defaultValue = "false") boolean historical) {
+        Stream<Transaction> professorTransactions = service.getProfessorTransactions(name).stream();
+        if(returned) {
+            professorTransactions = professorTransactions.filter(t -> t.getEquipments().isEmpty());
+        } else {
+            professorTransactions = professorTransactions.filter(t -> !t.getEquipments().isEmpty());
+        }
+
+        if(historical) {
+            List<TransactionHistListDto> transactionHistListDto = professorTransactions.map(Transaction::toTransactionHistListDto).toList();
+            return ResponseEntity.ok(transactionHistListDto);
+        }
+        List<TransactionListDto> transactionListDtos = professorTransactions.map(Transaction::toTransactionListDto).toList();
+        return ResponseEntity.ok(transactionListDtos);
+    }
+
     @GetMapping("/transactions/download")
     public void download(HttpServletResponse response,
                          @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime toDate,

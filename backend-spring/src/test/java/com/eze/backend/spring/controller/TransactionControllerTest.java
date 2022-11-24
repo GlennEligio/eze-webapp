@@ -312,7 +312,7 @@ public class TransactionControllerTest {
         when(service.excelToList(multipartFile)).thenReturn(transactionList);
         when(service.addOrUpdate(transactionList, false)).thenReturn(0);
         ObjectNode response = mapper.createObjectNode();
-        response.put("Items Affected", 0);
+        response.put("Transactions Affected", 0);
         String responseJson = mapper.writeValueAsString(response);
 
         mockMvc.perform(multipart(HttpMethod.POST, "/api/v1/transactions/upload")
@@ -776,6 +776,102 @@ public class TransactionControllerTest {
         String responseJson = mapper.writeValueAsString(dtoResponse);
 
         mockMvc.perform(get("/api/v1/transactions/student/" + validStudentNumber)
+                        .param("returned", returnedParam)
+                        .param("historical", historicalParam))
+                .andExpect(status().isOk())
+                .andExpect(content().json(responseJson));
+    }
+
+    @Test
+    @DisplayName("Get Professor's Transactions using invalid Auth")
+    void getProfessorTransactions_usingInvalidAuth_returns403Forbidden() throws Exception {
+        String validName = professor1.getName();
+        mockMvc.perform(get("/api/v1/transactions/professor/" + validName))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("Get returned Professor's Transactions with historical equipment using valid Auth")
+    @WithMockUser(authorities = "STUDENT_ASSISTANT")
+    void getProfessorTransactions_withReturnedTrueUsingValidAuth_returns200OkWithHistoricalEquipments() throws Exception {
+        String validName = professor1.getName();
+        List<Transaction> professorTransactions = transactionList.stream()
+                .filter(t -> !t.getDeleteFlag())
+                .filter(t -> t.getProfessor().getName().equalsIgnoreCase(validName)).toList();
+        List<Transaction> returnedProfessorTransactions = professorTransactions.stream().filter(t -> t.getEquipments().isEmpty()).toList();
+        List<TransactionHistListDto> dtoResponse = returnedProfessorTransactions.stream().map(Transaction::toTransactionHistListDto).toList();
+        when(service.getProfessorTransactions(validName)).thenReturn(professorTransactions);
+        String returnedParam = "true";
+        String historicalParam = "true"; // default value of historical parameter
+        String responseJson = mapper.writeValueAsString(dtoResponse);
+
+        mockMvc.perform(get("/api/v1/transactions/professor/" + validName)
+                        .param("returned", returnedParam)
+                        .param("historical", historicalParam))
+                .andExpect(status().isOk())
+                .andExpect(content().json(responseJson));
+    }
+
+    @Test
+    @DisplayName("Get returned Professor's Transactions with current equipment using valid Auth")
+    @WithMockUser(authorities = "STUDENT_ASSISTANT")
+    void getProfessorTransactions_withReturnedTrueUsingValidAuth_returns200OkWithCurrentEquipments() throws Exception {
+        String validName = professor1.getName();
+        List<Transaction> professorTransactions = transactionList.stream()
+                .filter(t -> !t.getDeleteFlag())
+                .filter(t -> t.getProfessor().getName().equalsIgnoreCase(validName)).toList();
+        List<Transaction> returnedProfessorTransactions = professorTransactions.stream().filter(t -> t.getEquipments().isEmpty()).toList();
+        List<TransactionListDto> dtoResponse = returnedProfessorTransactions.stream().map(Transaction::toTransactionListDto).toList();
+        when(service.getProfessorTransactions(validName)).thenReturn(professorTransactions);
+        String returnedParam = "true";
+        String historicalParam = "false"; // default value of historical parameter
+        String responseJson = mapper.writeValueAsString(dtoResponse);
+
+        mockMvc.perform(get("/api/v1/transactions/professor/" + validName)
+                        .param("returned", returnedParam)
+                        .param("historical", historicalParam))
+                .andExpect(status().isOk())
+                .andExpect(content().json(responseJson));
+    }
+
+    @Test
+    @DisplayName("Get unreturned Professor's Transactions with current equipment using valid Auth")
+    @WithMockUser(authorities = "STUDENT_ASSISTANT")
+    void getProfessorTransactions_withUnreturnedFalseUsingValidAuth_returns200OkWithCurrentEquipments() throws Exception {
+        String validName = professor1.getName();
+        List<Transaction> professorTransactions = transactionList.stream()
+                .filter(t -> !t.getDeleteFlag())
+                .filter(t -> t.getProfessor().getName().equalsIgnoreCase(validName)).toList();
+        List<Transaction> unreturnedProfessorTransactions = professorTransactions.stream().filter(t -> !t.getEquipments().isEmpty()).toList();
+        List<TransactionListDto> dtoResponse = unreturnedProfessorTransactions.stream().map(Transaction::toTransactionListDto).toList();
+        when(service.getProfessorTransactions(validName)).thenReturn(professorTransactions);
+        String returnedParam = "false"; //
+        String historicalParam = "false"; // default value of historical parameter is false
+        String responseJson = mapper.writeValueAsString(dtoResponse);
+
+        mockMvc.perform(get("/api/v1/transactions/professor/" + validName)
+                        .param("returned", returnedParam)
+                        .param("historical", historicalParam))
+                .andExpect(status().isOk())
+                .andExpect(content().json(responseJson));
+    }
+
+    @Test
+    @DisplayName("Get unreturned Student's Transactions with historical equipment using valid Auth")
+    @WithMockUser(authorities = "STUDENT_ASSISTANT")
+    void getProfessorTransactions_withUnreturnedFalseUsingValidAuth_returns200OkWithHistoricalEquipments() throws Exception {
+        String validName = professor1.getName();
+        List<Transaction> professorTransactions = transactionList.stream()
+                .filter(t -> !t.getDeleteFlag())
+                .filter(t -> t.getProfessor().getName().equalsIgnoreCase(validName)).toList();
+        List<Transaction> unreturnedProfessorTransactions = professorTransactions.stream().filter(t -> !t.getEquipments().isEmpty()).toList();
+        List<TransactionHistListDto> dtoResponse = unreturnedProfessorTransactions.stream().map(Transaction::toTransactionHistListDto).toList();
+        when(service.getProfessorTransactions(validName)).thenReturn(professorTransactions);
+        String returnedParam = "false"; //
+        String historicalParam = "true"; // default value of historical parameter is false
+        String responseJson = mapper.writeValueAsString(dtoResponse);
+
+        mockMvc.perform(get("/api/v1/transactions/professor/" + validName)
                         .param("returned", returnedParam)
                         .param("historical", historicalParam))
                 .andExpect(status().isOk())

@@ -142,7 +142,7 @@ public class YearSectionControllerTest {
         when(service.excelToList(multipartFile)).thenReturn(yearSectionList);
         when(service.addOrUpdate(yearSectionList, false)).thenReturn(0);
         ObjectNode response = mapper.createObjectNode();
-        response.put("Items Affected", 0);
+        response.put("YearSections Affected", 0);
         String responseJson = mapper.writeValueAsString(response);
 
         mockMvc.perform(multipart(HttpMethod.POST, "/api/v1/yearSections/upload")
