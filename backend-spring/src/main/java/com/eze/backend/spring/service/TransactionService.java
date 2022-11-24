@@ -429,4 +429,12 @@ public class TransactionService implements IService<Transaction>, IExcelService<
             throw new ApiException("Something went wrong when converting Excel file to Transactions", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    public List<Transaction> getStudentTransactions(String studentNumber) {
+        return txRepo.findByBorrowerStudentNumber(studentNumber);
+    }
+
+    public List<Transaction> getProfessorTransactions(String professorName) {
+        return txRepo.findByProfessorName(professorName);
+    }
 }

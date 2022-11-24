@@ -26,27 +26,35 @@ public class TransactionRepositoryTest {
     @Autowired
     private TestEntityManager entityManager;
 
-    private Transaction transaction0;
+    private Transaction transaction0, transaction1;
+    private Student student1, student2;
+    private Professor professor1, professor2;
 
     @BeforeEach
     void setup() {
         YearLevel yearLevel = new YearLevel(1, "First", false);
         YearSection yearSection = new YearSection("SectionName1", false, yearLevel);
-        Student student1 = new Student("2015-00129-MN-01", "FullName1", yearSection, "09062560571", "Birthday1", "Address1", "Email1", "Guardian1", "GuardianNumber1", yearLevel, "https://sampleprofile1.com", true);
-        Professor professor1 = new Professor("Name1", "+639062560574", true);
+        student1 = new Student("2015-00129-MN-01", "FullName1", yearSection, "09062560571", "Birthday1", "Address1", "Email1", "Guardian1", "GuardianNumber1", yearLevel, "https://sampleprofile1.com", true);
+        student2 = new Student("2015-00129-MN-02", "FullName2", yearSection, "09062560572", "Birthday2", "Address2", "Email2", "Guardian2", "GuardianNumber2", yearLevel, "https://sampleprofile2.com", true);
+        professor1 = new Professor("Name1", "+639062560571", false);
+        professor2 = new Professor("Name2", "+639062560572", false);
         Equipment equipment0 = new Equipment("EqCode0", "Name0", "Barcode0", EqStatus.GOOD, LocalDateTime.now(), true, false, false);
         Equipment equipment1 = new Equipment("EqCode01", "Name1", "Barcode1", EqStatus.GOOD, LocalDateTime.now(), true, false, false);
 
         transaction0 = new Transaction("TxCode0", List.of(equipment0, equipment1), List.of(equipment0, equipment1), student1, professor1, LocalDateTime.now(), null, TxStatus.PENDING, false);
-        Transaction transaction1 = new Transaction("TxCode1", List.of(equipment0, equipment1), List.of(equipment0, equipment1), student1, professor1, LocalDateTime.now(), null, TxStatus.PENDING, true);
+        transaction1 = new Transaction("TxCode1", List.of(equipment0, equipment1), List.of(equipment0, equipment1), student1, professor1, LocalDateTime.now(), null, TxStatus.PENDING, true);
+        Transaction transaction2 = new Transaction("TxCode2", List.of(equipment0, equipment1), List.of(equipment0, equipment1), student2, professor2, LocalDateTime.now(), null, TxStatus.PENDING, true);
 
         entityManager.persist(yearLevel);
         entityManager.persist(yearSection);
         entityManager.persist(student1);
+        entityManager.persist(student2);
         entityManager.persist(professor1);
+        entityManager.persist(professor2);
         entityManager.persist(equipment0);
         entityManager.persist(equipment0);
         entityManager.persist(transaction1);
+        entityManager.persist(transaction2);
         entityManager.persist(transaction0);
     }
 
@@ -89,5 +97,23 @@ public class TransactionRepositoryTest {
 
         assertTrue(transactionOptional.isPresent());
         assertTrue(transactionOptional.get().getDeleteFlag());
+    }
+
+    @Test
+    @DisplayName("Find Transactions of specific Student")
+    void findByBorrowersStudentNumber_returnsTransactionsOfBorrower() {
+        String borrowerStudentNumber = student1.getStudentNumber();
+        List<Transaction> studentTransaction = repository.findByBorrowerStudentNumber(borrowerStudentNumber);
+
+        assertEquals(0, studentTransaction.stream().filter(t -> !t.getBorrower().getStudentNumber().equalsIgnoreCase(borrowerStudentNumber)).count());
+    }
+
+    @Test
+    @DisplayName("Find Transactions of specific Professor")
+    void findByProfessorName_returnsTransactionsOfBorrower() {
+        String professorName = professor1.getName();
+        List<Transaction> professorTransactions = repository.findByProfessorName(professorName);
+
+        assertEquals(0, professorTransactions.stream().filter(t -> !t.getProfessor().getName().equalsIgnoreCase(professorName)).count());
     }
 }

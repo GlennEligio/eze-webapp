@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 @RestController
 @Slf4j
@@ -31,8 +32,13 @@ public class EquipmentController {
     private EquipmentService equipmentService;
 
     @GetMapping("/equipments")
-    public ResponseEntity<List<EquipmentDto>> getEquipments() {
-        return ResponseEntity.ok(equipmentService.getAllNotDeleted().stream().map(Equipment::toEquipmentDto).toList());
+    public ResponseEntity<List<EquipmentDto>> getEquipments(@RequestParam(required = false) Boolean isBorrowed) {
+        Stream<Equipment> equipments = equipmentService.getAllNotDeleted().stream();
+        if(isBorrowed != null) {
+            equipments = equipments.filter(e -> e.getIsBorrowed().equals(isBorrowed));
+        }
+        List<EquipmentDto> dtoResponse = equipments.map(Equipment::toEquipmentDto).toList();
+        return ResponseEntity.ok(dtoResponse);
     }
 
     @GetMapping("/equipments/{code}")

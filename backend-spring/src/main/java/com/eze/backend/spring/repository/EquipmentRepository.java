@@ -13,6 +13,8 @@ public interface EquipmentRepository extends JpaRepository<Equipment, Long> {
     Optional<Equipment> findByEquipmentCode(String equipmentCode);
     Optional<Equipment> findByBarcode(String barcode);
 
+    List<Equipment> findByIsBorrowed(boolean isBorrowed);
+
     @Query( "SELECT e FROM Equipment e WHERE e.deleteFlag=false")
     List<Equipment> findAllNotDeleted();
 

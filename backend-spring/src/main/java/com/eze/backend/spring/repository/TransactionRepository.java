@@ -19,4 +19,16 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
     @Query("UPDATE Transaction t SET t.deleteFlag=true WHERE t.txCode=?1")
     @Modifying(clearAutomatically = true, flushAutomatically = true)
     void softDelete(String txCode);
+
+    @Query("SELECT t FROM Transaction t " +
+            "LEFT JOIN t.borrower b " +
+            "WHERE b.studentNumber=?1 " +
+            "AND t.deleteFlag=false")
+    List<Transaction> findByBorrowerStudentNumber(String studentNumber);
+
+    @Query("SELECT t FROM Transaction t " +
+            "LEFT JOIN t.professor p " +
+            "WHERE p.name=?1 " +
+            "AND t.deleteFlag=false")
+    List<Transaction> findByProfessorName(String name);
 }

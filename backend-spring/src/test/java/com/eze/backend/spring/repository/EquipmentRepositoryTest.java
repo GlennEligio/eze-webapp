@@ -30,10 +30,12 @@ public class EquipmentRepositoryTest {
 
     @BeforeEach
     void setup() {
-        equipment0 = new Equipment("EqCode0", "Name0", "Barcode0", EqStatus.GOOD, LocalDateTime.now(), true, false, false);
+        equipment0 = new Equipment("EqCode0", "Name0", "Barcode0", EqStatus.GOOD, LocalDateTime.now(), false, false, false);
         Equipment equipment1 = new Equipment("EqCode01", "Name1", "Barcode1", EqStatus.GOOD, LocalDateTime.now(), true, false, true);
+        Equipment equipment2 = new Equipment("EqCode02", "Name2", "Barcode2", EqStatus.GOOD, LocalDateTime.now(), false, true, true);
         entityManager.persist(equipment0);
         entityManager.persist(equipment1);
+        entityManager.persist(equipment2);
     }
 
     @Test
@@ -96,5 +98,13 @@ public class EquipmentRepositoryTest {
 
         assertTrue(equipmentOptional.isPresent());
         assertTrue(equipmentOptional.get().getDeleteFlag());
+    }
+
+    @Test
+    @DisplayName("Find all non-borrowed Equipments")
+    void findAllNonBorrowed_returnsNonBorrowedEquipments() {
+        List<Equipment> nonBorrowedEquipments = repository.findByIsBorrowed(false);
+
+        assertEquals(0, nonBorrowedEquipments.stream().filter(Equipment::getIsBorrowed).count());
     }
 }

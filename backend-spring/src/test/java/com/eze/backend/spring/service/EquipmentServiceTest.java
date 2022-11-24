@@ -51,13 +51,14 @@ public class EquipmentServiceTest {
     private EquipmentService service;
 
     private List<Equipment> equipmentList;
-    private Equipment equipment0, equipment1;
+    private Equipment equipment0, equipment1, equipment2;
 
     @BeforeEach
     void setup () {
-        equipment0 = new Equipment("EqCode0", "Name0", "Barcode0", EqStatus.GOOD, LocalDateTime.now(), true, false, false);
+        equipment0 = new Equipment("EqCode0", "Name0", "Barcode0", EqStatus.GOOD, LocalDateTime.now(), false, false, false);
         equipment1 = new Equipment("EqCode01", "Name1", "Barcode1", EqStatus.GOOD, LocalDateTime.now(), true, false, true);
-        equipmentList = List.of(equipment0, equipment1);
+        equipment2 = new Equipment("EqCode02", "Name2", "Barcode2", EqStatus.GOOD, LocalDateTime.now(), false, true, true);
+        equipmentList = List.of(equipment0, equipment1, equipment2);
     }
 
     @Test
@@ -388,5 +389,18 @@ public class EquipmentServiceTest {
         } catch (IOException ignored) {
 
         }
+    }
+
+    @Test
+    @DisplayName("Find all non-borrowed equipments")
+    void getAllNotBorrowed_returnsNonBorrowedEquipments() {
+        List<Equipment> nonBorrowedEquipments = equipmentList.stream().filter(e -> !e.getIsBorrowed()).toList();
+        Mockito.when(repository.findByIsBorrowed(false)).thenReturn(nonBorrowedEquipments);
+
+        List<Equipment> equipments = service.getAllNotBorrowed();
+
+        assertNotNull(equipments);
+        assertEquals(0, equipments.stream().filter(Equipment::getIsBorrowed).count());
+        assertEquals(nonBorrowedEquipments, equipments);
     }
 }

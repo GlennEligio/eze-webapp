@@ -229,4 +229,8 @@ public class EquipmentService implements IService<Equipment>, IExcelService<Equi
             throw new ApiException("Something went wrong when converting Excel file to Equipments", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    public List<Equipment> getAllNotBorrowed() {
+        return repository.findByIsBorrowed(false);
+    }
 }
