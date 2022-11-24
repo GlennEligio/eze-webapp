@@ -111,7 +111,7 @@ public class TransactionController {
         log.info("Successfully updated {} transactions database using the excel file", itemsAffected);
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode objectNode = mapper.createObjectNode();
-        objectNode.put("Items Affected", itemsAffected);
+        objectNode.put("Transactions Affected", itemsAffected);
         return ResponseEntity.ok(objectNode);
     }
 

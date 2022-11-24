@@ -58,7 +58,7 @@ public class ProfessorController {
         log.info("Successfully updated {} professors database using the excel file", itemsAffected);
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode objectNode = mapper.createObjectNode();
-        objectNode.put("Items Affected", itemsAffected);
+        objectNode.put("Professors Affected", itemsAffected);
         return ResponseEntity.ok(objectNode);
     }
 

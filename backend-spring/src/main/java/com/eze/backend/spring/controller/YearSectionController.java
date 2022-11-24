@@ -59,8 +59,7 @@ public class YearSectionController {
         log.info("Successfully updated {} yearSections database using the excel file", itemsAffected);
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode objectNode = mapper.createObjectNode();
-        // TODO: Edit the FRE to read the correct property in response
-        objectNode.put("Items Affected", itemsAffected);
+        objectNode.put("YearSections Affected", itemsAffected);
         return ResponseEntity.ok(objectNode);
     }
 

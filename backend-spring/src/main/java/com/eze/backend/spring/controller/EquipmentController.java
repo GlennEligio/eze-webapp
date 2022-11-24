@@ -70,7 +70,7 @@ public class EquipmentController {
         log.info("Successfully updated {} equipments database using the excel file", itemsAffected);
         ObjectMapper mapper = new ObjectMapper();
         ObjectNode objectNode = mapper.createObjectNode();
-        objectNode.put("Items Affected", itemsAffected);
+        objectNode.put("Equipments Affected", itemsAffected);
         return ResponseEntity.ok(objectNode);
     }
 
