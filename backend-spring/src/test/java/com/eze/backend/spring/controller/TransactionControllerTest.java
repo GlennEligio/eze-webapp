@@ -67,7 +67,7 @@ public class TransactionControllerTest {
     private Student student, student2;
     private YearLevel yearLevel;
     private YearSection yearSection;
-    private Professor professor;
+    private Professor professor1, professor2;
     private Equipment eq0, eq1, eq2;
     private Transaction tx0, tx1, tx2;
     private LocalDateTime timeStamp, timeStamp2;
@@ -92,17 +92,18 @@ public class TransactionControllerTest {
         yearSection = new YearSection("SectionName1", false, yearLevel);
         student = new Student("2015-00129-MN-01", "FullName1", yearSection, "09062560571", "Birthday1", "Address1", "Email1", "Guardian1", "GuardianNumber1", yearLevel, "https://sampleprofile1.com", false);
         student2 = new Student("2015-00129-MN-02", "FullName2", yearSection, "09062560571", "Birthday2", "Address2", "Email2", "Guardian2", "GuardianNumber2", yearLevel, "https://sampleprofile2.com", false);
-        professor = new Professor("Name1", "+639062560574", true);
+        professor1 = new Professor("Name1", "+639062560571", false);
+        professor2 = new Professor("Name2", "+639062560572", false);
         eq0 = new Equipment("EqCode0", "Name0", "Barcode0", EqStatus.GOOD, null, false, true, false);
         eq1 = new Equipment("EqCode1", "Name1", "Barcode1", EqStatus.GOOD, null, true, false, false);
         eq2 = new Equipment("EqCode2", "Name2", "Barcode2", EqStatus.GOOD, null, false, false, false);
 
         // all items returned
-        tx0 = new Transaction(new ObjectId().toHexString(), new ArrayList<>(), List.of(eq0, eq1), student, professor, timeStamp, null, TxStatus.PENDING, false);
+        tx0 = new Transaction(new ObjectId().toHexString(), new ArrayList<>(), List.of(eq0, eq1), student, professor1, timeStamp, null, TxStatus.PENDING, false);
         // eq0 is not returned yet
-        tx1 = new Transaction(new ObjectId().toHexString(), List.of(eq0), List.of(eq0, eq1), student2, professor, timeStamp, null, TxStatus.PENDING, false);
+        tx1 = new Transaction(new ObjectId().toHexString(), List.of(eq0), List.of(eq0, eq1), student2, professor2, timeStamp, null, TxStatus.PENDING, false);
         // eq2 is not returned yet
-        tx2 = new Transaction(new ObjectId().toHexString(), List.of(eq2), List.of(eq1, eq2), student2, professor, timeStamp2, null, TxStatus.PENDING, false);
+        tx2 = new Transaction(new ObjectId().toHexString(), List.of(eq2), List.of(eq1, eq2), student2, professor2, timeStamp2, null, TxStatus.PENDING, false);
         transactionList = List.of(tx0, tx1, tx2);
     }
 
@@ -417,7 +418,7 @@ public class TransactionControllerTest {
     void createTransaction_usingInvalidAuth_returns403Forbidden() throws Exception {
         List<Equipment> equipments = List.of(eq0, eq1, eq2);
         List<EquipmentDto> equipmentDtos = equipments.stream().map(Equipment::toEquipmentDto).toList();
-        ProfessorDto professorDto = Professor.toProfessorDto(professor);
+        ProfessorDto professorDto = Professor.toProfessorDto(professor1);
         StudentDto studentDto = Student.toStudentDto(student);
         CreateUpdateTransactionDto createUpdateTransactionDto = new CreateUpdateTransactionDto(equipmentDtos, studentDto, professorDto, "PENDING");
         String requestJson = mapper.writeValueAsString(createUpdateTransactionDto);
@@ -434,7 +435,7 @@ public class TransactionControllerTest {
     void createTransaction_withMalformedPayloadUsingInvalidAuth_returns400BadRequest() throws Exception {
         List<Equipment> equipments = List.of(eq0, eq1, eq2);
         List<EquipmentDto> equipmentDtos = equipments.stream().map(Equipment::toEquipmentDto).toList();
-        ProfessorDto professorDto = Professor.toProfessorDto(professor);
+        ProfessorDto professorDto = Professor.toProfessorDto(professor1);
         StudentDto studentDto = Student.toStudentDto(student);
         CreateUpdateTransactionDto createUpdateTransactionDto = new CreateUpdateTransactionDto(equipmentDtos, studentDto, professorDto, "INCORRECT_STATUS");
         String requestJson = mapper.writeValueAsString(createUpdateTransactionDto);
@@ -451,7 +452,7 @@ public class TransactionControllerTest {
     void createTransaction_withTakenTxCodeUsingInvalidAuth_returns400BadRequest() throws Exception {
         List<Equipment> equipments = List.of(eq0, eq1, eq2);
         List<EquipmentDto> equipmentDtos = equipments.stream().map(Equipment::toEquipmentDto).toList();
-        ProfessorDto professorDto = Professor.toProfessorDto(professor);
+        ProfessorDto professorDto = Professor.toProfessorDto(professor1);
         StudentDto studentDto = Student.toStudentDto(student);
         CreateUpdateTransactionDto createUpdateTransactionDto = new CreateUpdateTransactionDto(equipmentDtos, studentDto, professorDto, "PENDING");
         Transaction transactionToCreate = Transaction.toTransaction(createUpdateTransactionDto);
@@ -470,7 +471,7 @@ public class TransactionControllerTest {
     void createTransaction_withAvailableTxCodeAndCompleteParamTrueUsingInvalidAuth_returns201CreatedWithCompleteTransaction() throws Exception {
         List<Equipment> equipments = List.of(eq0, eq1, eq2);
         List<EquipmentDto> equipmentDtos = equipments.stream().map(Equipment::toEquipmentDto).toList();
-        ProfessorDto professorDto = Professor.toProfessorDto(professor);
+        ProfessorDto professorDto = Professor.toProfessorDto(professor1);
         StudentDto studentDto = Student.toStudentDto(student);
         CreateUpdateTransactionDto createUpdateTransactionDto = new CreateUpdateTransactionDto(equipmentDtos, studentDto, professorDto, "PENDING");
         Transaction transactionToCreate = Transaction.toTransaction(createUpdateTransactionDto);
@@ -496,7 +497,7 @@ public class TransactionControllerTest {
     void createTransaction_withAvailableTxCodeAndCompleteParamFalseUsingInvalidAuth_returns201CreatedWithIncompleteTransaction() throws Exception {
         List<Equipment> equipments = List.of(eq0, eq1, eq2);
         List<EquipmentDto> equipmentDtos = equipments.stream().map(Equipment::toEquipmentDto).toList();
-        ProfessorDto professorDto = Professor.toProfessorDto(professor);
+        ProfessorDto professorDto = Professor.toProfessorDto(professor1);
         StudentDto studentDto = Student.toStudentDto(student);
         CreateUpdateTransactionDto createUpdateTransactionDto = new CreateUpdateTransactionDto(equipmentDtos, studentDto, professorDto, "PENDING");
         Transaction transactionToCreate = Transaction.toTransaction(createUpdateTransactionDto);
@@ -522,7 +523,7 @@ public class TransactionControllerTest {
         String validTxCode = tx0.getTxCode();
         List<Equipment> equipments = List.of(eq0, eq1, eq2);
         List<EquipmentDto> equipmentDtos = equipments.stream().map(Equipment::toEquipmentDto).toList();
-        ProfessorDto professorDto = Professor.toProfessorDto(professor);
+        ProfessorDto professorDto = Professor.toProfessorDto(professor1);
         StudentDto studentDto = Student.toStudentDto(student);
         CreateUpdateTransactionDto createUpdateTransactionDto = new CreateUpdateTransactionDto(equipmentDtos, studentDto, professorDto, "PENDING");
         String requestJson = mapper.writeValueAsString(createUpdateTransactionDto);
@@ -541,7 +542,7 @@ public class TransactionControllerTest {
         String validTxCode = tx0.getTxCode();
         List<Equipment> equipments = List.of(eq0, eq1, eq2);
         List<EquipmentDto> equipmentDtos = equipments.stream().map(Equipment::toEquipmentDto).toList();
-        ProfessorDto professorDto = Professor.toProfessorDto(professor);
+        ProfessorDto professorDto = Professor.toProfessorDto(professor1);
         StudentDto studentDto = Student.toStudentDto(student);
         CreateUpdateTransactionDto createUpdateTransactionDto = new CreateUpdateTransactionDto(equipmentDtos, studentDto, professorDto, "PENDING");
         Transaction transactionForUpdate = Transaction.toTransaction(createUpdateTransactionDto);
@@ -562,7 +563,7 @@ public class TransactionControllerTest {
         String validTxCode = tx0.getTxCode();
         List<Equipment> equipments = List.of(eq0, eq1, eq2);
         List<EquipmentDto> equipmentDtos = equipments.stream().map(Equipment::toEquipmentDto).toList();
-        ProfessorDto professorDto = Professor.toProfessorDto(professor);
+        ProfessorDto professorDto = Professor.toProfessorDto(professor1);
         StudentDto studentDto = Student.toStudentDto(student);
         CreateUpdateTransactionDto createUpdateTransactionDto = new CreateUpdateTransactionDto(equipmentDtos, studentDto, professorDto, "INVALID_STATUS_VALUE");
         String requestJson = mapper.writeValueAsString(createUpdateTransactionDto);
@@ -581,7 +582,7 @@ public class TransactionControllerTest {
         String validTxCode = tx0.getTxCode();
         List<Equipment> equipments = List.of(eq0, eq1, eq2);
         List<EquipmentDto> equipmentDtos = equipments.stream().map(Equipment::toEquipmentDto).toList();
-        ProfessorDto professorDto = Professor.toProfessorDto(professor);
+        ProfessorDto professorDto = Professor.toProfessorDto(professor1);
         StudentDto studentDto = Student.toStudentDto(student);
         CreateUpdateTransactionDto createUpdateTransactionDto = new CreateUpdateTransactionDto(equipmentDtos, studentDto, professorDto, "PENDING");
         Transaction transactionForUpdate = Transaction.toTransaction(createUpdateTransactionDto);
@@ -635,7 +636,7 @@ public class TransactionControllerTest {
     @DisplayName("Returning equipments using invalid Auth")
     void returnEquipments_usingInvalidAuth_returns403Forbidden() throws Exception {
         String borrowerParam = student.getStudentNumber();
-        String professorParam = professor.getName();
+        String professorParam = professor1.getName();
         String[] barcodesParam = new String[]{eq0.getBarcode()};
 
         mockMvc.perform(put("/api/v1/transactions/return")
@@ -650,7 +651,7 @@ public class TransactionControllerTest {
     @WithMockUser(authorities = "STUDENT_ASSISTANT")
     void returnEquipments_withNoTransactionMatchUsingValidAuth_returns404NotFound() throws Exception {
         String borrowerParam = student.getStudentNumber();
-        String professorParam = professor.getName();
+        String professorParam = professor1.getName();
         String[] barcodes = new String[]{eq0.getBarcode()};
         String barcodeParam = String.join(",", barcodes);
         when(service.returnEquipments(borrowerParam, professorParam, Arrays.asList(barcodes))).thenThrow(new ApiException("No transaction match found", HttpStatus.NOT_FOUND));
@@ -668,11 +669,11 @@ public class TransactionControllerTest {
     void returnEquipments_withTransactionMatchUsingValidAuth_returns200OkWithUpdatedTransaction() throws Exception {
         String txCode = new ObjectId().toHexString();
         String borrowerParam = student.getStudentNumber();
-        String professorParam = professor.getName();
+        String professorParam = professor1.getName();
         String[] barcodes = new String[]{eq0.getBarcode()};
         String barcodesParam = String.join(",", barcodes);
         tx1.setTxCode(txCode);
-        Transaction updatedTx1 = new Transaction(txCode, new ArrayList<>(), List.of(eq0, eq1), student2, professor, timeStamp, null, TxStatus.PENDING, false);
+        Transaction updatedTx1 = new Transaction(txCode, new ArrayList<>(), List.of(eq0, eq1), student2, professor1, timeStamp, null, TxStatus.PENDING, false);
         TransactionListDto transactionListDto = Transaction.toTransactionListDto(updatedTx1);
         when(service.returnEquipments(borrowerParam, professorParam, Arrays.asList(barcodes))).thenReturn(updatedTx1);
         String responseJson = mapper.writeValueAsString(transactionListDto);
@@ -685,6 +686,101 @@ public class TransactionControllerTest {
                 .andExpect(content().json(responseJson));
     }
 
+    @Test
+    @DisplayName("Get Student's Transactions using invalid Auth")
+    void getStudentTransactions_usingInvalidAuth_returns403Forbidden() throws Exception {
+        String validStudentNumber = student.getStudentNumber();
+        mockMvc.perform(get("/api/v1/transactions/student/" + validStudentNumber))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("Get returned Student's Transactions with historical equipment using valid Auth")
+    @WithMockUser(authorities = "STUDENT_ASSISTANT")
+    void getStudentTransactions_withReturnedTrueUsingValidAuth_returns200OkWithHistoricalEquipments() throws Exception {
+        String validStudentNumber = student.getStudentNumber();
+        List<Transaction> studentTransactions = transactionList.stream()
+                .filter(t -> !t.getDeleteFlag())
+                .filter(t -> t.getBorrower().getStudentNumber().equalsIgnoreCase(validStudentNumber)).toList();
+        List<Transaction> returnedStudentTransactions = studentTransactions.stream().filter(t -> t.getEquipments().isEmpty()).toList();
+        List<TransactionHistListDto> dtoResponse = returnedStudentTransactions.stream().map(Transaction::toTransactionHistListDto).toList();
+        when(service.getStudentTransactions(validStudentNumber)).thenReturn(studentTransactions);
+        String returnedParam = "true";
+        String historicalParam = "true"; // default value of historical parameter
+        String responseJson = mapper.writeValueAsString(dtoResponse);
+
+        mockMvc.perform(get("/api/v1/transactions/student/" + validStudentNumber)
+                        .param("returned", returnedParam)
+                        .param("historical", historicalParam))
+                .andExpect(status().isOk())
+                .andExpect(content().json(responseJson));
+    }
+
+    @Test
+    @DisplayName("Get returned Student's Transactions with current equipment using valid Auth")
+    @WithMockUser(authorities = "STUDENT_ASSISTANT")
+    void getStudentTransactions_withReturnedTrueUsingValidAuth_returns200OkWithCurrentEquipments() throws Exception {
+        String validStudentNumber = student.getStudentNumber();
+        List<Transaction> studentTransactions = transactionList.stream()
+                .filter(t -> !t.getDeleteFlag())
+                .filter(t -> t.getBorrower().getStudentNumber().equalsIgnoreCase(validStudentNumber)).toList();
+        List<Transaction> returnedStudentTransactions = studentTransactions.stream().filter(t -> t.getEquipments().isEmpty()).toList();
+        List<TransactionListDto> dtoResponse = returnedStudentTransactions.stream().map(Transaction::toTransactionListDto).toList();
+        when(service.getStudentTransactions(validStudentNumber)).thenReturn(studentTransactions);
+        String returnedParam = "true";
+        String historicalParam = "false"; // default value of historical parameter is false
+        String responseJson = mapper.writeValueAsString(dtoResponse);
+
+        mockMvc.perform(get("/api/v1/transactions/student/" + validStudentNumber)
+                        .param("returned", returnedParam)
+                        .param("historical", historicalParam))
+                .andExpect(status().isOk())
+                .andExpect(content().json(responseJson));
+    }
+
+    @Test
+    @DisplayName("Get unreturned Student's Transactions with complete equipment using valid Auth")
+    @WithMockUser(authorities = "STUDENT_ASSISTANT")
+    void getStudentTransactions_withUnreturnedFalseUsingValidAuth_returns200OkWithCompleteEquipments() throws Exception {
+        String validStudentNumber = student.getStudentNumber();
+        List<Transaction> studentTransactions = transactionList.stream()
+                .filter(t -> !t.getDeleteFlag())
+                .filter(t -> t.getBorrower().getStudentNumber().equalsIgnoreCase(validStudentNumber)).toList();
+        List<Transaction> unreturnedStudentTransactions = studentTransactions.stream().filter(t -> !t.getEquipments().isEmpty()).toList();
+        List<TransactionListDto> dtoResponse = unreturnedStudentTransactions.stream().map(Transaction::toTransactionListDto).toList();
+        when(service.getStudentTransactions(validStudentNumber)).thenReturn(studentTransactions);
+        String returnedParam = "false"; //
+        String historicalParam = "false"; // default value of historical parameter is false
+        String responseJson = mapper.writeValueAsString(dtoResponse);
+
+        mockMvc.perform(get("/api/v1/transactions/student/" + validStudentNumber)
+                        .param("returned", returnedParam)
+                        .param("historical", historicalParam))
+                .andExpect(status().isOk())
+                .andExpect(content().json(responseJson));
+    }
+
+    @Test
+    @DisplayName("Get unreturned Student's Transactions with historical equipment using valid Auth")
+    @WithMockUser(authorities = "STUDENT_ASSISTANT")
+    void getStudentTransactions_withUnreturnedFalseUsingValidAuth_returns200OkWithHistoricalEquipments() throws Exception {
+        String validStudentNumber = student.getStudentNumber();
+        List<Transaction> studentTransactions = transactionList.stream()
+                .filter(t -> !t.getDeleteFlag())
+                .filter(t -> t.getBorrower().getStudentNumber().equalsIgnoreCase(validStudentNumber)).toList();
+        List<Transaction> unreturnedStudentTransactions = studentTransactions.stream().filter(t -> !t.getEquipments().isEmpty()).toList();
+        List<TransactionHistListDto> dtoResponse = unreturnedStudentTransactions.stream().map(Transaction::toTransactionHistListDto).toList();
+        when(service.getStudentTransactions(validStudentNumber)).thenReturn(studentTransactions);
+        String returnedParam = "false"; //
+        String historicalParam = "false"; // default value of historical parameter is false
+        String responseJson = mapper.writeValueAsString(dtoResponse);
+
+        mockMvc.perform(get("/api/v1/transactions/student/" + validStudentNumber)
+                        .param("returned", returnedParam)
+                        .param("historical", historicalParam))
+                .andExpect(status().isOk())
+                .andExpect(content().json(responseJson));
+    }
 
     public MockMultipartFile createMultipartFile(List<Transaction> transactions, String contentType) {
         try {

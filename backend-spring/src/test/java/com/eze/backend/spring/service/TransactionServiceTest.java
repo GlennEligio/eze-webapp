@@ -57,13 +57,13 @@ public class TransactionServiceTest {
     @InjectMocks
     private TransactionService service;
 
-    private Student student, student2;
+    private Student student1, student2;
     private YearLevel yearLevel;
     private YearSection yearSection;
-    private Professor professor;
+    private Professor professor1, professor2;
     private Equipment eq0, eq1;
-    private Transaction tx0, tx1;
-    private String txCode0, txCode1;
+    private Transaction tx0, tx1, tx2;
+    private String txCode0, txCode1, txCode2;
     private LocalDateTime timeStamp;
     private List<Transaction> transactionList;
 
@@ -71,18 +71,21 @@ public class TransactionServiceTest {
     void setup () {
         txCode0 = new ObjectId().toHexString();
         txCode1 = new ObjectId().toHexString();
+        txCode2 = new ObjectId().toHexString();
         timeStamp = LocalDateTime.now();
         yearLevel = new YearLevel(1, "First", false);
         yearSection = new YearSection("SectionName1", false, yearLevel);
-        student = new Student("2015-00129-MN-01", "FullName1", yearSection, "09062560571", "Birthday1", "Address1", "Email1", "Guardian1", "GuardianNumber1", yearLevel, "https://sampleprofile1.com", false);
+        student1 = new Student("2015-00129-MN-01", "FullName1", yearSection, "09062560571", "Birthday1", "Address1", "Email1", "Guardian1", "GuardianNumber1", yearLevel, "https://sampleprofile1.com", false);
         student2 = new Student("2015-00129-MN-02", "FullName2", yearSection, "09062560571", "Birthday2", "Address2", "Email2", "Guardian2", "GuardianNumber2", yearLevel, "https://sampleprofile2.com", false);
-        professor = new Professor("Name1", "+639062560574", true);
+        professor1 = new Professor("Name1", "+639062560571", false);
+        professor2 = new Professor("Name2", "+639062560572", false);
         eq0 = new Equipment("EqCode0", "Name0", "Barcode0", EqStatus.GOOD, LocalDateTime.now(), false, false, false);
         eq1 = new Equipment("EqCode1", "Name1", "Barcode1", EqStatus.GOOD, LocalDateTime.now(), true, false, false);
 
-        tx0 = new Transaction(txCode0, List.of(eq0, eq1), List.of(eq0, eq1), student, professor, timeStamp, null, TxStatus.PENDING, false);
-        tx1 = new Transaction(txCode1, List.of(eq0, eq1), List.of(eq0, eq1), student2, professor, timeStamp, null, TxStatus.PENDING, true);
-        transactionList = List.of(tx1, tx0);
+        tx0 = new Transaction(txCode0, List.of(eq0, eq1), List.of(eq0, eq1), student1, professor1, timeStamp, null, TxStatus.PENDING, false);
+        tx1 = new Transaction(txCode1, List.of(eq0, eq1), List.of(eq0, eq1), student2, professor2, timeStamp, null, TxStatus.PENDING, false);
+        tx2 = new Transaction(txCode2, List.of(eq0, eq1), List.of(eq0, eq1), student2, professor2, timeStamp, null, TxStatus.PENDING, true);
+        transactionList = List.of(tx1, tx0, tx2);
     }
 
     @Test
@@ -144,13 +147,13 @@ public class TransactionServiceTest {
         String availableTxCode = tx0.getTxCode();
         // isBorrowed of not duplicable Equipments is changes to true
         Equipment borrowedEquipment0 = new Equipment(eq0.getEquipmentCode(), eq0.getName(), eq0.getBarcode(), eq0.getStatus(), eq0.getDefectiveSince(), false, true, false);
-        Transaction newTransaction = new Transaction(txCode0, List.of(borrowedEquipment0), List.of(borrowedEquipment0, eq1), student, professor, timeStamp, null, TxStatus.PENDING, false);
+        Transaction newTransaction = new Transaction(txCode0, List.of(borrowedEquipment0), List.of(borrowedEquipment0, eq1), student1, professor1, timeStamp, null, TxStatus.PENDING, false);
         Mockito.when(idGenerator.createId()).thenReturn(txCode0);
         Mockito.when(repository.findByTxCode(availableTxCode)).thenReturn(Optional.empty());
         Mockito.when(equipmentService.get(eq0.getEquipmentCode())).thenReturn(eq0);
         Mockito.when(equipmentService.get(eq1.getEquipmentCode())).thenReturn(eq1);
-        Mockito.when(professorService.get(professor.getName())).thenReturn(professor);
-        Mockito.when(studentService.get(student.getStudentNumber())).thenReturn(student);
+        Mockito.when(professorService.get(professor1.getName())).thenReturn(professor1);
+        Mockito.when(studentService.get(student1.getStudentNumber())).thenReturn(student1);
         log.info(newTransaction.toString());
         Mockito.when(repository.save(newTransaction)).thenReturn(newTransaction);
 
@@ -304,7 +307,7 @@ public class TransactionServiceTest {
     @Test
     @DisplayName("Add or Update with different data and overwrite is false")
     void addOrUpdate_withDifferentDataAndOverwriteFalse_returnsZero() {
-        Transaction updatedTx0 = new Transaction(tx0.getTxCode(), tx0.getEquipments(), tx0.getEquipmentsHist(), student, professor, timeStamp, null, TxStatus.PENDING, !tx0.getDeleteFlag());
+        Transaction updatedTx0 = new Transaction(tx0.getTxCode(), tx0.getEquipments(), tx0.getEquipmentsHist(), student1, professor1, timeStamp, null, TxStatus.PENDING, !tx0.getDeleteFlag());
         List<Transaction> transactions = List.of(updatedTx0, tx1);
         Mockito.when(repository.findByTxCode(tx0.getTxCode())).thenReturn(Optional.of(tx0));
         Mockito.when(repository.findByTxCode(tx1.getTxCode())).thenReturn(Optional.of(tx1));
@@ -317,7 +320,7 @@ public class TransactionServiceTest {
     @Test
     @DisplayName("Add or Update with different data and overwrite is true")
     void addOrUpdate_withDifferentDataAndOverwriteTrue_returnsZero() {
-        Transaction updatedTx0 = new Transaction(tx0.getTxCode(), tx0.getEquipments(), tx0.getEquipmentsHist(), student, professor, timeStamp, null, TxStatus.PENDING, !tx0.getDeleteFlag());
+        Transaction updatedTx0 = new Transaction(tx0.getTxCode(), tx0.getEquipments(), tx0.getEquipmentsHist(), student1, professor1, timeStamp, null, TxStatus.PENDING, !tx0.getDeleteFlag());
         List<Transaction> transactions = List.of(updatedTx0, tx1);
         Mockito.when(repository.findByTxCode(tx0.getTxCode())).thenReturn(Optional.of(tx0));
         Mockito.when(repository.findByTxCode(tx1.getTxCode())).thenReturn(Optional.of(tx1));
@@ -366,7 +369,7 @@ public class TransactionServiceTest {
         eq0.setIsBorrowed(true);
         eq0.setIsDuplicable(false);
         List<String> barcodes = List.of(eq0.getBarcode(), eq1.getBarcode());
-        Transaction updatedTx0 = new Transaction(txCode0, new ArrayList<>(), List.of(returnedEq0, eq1), student, professor, timeStamp, timeStamp, TxStatus.PENDING, false);
+        Transaction updatedTx0 = new Transaction(txCode0, new ArrayList<>(), List.of(returnedEq0, eq1), student1, professor1, timeStamp, timeStamp, TxStatus.PENDING, false);
         Mockito.when(equipmentService.getByBarcode(eq0.getBarcode())).thenReturn(eq0);
         Mockito.when(equipmentService.getByBarcode(eq1.getBarcode())).thenReturn(eq1);
         Mockito.when(timeStampProvider.getNow()).thenReturn(timeStamp);
@@ -449,9 +452,10 @@ public class TransactionServiceTest {
     void excelToList_returnsListOfAccount() {
         Mockito.when(equipmentService.get(eq0.getEquipmentCode())).thenReturn(eq0);
         Mockito.when(equipmentService.get(eq1.getEquipmentCode())).thenReturn(eq1);
-        Mockito.when(studentService.get(student.getStudentNumber())).thenReturn(student);
+        Mockito.when(studentService.get(student1.getStudentNumber())).thenReturn(student1);
         Mockito.when(studentService.get(student2.getStudentNumber())).thenReturn(student2);
-        Mockito.when(professorService.get(professor.getName())).thenReturn(professor);
+        Mockito.when(professorService.get(professor1.getName())).thenReturn(professor1);
+        Mockito.when(professorService.get(professor2.getName())).thenReturn(professor2);
         try {
             // remove duplicable eqs and returned equipments (isBorrowed is false)
             tx0.setEquipments(new ArrayList<>());
@@ -530,5 +534,35 @@ public class TransactionServiceTest {
         } catch (IOException ignored) {
 
         }
+    }
+
+    @Test
+    @DisplayName("Get all Transactions of the Student")
+    void getStudentTransactions_returnsTransactionsOfStudents() {
+        String studentNumber = student1.getStudentNumber();
+        List<Transaction> notDeletedTransactions = transactionList.stream().filter(t -> !t.getDeleteFlag()).toList();
+        List<Transaction> studentTransactions = notDeletedTransactions.stream().filter(t -> t.getBorrower().getStudentNumber().equalsIgnoreCase(studentNumber)).toList();
+        Mockito.when(repository.findByBorrowerStudentNumber(studentNumber)).thenReturn(studentTransactions);
+
+        List<Transaction> transactionsResult = service.getStudentTransactions(studentNumber);
+
+        assertNotNull(transactionsResult);
+        assertEquals(studentTransactions, transactionsResult);
+        assertEquals(0, transactionsResult.stream().filter(t -> !t.getBorrower().getStudentNumber().equalsIgnoreCase(studentNumber)).count());
+    }
+
+    @Test
+    @DisplayName("Get all Transactions of the Professor")
+    void getProfessorTransactions_returnsTransactionsOfProfessor() {
+        String professorName = professor1.getName();
+        List<Transaction> notDeletedTransactions = transactionList.stream().filter(t -> !t.getDeleteFlag()).toList();
+        List<Transaction> professorTransactions = notDeletedTransactions.stream().filter(t -> t.getProfessor().getName().equalsIgnoreCase(professorName)).toList();
+        Mockito.when(repository.findByProfessorName(professorName)).thenReturn(professorTransactions);
+
+        List<Transaction> transactionsResult = service.getProfessorTransactions(professorName);
+
+        assertNotNull(transactionsResult);
+        assertEquals(professorTransactions, transactionsResult);
+        assertEquals(0, transactionsResult.stream().filter(t -> !t.getProfessor().getName().equalsIgnoreCase(professorName)).count());
     }
 }

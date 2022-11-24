@@ -43,7 +43,8 @@ public class TransactionController {
                                                    @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fromDate)
     {
         Stream<Transaction> transactions = service.getAll().stream();
-        // if returned is false, only get transactions with no (duplicable) equipments
+
+        // if returned is false, only get transactions with no (duplicable) equipments in the "equipments" property
         if(returned != null) {
             if(Boolean.TRUE.equals(returned)) {
                 transactions = transactions.filter(t -> t.getEquipments()
@@ -63,6 +64,8 @@ public class TransactionController {
             transactions = transactions.filter(t -> t.getBorrowedAt().isAfter(fromDate) && t.getBorrowedAt().isBefore(toDate));
         }
 
+        // historical will determine if we will use the equipment (current unreturned eqs) or equipmentHist (saved equipments history)
+        // complete will determine if we will send the equipments with complete info or just send the number of equipments in transaction (unreturned or historical)
         if(Boolean.TRUE.equals(historical)) {
             if(Boolean.TRUE.equals(complete)) {
                 return ResponseEntity.ok(transactions.map(Transaction::toTransactionHistDto).toList());
@@ -76,6 +79,25 @@ public class TransactionController {
                 return ResponseEntity.ok(transactions.map(Transaction::toTransactionListDto).toList());
             }
         }
+    }
+
+    @GetMapping("/transactions/student/{studentNumber}")
+    public ResponseEntity<List<?>> getStudentTransactions(@PathVariable String studentNumber,
+                                          @RequestParam(defaultValue = "false") boolean returned,
+                                          @RequestParam(defaultValue = "false") boolean historical) {
+        Stream<Transaction> studentTransactions = service.getStudentTransactions(studentNumber).stream();
+        if(returned) {
+            studentTransactions = studentTransactions.filter(t -> t.getEquipments().isEmpty());
+        } else {
+            studentTransactions = studentTransactions.filter(t -> !t.getEquipments().isEmpty());
+        }
+
+        if(historical) {
+            List<TransactionHistListDto> transactionHistListDto = studentTransactions.map(Transaction::toTransactionHistListDto).toList();
+            return ResponseEntity.ok(transactionHistListDto);
+        }
+        List<TransactionListDto> transactionListDtos = studentTransactions.map(Transaction::toTransactionListDto).toList();
+        return ResponseEntity.ok(transactionListDtos);
     }
 
     @GetMapping("/transactions/download")
