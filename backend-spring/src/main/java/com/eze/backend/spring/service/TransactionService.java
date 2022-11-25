@@ -104,6 +104,9 @@ public class TransactionService implements IService<Transaction>, IExcelService<
         // Set the transaction code
         transaction.setTxCode(idGenerator.createId());
 
+        // Set transaction status to pending
+        transaction.setStatus(TxStatus.PENDING);
+
         // Set deleteFlag to false
         transaction.setDeleteFlag(false);
 

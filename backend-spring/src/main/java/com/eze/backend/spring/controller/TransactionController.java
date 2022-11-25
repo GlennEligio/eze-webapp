@@ -1,9 +1,11 @@
 package com.eze.backend.spring.controller;
 
 import com.eze.backend.spring.dtos.*;
+import com.eze.backend.spring.enums.TxStatus;
 import com.eze.backend.spring.exception.ApiException;
 import com.eze.backend.spring.model.Transaction;
 import com.eze.backend.spring.service.TransactionService;
+import com.eze.backend.spring.validation.EnumNamePattern;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.extern.slf4j.Slf4j;
@@ -40,13 +42,12 @@ public class TransactionController {
                                                    @RequestParam(required = false, defaultValue = "false") Boolean historical,
                                                    @RequestParam(required = false) Boolean returned,
                                                    @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime toDate,
-                                                   @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fromDate)
-    {
+                                                   @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fromDate) {
         Stream<Transaction> transactions = service.getAll().stream();
 
         // if returned is false, only get transactions with no (duplicable) equipments in the "equipments" property
-        if(returned != null) {
-            if(Boolean.TRUE.equals(returned)) {
+        if (returned != null) {
+            if (Boolean.TRUE.equals(returned)) {
                 transactions = transactions.filter(t -> t.getEquipments()
                         .stream()
                         .filter(equipment -> !equipment.getIsDuplicable())
@@ -60,20 +61,20 @@ public class TransactionController {
         }
 
         // if fromDate and toDate is present, filter the transactions again
-        if(fromDate != null && toDate != null) {
+        if (fromDate != null && toDate != null) {
             transactions = transactions.filter(t -> t.getBorrowedAt().isAfter(fromDate) && t.getBorrowedAt().isBefore(toDate));
         }
 
         // historical will determine if we will use the equipment (current unreturned eqs) or equipmentHist (saved equipments history)
         // complete will determine if we will send the equipments with complete info or just send the number of equipments in transaction (unreturned or historical)
-        if(Boolean.TRUE.equals(historical)) {
-            if(Boolean.TRUE.equals(complete)) {
+        if (Boolean.TRUE.equals(historical)) {
+            if (Boolean.TRUE.equals(complete)) {
                 return ResponseEntity.ok(transactions.map(Transaction::toTransactionHistDto).toList());
             } else {
                 return ResponseEntity.ok(transactions.map(Transaction::toTransactionHistListDto).toList());
             }
         } else {
-            if(Boolean.TRUE.equals(complete)) {
+            if (Boolean.TRUE.equals(complete)) {
                 return ResponseEntity.ok(transactions.map(Transaction::toTransactionDto).toList());
             } else {
                 return ResponseEntity.ok(transactions.map(Transaction::toTransactionListDto).toList());
@@ -83,16 +84,21 @@ public class TransactionController {
 
     @GetMapping("/transactions/student/{studentNumber}")
     public ResponseEntity<List<?>> getStudentTransactions(@PathVariable String studentNumber,
-                                          @RequestParam(defaultValue = "false") boolean returned,
-                                          @RequestParam(defaultValue = "false") boolean historical) {
+                                                          @RequestParam(defaultValue = "false") boolean returned,
+                                                          @RequestParam(defaultValue = "false") boolean historical,
+                                                          @RequestParam(required = false) String status) {
         Stream<Transaction> studentTransactions = service.getStudentTransactions(studentNumber).stream();
-        if(returned) {
+        if (status != null) {
+            studentTransactions = studentTransactions.filter(t -> t.getStatus().getName().equalsIgnoreCase(status));
+        }
+
+        if (returned) {
             studentTransactions = studentTransactions.filter(t -> t.getEquipments().isEmpty());
         } else {
             studentTransactions = studentTransactions.filter(t -> !t.getEquipments().isEmpty());
         }
 
-        if(historical) {
+        if (historical) {
             List<TransactionHistListDto> transactionHistListDto = studentTransactions.map(Transaction::toTransactionHistListDto).toList();
             return ResponseEntity.ok(transactionHistListDto);
         }
@@ -102,16 +108,16 @@ public class TransactionController {
 
     @GetMapping("/transactions/professor/{name}")
     public ResponseEntity<List<?>> getProfessorTransactions(@PathVariable String name,
-                                                          @RequestParam(defaultValue = "false") boolean returned,
-                                                          @RequestParam(defaultValue = "false") boolean historical) {
+                                                            @RequestParam(defaultValue = "false") boolean returned,
+                                                            @RequestParam(defaultValue = "false") boolean historical) {
         Stream<Transaction> professorTransactions = service.getProfessorTransactions(name).stream();
-        if(returned) {
+        if (returned) {
             professorTransactions = professorTransactions.filter(t -> t.getEquipments().isEmpty());
         } else {
             professorTransactions = professorTransactions.filter(t -> !t.getEquipments().isEmpty());
         }
 
-        if(historical) {
+        if (historical) {
             List<TransactionHistListDto> transactionHistListDto = professorTransactions.map(Transaction::toTransactionHistListDto).toList();
             return ResponseEntity.ok(transactionHistListDto);
         }
@@ -130,9 +136,9 @@ public class TransactionController {
         Stream<Transaction> transactions = service.getAll().stream();
 
         // if fromDate and toDate is present, filter the transactions again
-        if(fromDate != null && toDate != null) {
+        if (fromDate != null && toDate != null) {
             transactions = transactions.filter(t -> t.getBorrowedAt().isAfter(fromDate) && t.getBorrowedAt().isBefore(toDate));
-            response.setHeader("Content-Disposition", "attachment; filename=transactions("+ fromDate + "-" + toDate +").xlsx");
+            response.setHeader("Content-Disposition", "attachment; filename=transactions(" + fromDate + "-" + toDate + ").xlsx");
         }
 
         ByteArrayInputStream stream = service.listToExcel(transactions.toList());
@@ -143,7 +149,7 @@ public class TransactionController {
     public ResponseEntity<Object> upload(@RequestParam(required = false, defaultValue = "false") Boolean overwrite,
                                          @RequestParam MultipartFile file) {
         log.info("Preparing Excel for Transaction Database update");
-        if(!Objects.equals(file.getContentType(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")){
+        if (!Objects.equals(file.getContentType(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")) {
             throw new ApiException("Can only upload .xlsx files", HttpStatus.BAD_REQUEST);
         }
         List<Transaction> transactions = service.excelToList(file);
@@ -162,8 +168,8 @@ public class TransactionController {
                                                  @RequestParam(required = false, defaultValue = "false") boolean historical) {
         Transaction transaction = service.get(code);
         // condition statements for complete details and historical data
-        if(Boolean.TRUE.equals(complete)) {
-            if(Boolean.TRUE.equals(historical)) {
+        if (Boolean.TRUE.equals(complete)) {
+            if (Boolean.TRUE.equals(historical)) {
                 TransactionHistDto dto = Transaction.toTransactionHistDto(transaction);
                 return ResponseEntity.ok(dto);
             } else {
@@ -171,7 +177,7 @@ public class TransactionController {
                 return ResponseEntity.ok(dto);
             }
         } else {
-            if(Boolean.TRUE.equals(historical)) {
+            if (Boolean.TRUE.equals(historical)) {
                 TransactionHistListDto dto = Transaction.toTransactionHistListDto(transaction);
                 return ResponseEntity.ok(dto);
             } else {

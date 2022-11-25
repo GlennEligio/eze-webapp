@@ -98,8 +98,8 @@ public class TransactionControllerTest {
         eq1 = new Equipment("EqCode1", "Name1", "Barcode1", EqStatus.GOOD, null, true, false, false);
         eq2 = new Equipment("EqCode2", "Name2", "Barcode2", EqStatus.GOOD, null, false, false, false);
 
-        // all items returned
-        tx0 = new Transaction(new ObjectId().toHexString(), new ArrayList<>(), List.of(eq0, eq1), student, professor1, timeStamp, null, TxStatus.PENDING, false);
+        // all items returned, accepted status
+        tx0 = new Transaction(new ObjectId().toHexString(), new ArrayList<>(), List.of(eq0, eq1), student, professor1, timeStamp, null, TxStatus.ACCEPTED, false);
         // eq0 is not returned yet
         tx1 = new Transaction(new ObjectId().toHexString(), List.of(eq0), List.of(eq0, eq1), student2, professor2, timeStamp, null, TxStatus.PENDING, false);
         // eq2 is not returned yet
@@ -712,6 +712,31 @@ public class TransactionControllerTest {
         mockMvc.perform(get("/api/v1/transactions/student/" + validStudentNumber)
                         .param("returned", returnedParam)
                         .param("historical", historicalParam))
+                .andExpect(status().isOk())
+                .andExpect(content().json(responseJson));
+    }
+
+    @Test
+    @DisplayName("Get Student's Transactions with status of ACCEPTED using valid Auth")
+    @WithMockUser(authorities = "STUDENT_ASSISTANT")
+    void getStudentTransactions_withStatusParamUsingValidAuth_returns200OkWithTransactionsOfSameStatus() throws Exception {
+        String returnedParam = "true";
+        String historicalParam = "true"; // default value of historical
+        String statusParam = "ACCEPTED";
+        String validStudentNumber = student.getStudentNumber();
+        List<Transaction> studentTransactions = transactionList.stream()
+                .filter(t -> !t.getDeleteFlag())
+                .filter(t -> t.getBorrower().getStudentNumber().equalsIgnoreCase(validStudentNumber)).toList();
+        List<Transaction> acceptedTransactions = transactionList.stream().filter(t -> t.getStatus().getName().equalsIgnoreCase(statusParam)).toList();
+        List<Transaction> returnedStudentTransactions = acceptedTransactions.stream().filter(t -> t.getEquipments().isEmpty()).toList();
+        List<TransactionHistListDto> dtoResponse = returnedStudentTransactions.stream().map(Transaction::toTransactionHistListDto).toList();
+        when(service.getStudentTransactions(validStudentNumber)).thenReturn(studentTransactions);
+        String responseJson = mapper.writeValueAsString(dtoResponse);
+
+        mockMvc.perform(get("/api/v1/transactions/student/" + validStudentNumber)
+                        .param("returned", returnedParam)
+                        .param("historical", historicalParam)
+                        .param("status", statusParam))
                 .andExpect(status().isOk())
                 .andExpect(content().json(responseJson));
     }
