@@ -109,10 +109,10 @@ function TransactionHistory() {
 
   return (
     <>
-      <div className="container-md d-flex flex-column h-100">
+      <div className="container-lg d-flex flex-column h-100">
         <div className="row">
           <header>
-            <div className="pt-5 pb-2">
+            <div className="pt-2 pb-1">
               <div className="d-flex justify-content-between">
                 <div className="my-auto">
                   <span>
@@ -134,12 +134,12 @@ function TransactionHistory() {
             </div>
           </header>
         </div>
-        <div className="row h-80">
+        <div className="row h-85">
           <main className="col-12 d-flex flex-column h-100">
             <div className="row mt-2 gx-1">
               <div className="col d-flex align-items-center justify-content-end">
-                <form onSubmit={searchTransactionHandler}>
-                  <div className="d-flex">
+                <form onSubmit={searchTransactionHandler} className="w-100">
+                  <div className="d-flex overflow-auto">
                     <div className="d-flex align-items-center me-4">
                       <div className="me-2 fs-5">From:</div>
                       <input

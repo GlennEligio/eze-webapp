@@ -19,6 +19,9 @@
 .h-80 {
   height: 80% !important;
 }
+.h-85 {
+  height: 85% !important;
+}
 .h-90 {
   height: 90% !important;
 }
@@ -34,4 +37,62 @@
 }
 .mh-50 {
   max-height: 50% !important;
+}
+
+.invalid input,
+.invalid select {
+  border: 2px solid #b40e0e !important;
+  background-color: #fddddd !important;
+}
+
+.invalid span {
+  color: #b40e0e;
+  margin-left: 0.5rem;
+  font-size: small;
+}
+
+.request-status-message {
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+.request-status-message.pending {
+  color: black;
+}
+
+.request-status-message span {
+  margin-left: 0.5rem;
+}
+
+.request-status-message.success {
+  color: green;
+}
+
+.request-status-message.error {
+  color: red;
+}
+
+.eze-menu {
+  font-family: sans-serif;
+  font-size: 0.925rem;
+  user-select: none;
+  box-shadow: 1px 1px 20px 1px rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+  padding: 6px;
+  min-width: 10rem;
+  list-style: none;
+  background-color: white;
+}
+
+.eze-menu li {
+  border-radius: 6px;
+  padding: 0.375rem 0.625rem;
+}
+
+.eze-menu li:hover {
+  border-radius: 6px;
+  padding: 0.375rem 0.625rem;
+  color: #fff;
+  background-color: #59a2ff;
+  border-color: white;
 }
