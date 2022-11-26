@@ -1,0 +1,127 @@
+# Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    deployment.kubernetes.io/revision: "1"
+  labels:
+    app: eze-backend-spring
+  name: eze-backend-spring
+  namespace: default
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: eze-backend-spring
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: eze-backend-spring
+    spec:
+      containers:
+        - image: shuntjg/eze-backend-spring:0.0.1-SNAPSHOT
+          imagePullPolicy: IfNotPresent
+          name: eze-backend-spring
+          envFrom:
+            - configMapRef:
+                name: eze-backend-spring
+          readinessProbe:
+            httpGet:
+              port: 8080
+              path: /actuator/health/readiness
+          livenessProbe:
+            httpGet:
+              port: 8080
+              path: /actuator/health/liveness
+            initialDelaySeconds: 30
+            periodSeconds: 50
+      restartPolicy: Always
+
+---
+# Service
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: eze-backend-spring
+  name: eze-backend-spring
+  namespace: default
+spec:
+  ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: 8080
+  selector:
+    app: eze-backend-spring
+  sessionAffinity: None
+  type: ClusterIP
+
+---
+# Configmap
+apiVersion: v1
+data:
+  MYSQL_SERVICE_URI: eze-backend-mariadb-service
+  MYSQL_USERNAME: root
+  MYSQL_PASSWORD: P4ssw0rd
+  USER-SERVICE_SECRETKEY: grocerybillapp
+kind: ConfigMap
+metadata:
+  name: eze-backend-spring-configmap
+  namespace: default
+
+---
+# StatefulSet for Mysql Server
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: eze-backend-mariadb
+spec:
+  serviceName: "eze-backend-mariadb-service"
+  selector:
+    matchLabels:
+      app: eze-backend-mariadb
+  template:
+    metadata:
+      labels:
+        app: eze-backend-mariadb
+    spec:
+      containers:
+        - name: eze-backend-mariadb
+          image: mariadb:10.8.2-rc
+          ports:
+            - containerPort: 3306
+          env:
+            - name: MARIADB_ROOT_PASSWORD
+              value: "P4ssw0rd"
+            - name: MARIADB_DATABASE
+              value: eze-database
+          volumeMounts:
+            - mountPath: /data/eze
+              name: eze-backend-data
+  volumeClaimTemplates:
+    - metadata:
+        name: eze-backend-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: eze-backend-mariadb-service
+spec:
+  clusterIP: None
+  selector:
+    app: eze-backend-mariadb
+  ports:
+    - port: 3306
+      targetPort: 3306

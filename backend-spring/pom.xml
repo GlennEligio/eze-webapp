@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.eze</groupId>
-	<artifactId>backend.spring</artifactId>
+	<artifactId>backend-spring</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>backend.spring</name>
+	<name>backend-spring</name>
 	<description>Eze Backend Spring</description>
 	<properties>
 		<java.version>17</java.version>
@@ -126,6 +126,10 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
+					<image>
+						<name>shuntjg/eze-${project.artifactId}:${project.version}</name>
+					</image>
+					<pullPolicy>IF_NOT_PRESENT</pullPolicy>
 					<excludes>
 						<exclude>
 							<groupId>org.projectlombok</groupId>
