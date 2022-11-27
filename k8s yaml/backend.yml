@@ -30,7 +30,7 @@ spec:
           name: eze-backend-spring
           envFrom:
             - configMapRef:
-                name: eze-backend-spring
+                name: eze-backend-spring-configmap
           readinessProbe:
             httpGet:
               port: 8080
@@ -50,7 +50,7 @@ kind: Service
 metadata:
   labels:
     app: eze-backend-spring
-  name: eze-backend-spring
+  name: eze-backend-spring-service
   namespace: default
 spec:
   ports:
@@ -60,16 +60,18 @@ spec:
   selector:
     app: eze-backend-spring
   sessionAffinity: None
+  # for standalone backend api test, set the type to LoadBalancer and use port 8080 of the machine
   type: ClusterIP
 
 ---
 # Configmap
 apiVersion: v1
 data:
-  MYSQL_SERVICE_URI: eze-backend-mariadb-service
-  MYSQL_USERNAME: root
-  MYSQL_PASSWORD: P4ssw0rd
-  USER-SERVICE_SECRETKEY: grocerybillapp
+  EZE_BACKEND_MYSQL_SERVICE_URI: eze-backend-mariadb-service
+  EZE_BACKEND_MYSQL_USERNAME: root
+  EZE_BACKEND_MYSQL_PASSWORD: P4ssw0rd
+  EZE_BACKEND_JWT_SECRET_KEY: somerandomstringagain
+  EZE_BACKEND_SERVER_PORT: "8080"
 kind: ConfigMap
 metadata:
   name: eze-backend-spring-configmap
