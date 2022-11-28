@@ -42,7 +42,9 @@ export interface CreateUpdateAccountDto {
   profile: string;
 }
 
-const BACKEND_URI = "http://localhost:8080";
+const windowObj = window as any;
+const envObj = windowObj._env_;
+const BACKEND_URI = `http://${envObj.REACT_APP_BACKEND_SERVICE_URI}`;
 
 const login = async (requestConfig: RequestConfig) => {
   const responseObj: LoginResponseDto = await fetch(
