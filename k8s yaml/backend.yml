@@ -60,7 +60,7 @@ spec:
   selector:
     app: eze-backend-spring
   sessionAffinity: None
-  # for standalone backend api test, set the type to LoadBalancer and use port 8080 of the machine
+  # for standalone backend api testing, set the type to LoadBalancer and use port 8080 of the machine
   type: ClusterIP
 
 ---

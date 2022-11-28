@@ -1,0 +1,75 @@
+# Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    deployment.kubernetes.io/revision: "1"
+  labels:
+    app: eze-frontend
+  name: eze-frontend
+  namespace: default
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: eze-frontend
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: eze-frontend
+    spec:
+      containers:
+        - image: "shuntjg/eze-frontend:0.0.1.PROD"
+          name: eze-frontend
+          envFrom:
+            - configMapRef:
+                name: eze-frontend-configmap
+          livenessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - "[ -f /var/run/nginx.pid ] && ps -A | grep nginx"
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          readinessProbe:
+            tcpSocket:
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 5
+      restartPolicy: Always
+
+---
+# Configmap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: eze-frontend-configmap
+  namespace: default
+data:
+  REACT_APP_BACKEND_SERVICE_URI: "eze-backend-spring-service"
+
+---
+# Service
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: eze-frontend
+  name: eze-frontend-service
+  namespace: default
+spec:
+  ports:
+    - port: 80
+      protocol: TCP
+      targetPort: 80
+  selector:
+    app: eze-frontend
+  sessionAffinity: None
+  type: LoadBalancer

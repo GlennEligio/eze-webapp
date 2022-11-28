@@ -12,7 +12,9 @@ export interface CreateYearLevelDto {
   yearNumber: number;
 }
 
-const BACKEND_URI = "http://localhost:8080";
+const windowObj = window as any;
+const envObj = windowObj._env_;
+const BACKEND_URI = `http://${envObj.REACT_APP_BACKEND_SERVICE_URI}`;
 
 const getYearLevels = async (requestConfig: RequestConfig) => {
   const responseObj: YearLevel[] = await fetch(

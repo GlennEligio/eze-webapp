@@ -35,7 +35,9 @@ export interface CreateUpdateTransaction {
   status: "PENDING" | "ACCEPTED" | "DENIED";
 }
 
-const BACKEND_URI = "http://localhost:8080";
+const windowObj = window as any;
+const envObj = windowObj._env_;
+const BACKEND_URI = `http://${envObj.REACT_APP_BACKEND_SERVICE_URI}`;
 
 // TODO: Refactor api functions so it will be only one function that takes different inputs
 const getTransactions = async (requestConfig: RequestConfig) => {
