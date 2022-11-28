@@ -20,9 +20,10 @@ export interface CreateUpdateEquipmentDto {
   isDuplicable: boolean;
 }
 
-const windowObj = window as any;
-const envObj = windowObj._env_;
-const BACKEND_URI = `http://${envObj.REACT_APP_BACKEND_SERVICE_URI}`;
+const BACKEND_URI =
+  process.env.NODE_ENV === "development"
+    ? process.env.REACT_APP_BACKEND_GATEWAY_URI_DEV
+    : process.env.REACT_APP_BACKEND_GATEWAY_URI_PROD;
 
 const getEquipments = async (requestConfig: RequestConfig) => {
   const responseObj: Equipment[] = await fetch(
