@@ -48,9 +48,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  labels:
-    app: eze-backend-spring
-  name: eze-backend-spring-service
+  name: api-gateway
   namespace: default
 spec:
   ports:
