@@ -54,6 +54,118 @@
             </div>
           </header>
         </div>
+        <div class="row">
+          <main>
+            <form>
+              <div class="row">
+                <div class="col-6">
+                  <!-- Credentials -->
+                  <div>
+                    <div>
+                      <p><b>Credentials</b></p>
+                    </div>
+                    <div class="mb-2">
+                      <label for="studentAccountUsername" class="form-label"
+                        >Username</label
+                      >
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="studentAccountUsername"
+                      />
+                    </div>
+                    <div class="mb-2">
+                      <label for="studentAccountPassword" class="form-label"
+                        >Password</label
+                      >
+                      <input
+                        type="password"
+                        class="form-control"
+                        id="studentAccountPassword"
+                      />
+                    </div>
+                  </div>
+                  <!-- Personal Information -->
+                  <br />
+                  <div>
+                    <p><b>Personal Information</b></p>
+                    <div class="mb-2">
+                      <label for="studentAccountFullName" class="form-label"
+                        >Full name</label
+                      >
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="studentAccountFullName"
+                      />
+                    </div>
+                    <div class="mb-2">
+                      <label for="studentAccountEmail" class="form-label"
+                        >Email</label
+                      >
+                      <input
+                        type="email"
+                        class="form-control"
+                        id="studentAccountEmail"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <p><b>Display</b></p>
+                  <div>
+                    <span>Photo</span>
+                    <div class="row">
+                      <div class="col-4 d-flex justify-content-end">
+                        <img
+                          src="./img/example student image.jpg"
+                          alt=""
+                          class="rounded-circle"
+                          width="100px"
+                          height="100px"
+                          style="object-fit: cover"
+                        />
+                      </div>
+                      <div class="col-8">
+                        <div class="d-flex flex-column">
+                          <div class="mb-2">
+                            <label
+                              for="studentAccountProfileUrl"
+                              class="form-label"
+                              >Profile image url</label
+                            >
+                            <input
+                              type="text"
+                              class="form-control"
+                              id="studentAccounttProfileUrl"
+                            />
+                          </div>
+                          <div>
+                            <button
+                              class="btn btn-sm btn-success"
+                              type="button"
+                            >
+                              Check
+                            </button>
+                            <button class="btn btn-sm btn-dark" type="button">
+                              Remove
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <hr />
+              <div class="row">
+                <div class="col d-flex justify-content-end">
+                  <button class="btn btn-success" type="submit">Update</button>
+                </div>
+              </div>
+            </form>
+          </main>
+        </div>
       </div>
       <!-- Offcanvas -->
       <div>
@@ -91,6 +203,9 @@
               <nav class="nav nav-pills flex-column">
                 <a class="nav-link active" aria-current="page" href="#"
                   ><i class="bi bi-house-fill"></i> Home</a
+                >
+                <a class="nav-link" aria-current="page" href="#"
+                  ><i class="bi bi-bag-plus-fill"></i> Borrow Equipments</a
                 >
                 <a class="nav-link" href="#"
                   ><i class="bi bi-clock-history"></i> Current Transactions</a

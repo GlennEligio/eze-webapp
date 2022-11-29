@@ -20,7 +20,7 @@
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.2/font/bootstrap-icons.css"
     />
-    <title>Current Transactions</title>
+    <title>Borrow Equipments</title>
   </head>
   <body>
     <div class="vh-100 d-flex flex-column border-top border-info border-5">
@@ -42,116 +42,63 @@
                 </div>
                 <div class="d-flex justify-content-end">
                   <div class="d-flex align-items-center">
-                    <i class="bi bi-clock-history fs-1"></i>
+                    <i class="bi bi-bag-plus-fill fs-1"></i>
                   </div>
                   <div
                     class="d-flex flex-column justify-content-center ms-3 flex-grow-1"
                   >
-                    <span class="fs-3">Current Transactions</span>
+                    <span class="fs-3">Borrow Equipments</span>
                   </div>
                 </div>
               </div>
             </div>
           </header>
         </div>
-        <div class="row h-85">
-          <main class="col-12 d-flex flex-column h-100">
-            <div class="row mt-2 gx-1">
-              <div class="col d-flex align-items-center justify-content-end">
-                <form class="w-100">
-                  <div class="d-flex justify-content-end">
-                    <div class="d-flex align-items-center me-4">
-                      <div class="me-2 fs-5">From:</div>
-                      <input type="datetime-local" class="form-control" />
-                    </div>
-                    <div class="d-flex align-items-center me-4">
-                      <div class="me-2 fs-5">To:</div>
-                      <input type="datetime-local" class="form-control" />
-                    </div>
-                    <div class="d-flex">
-                      <button class="btn btn-dark me-2">
-                        <i class="bi bi-search"></i> Search
-                      </button>
-                      <div class="dropdown">
-                        <button
-                          class="btn btn-dark me-2 dropdown-toggle"
-                          type="button"
-                          data-bs-toggle="dropdown"
-                          aria-expanded="false"
-                        >
-                          Status
-                        </button>
-                        <ul class="dropdown-menu" style="z-index: 1000">
-                          <li>
-                            <a class="dropdown-item" href="#"
-                              ><i class="bi bi-hourglass-split"></i> Pending</a
-                            >
-                          </li>
-                          <li>
-                            <a class="dropdown-item" href="#"
-                              ><i class="bi bi-check"></i> Accepted</a
-                            >
-                          </li>
-                          <li>
-                            <a class="dropdown-item" href="#">
-                              <i class="bi bi-x"></i>Rejected</a
-                            >
-                          </li>
-                        </ul>
-                      </div>
-                      <button class="btn btn-dark">
-                        <i class="bi bi-arrow-repeat"></i> Reset
+        <div class="row">
+          <main>
+            <form>
+              <div class="row">
+                <div class="col-6">
+                  <div class="mb-3">
+                    <label for="borrowStudentNumber" class="form-label"
+                      >Borrower Student Number</label
+                    >
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="borrowStudentNumber"
+                    />
+                  </div>
+                  <!-- Equipment Search box -->
+                  <div class="mb-3">
+                    <label for="borrowEquipment" class="form-label"
+                      >Equipment</label
+                    >
+                    <div class="input-group mb-3">
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="borrowEquipment"
+                      />
+                      <button class="btn btn-secondary" type="button">
+                        <i class="bi bi-search"></i>
                       </button>
                     </div>
                   </div>
-                </form>
+                  <!-- Equipments Search result list -->
+                  <div class="list-group"></div>
+                </div>
+                <div class="col-6"></div>
               </div>
-            </div>
-            <div class="row mt-2 gx-0 overflow-auto">
-              <div class="col">
-                <div class="table-responsive-xxl">
-                  <table
-                    class="table table-sm table-hover"
-                    style="min-width: 1500px"
-                  >
-                    <thead class="table-dark">
-                      <tr>
-                        <th>Transaction Code</th>
-                        <th>Borrower</th>
-                        <th>Year and Section</th>
-                        <th>Equipment Count</th>
-                        <th>Professor</th>
-                        <th>Borrowed At</th>
-                        <th>Returned At</th>
-                        <th>Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td>123123123</td>
-                        <td>John Doe</td>
-                        <td>BSECE 1-3</td>
-                        <td>3</td>
-                        <td>Prof John Doe</td>
-                        <td>April 24 123123</td>
-                        <td>APril 24 2132312</td>
-                        <td>ACCEPTED</td>
-                      </tr>
-                    </tbody>
-                  </table>
+              <hr />
+              <div class="row">
+                <div class="col d-flex justify-content-end">
+                  <button class="btn btn-success" type="submit">
+                    Borrow Equipments
+                  </button>
                 </div>
               </div>
-            </div>
-            <div class="row py-1 mt-auto">
-              <div
-                class="col d-flex justify-content-between align-items-center"
-              >
-                <div>
-                  <h5>List of Transactions: 1</h5>
-                </div>
-                <MiniClock />
-              </div>
-            </div>
+            </form>
           </main>
         </div>
       </div>
