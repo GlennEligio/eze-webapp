@@ -72,4 +72,4 @@ spec:
   selector:
     app: eze-frontend
   sessionAffinity: None
-  type: LoadBalancer
+  type: ClusterIP
