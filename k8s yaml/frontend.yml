@@ -53,7 +53,7 @@ metadata:
   name: eze-frontend-configmap
   namespace: glenneligio
 data:
-  REACT_APP_BACKEND_SERVICE_URI_PROD: http://localhost:80 #DONT wrap in double quotes
+  REACT_APP_BACKEND_SERVICE_URI_PROD: https://eze-glenneligio.cloud.okteto.net #DONT wrap in double quotes
 
 ---
 # Service
