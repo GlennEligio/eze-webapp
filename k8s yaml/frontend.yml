@@ -7,7 +7,7 @@ metadata:
   labels:
     app: eze-frontend
   name: eze-frontend
-  namespace: default
+  namespace: glenneligio
 spec:
   replicas: 1
   revisionHistoryLimit: 10
@@ -51,7 +51,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: eze-frontend-configmap
-  namespace: default
+  namespace: glenneligio
 data:
   REACT_APP_BACKEND_SERVICE_URI_PROD: http://localhost:80 #DONT wrap in double quotes
 
@@ -63,7 +63,7 @@ metadata:
   labels:
     app: eze-frontend
   name: eze-frontend-service
-  namespace: default
+  namespace: glenneligio
 spec:
   ports:
     - port: 80
