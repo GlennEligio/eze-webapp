@@ -35,10 +35,17 @@ export interface CreateUpdateTransaction {
   status: "PENDING" | "ACCEPTED" | "DENIED";
 }
 
-const BACKEND_URI =
-  process.env.NODE_ENV === "development"
-    ? process.env.REACT_APP_BACKEND_GATEWAY_URI_DEV
-    : process.env.REACT_APP_BACKEND_GATEWAY_URI_PROD;
+const envSettings = (window as any)._env_;
+
+const getBackendUri = () => {
+  if (process.env.NODE_ENV === "development") {
+    return envSettings.REACT_APP_BACKEND_SERVICE_URI_DEV;
+  } else if (process.env.NODE_ENV === "production") {
+    return envSettings.REACT_APP_BACKEND_SERVICE_URI_PROD;
+  }
+};
+
+const BACKEND_URI = getBackendUri();
 
 // TODO: Refactor api functions so it will be only one function that takes different inputs
 const getTransactions = async (requestConfig: RequestConfig) => {

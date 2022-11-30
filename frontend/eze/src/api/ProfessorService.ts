@@ -12,10 +12,17 @@ export interface CreateUpdateProfessor {
   contactNumber: string;
 }
 
-const BACKEND_URI =
-  process.env.NODE_ENV === "development"
-    ? process.env.REACT_APP_BACKEND_GATEWAY_URI_DEV
-    : process.env.REACT_APP_BACKEND_GATEWAY_URI_PROD;
+const envSettings = (window as any)._env_;
+
+const getBackendUri = () => {
+  if (process.env.NODE_ENV === "development") {
+    return envSettings.REACT_APP_BACKEND_SERVICE_URI_DEV;
+  } else if (process.env.NODE_ENV === "production") {
+    return envSettings.REACT_APP_BACKEND_SERVICE_URI_PROD;
+  }
+};
+
+const BACKEND_URI = getBackendUri();
 
 const getProfessors = async (requestConfig: RequestConfig) => {
   const responseObj: Professor[] = await fetch(

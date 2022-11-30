@@ -53,7 +53,7 @@ metadata:
   name: eze-frontend-configmap
   namespace: default
 data:
-  REACT_APP_BACKEND_SERVICE_URI: "eze-backend-spring-service"
+  REACT_APP_BACKEND_SERVICE_URI_PROD: http://localhost:80 #DONT wrap in double quotes
 
 ---
 # Service
