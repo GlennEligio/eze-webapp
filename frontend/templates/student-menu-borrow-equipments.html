@@ -57,6 +57,7 @@
         <div class="row">
           <main>
             <form>
+              <!-- Borrower Student Number -->
               <div class="row">
                 <div class="col-6">
                   <div class="mb-3">
@@ -69,7 +70,121 @@
                       id="borrowStudentNumber"
                     />
                   </div>
-                  <!-- Equipment Search box -->
+                </div>
+              </div>
+              <!-- Professor -->
+              <div class="row">
+                <label for="borrowProfessor" class="form-label"
+                  >Professor</label
+                >
+              </div>
+              <div class="row">
+                <div class="col-6">
+                  <div class="input-group mb-3">
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="borrowEquipment"
+                      list="borrowEquipment"
+                    />
+                    <button class="btn btn-secondary" type="button">
+                      <i class="bi bi-search"></i>
+                    </button>
+                  </div>
+                </div>
+                <div
+                  class="col-1 d-flex justify-content-center align-items-start"
+                >
+                  <i class="bi bi-caret-right-fill fs-4"></i>
+                </div>
+                <div class="col-5">
+                  <ul
+                    class="list-group"
+                    style="max-height: 30vh; overflow-y: auto"
+                  >
+                    <li class="list-group-item">
+                      <div class="d-flex justify-content-between">
+                        <a href="">Professor 1</a>
+                        <i class="bi bi-plus-lg"></i>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              <!-- Professor search result -->
+              <div class="row mb-3">
+                <div class="col-6">
+                  <ul
+                    class="list-group"
+                    style="max-height: 20vh; overflow-y: auto"
+                  >
+                    <li class="list-group-item">
+                      <div class="d-flex justify-content-between">
+                        <a href="">Equipment no. 1</a>
+                        <i class="bi bi-dash-lg"></i>
+                      </div>
+                    </li>
+                    <li class="list-group-item">
+                      <div class="d-flex justify-content-between">
+                        <a href="">Equipment no. 2</a>
+                        <i class="bi bi-dash-lg"></i>
+                      </div>
+                    </li>
+                    <li class="list-group-item">
+                      <div class="d-flex justify-content-between">
+                        <a href="">Equipment no. 3</a>
+                        <i class="bi bi-dash-lg"></i>
+                      </div>
+                    </li>
+                    <li class="list-group-item">
+                      <div class="d-flex justify-content-between">
+                        <a href="">Equipment no. 3</a>
+                        <i class="bi bi-dash-lg"></i>
+                      </div>
+                    </li>
+                    <li class="list-group-item">
+                      <div class="d-flex justify-content-between">
+                        <a href="">Equipment no. 3</a>
+                        <i class="bi bi-dash-lg"></i>
+                      </div>
+                    </li>
+                    <li class="list-group-item">
+                      <div class="d-flex justify-content-between">
+                        <a href="">Equipment no. 3</a>
+                        <i class="bi bi-dash-lg"></i>
+                      </div>
+                    </li>
+                    <li class="list-group-item">
+                      <div class="d-flex justify-content-between">
+                        <a href="">Equipment no. 3</a>
+                        <i class="bi bi-dash-lg"></i>
+                      </div>
+                    </li>
+                    <li class="list-group-item">
+                      <div class="d-flex justify-content-between">
+                        <a href="">Equipment no. 3</a>
+                        <i class="bi bi-dash-lg"></i>
+                      </div>
+                    </li>
+                    <li class="list-group-item">
+                      <div class="d-flex justify-content-between">
+                        <a href="">Equipment no. 3</a>
+                        <i class="bi bi-dash-lg"></i>
+                      </div>
+                    </li>
+                    <li class="list-group-item">
+                      <div class="d-flex justify-content-between">
+                        <a href="">Equipment no. 3</a>
+                        <i class="bi bi-dash-lg"></i>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+              <!-- Equipment borrow form -->
+              <div class="row">
+                <!-- Equipment Search box -->
+                <div class="col-6">
                   <div class="mb-3">
                     <label for="borrowEquipment" class="form-label"
                       >Equipment</label
@@ -79,16 +194,146 @@
                         type="text"
                         class="form-control"
                         id="borrowEquipment"
+                        list="borrowEquipment"
                       />
                       <button class="btn btn-secondary" type="button">
                         <i class="bi bi-search"></i>
                       </button>
                     </div>
                   </div>
-                  <!-- Equipments Search result list -->
-                  <div class="list-group"></div>
                 </div>
-                <div class="col-6"></div>
+              </div>
+              <!-- Equipment search result and borrowed list -->
+              <div class="row">
+                <!-- Equipment search result list -->
+                <div class="col-6">
+                  <ul
+                    class="list-group"
+                    style="max-height: 20vh; overflow-y: auto"
+                  >
+                    <li class="list-group-item">
+                      <div class="d-flex justify-content-between">
+                        <a href="">Equipment no. 1</a>
+                        <i class="bi bi-plus-lg"></i>
+                      </div>
+                    </li>
+                    <li class="list-group-item">
+                      <div class="d-flex justify-content-between">
+                        <a href="">Equipment no.2</a>
+                        <i class="bi bi-plus-lg"></i>
+                      </div>
+                    </li>
+                    <li class="list-group-item">
+                      <div class="d-flex justify-content-between">
+                        <a href="">Equipment no. 3</a>
+                        <i class="bi bi-plus-lg"></i>
+                      </div>
+                    </li>
+                    <li class="list-group-item">
+                      <div class="d-flex justify-content-between">
+                        <a href="">Equipment no. 3</a>
+                        <i class="bi bi-plus-lg"></i>
+                      </div>
+                    </li>
+                    <li class="list-group-item">
+                      <div class="d-flex justify-content-between">
+                        <a href="">Equipment no. 3</a>
+                        <i class="bi bi-plus-lg"></i>
+                      </div>
+                    </li>
+                    <li class="list-group-item">
+                      <div class="d-flex justify-content-between">
+                        <a href="">Equipment no. 3</a>
+                        <i class="bi bi-plus-lg"></i>
+                      </div>
+                    </li>
+                    <li class="list-group-item">
+                      <div class="d-flex justify-content-between">
+                        <a href="">Equipment no. 3</a>
+                        <i class="bi bi-plus-lg"></i>
+                      </div>
+                    </li>
+                    <li class="list-group-item">
+                      <div class="d-flex justify-content-between">
+                        <a href="">Equipment no. 3</a>
+                        <i class="bi bi-plus-lg"></i>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+                <div
+                  class="col-1 d-flex justify-content-center align-items-center"
+                >
+                  <i class="bi bi-caret-right-fill fs-4"></i>
+                </div>
+                <!-- Equipment selected -->
+                <div class="col-5">
+                  <ul
+                    class="list-group"
+                    style="max-height: 20vh; overflow-y: auto"
+                  >
+                    <li class="list-group-item">
+                      <div class="d-flex justify-content-between">
+                        <a href="">Equipment no. 1</a>
+                        <i class="bi bi-dash-lg"></i>
+                      </div>
+                    </li>
+                    <li class="list-group-item">
+                      <div class="d-flex justify-content-between">
+                        <a href="">Equipment no. 2</a>
+                        <i class="bi bi-dash-lg"></i>
+                      </div>
+                    </li>
+                    <li class="list-group-item">
+                      <div class="d-flex justify-content-between">
+                        <a href="">Equipment no. 3</a>
+                        <i class="bi bi-dash-lg"></i>
+                      </div>
+                    </li>
+                    <li class="list-group-item">
+                      <div class="d-flex justify-content-between">
+                        <a href="">Equipment no. 3</a>
+                        <i class="bi bi-dash-lg"></i>
+                      </div>
+                    </li>
+                    <li class="list-group-item">
+                      <div class="d-flex justify-content-between">
+                        <a href="">Equipment no. 3</a>
+                        <i class="bi bi-dash-lg"></i>
+                      </div>
+                    </li>
+                    <li class="list-group-item">
+                      <div class="d-flex justify-content-between">
+                        <a href="">Equipment no. 3</a>
+                        <i class="bi bi-dash-lg"></i>
+                      </div>
+                    </li>
+                    <li class="list-group-item">
+                      <div class="d-flex justify-content-between">
+                        <a href="">Equipment no. 3</a>
+                        <i class="bi bi-dash-lg"></i>
+                      </div>
+                    </li>
+                    <li class="list-group-item">
+                      <div class="d-flex justify-content-between">
+                        <a href="">Equipment no. 3</a>
+                        <i class="bi bi-dash-lg"></i>
+                      </div>
+                    </li>
+                    <li class="list-group-item">
+                      <div class="d-flex justify-content-between">
+                        <a href="">Equipment no. 3</a>
+                        <i class="bi bi-dash-lg"></i>
+                      </div>
+                    </li>
+                    <li class="list-group-item">
+                      <div class="d-flex justify-content-between">
+                        <a href="">Equipment no. 3</a>
+                        <i class="bi bi-dash-lg"></i>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
               </div>
               <hr />
               <div class="row">
