@@ -90,6 +90,7 @@ function TransactionHistory() {
       const params = {
         historical: "true",
         returned: "true",
+        complete: "false",
         fromDate,
         toDate,
       };

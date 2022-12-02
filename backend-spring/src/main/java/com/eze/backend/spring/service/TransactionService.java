@@ -74,14 +74,17 @@ public class TransactionService implements IService<Transaction>, IExcelService<
         }
 
         // Populate transaction's equipments
+        log.info("Getting complete equipment information of the borrowed equipments");
         List<Equipment> equipments = transaction.getEquipments().parallelStream()
                 .map(eq -> eqService.get(eq.getEquipmentCode()))
                 .toList();
 
         // Check if any equipments is not duplicable and is already borrowed
+        log.info("Checking if any equipments is borrowed already");
         checkEqAlreadyBorrowed(equipments);
 
         // Set the isBorrowed of non-duplicable equipment to true
+        log.info("Updating all non-duplicable equipments' borrowed status to true");
         equipments.forEach(e -> {
             if (Boolean.FALSE.equals(e.getIsDuplicable())) {
                 e.setIsBorrowed(true);
@@ -91,29 +94,34 @@ public class TransactionService implements IService<Transaction>, IExcelService<
 
         // Populate Equipment and Equipment history data of transaction
         // For Equipment, remove those that is duplicable (i.e. only maintain those that is not duplicable)
+        log.info("Populating eqHist and eqs of Transaction");
         transaction.setEquipmentsHist(new ArrayList<>(equipments));
         transaction.setEquipments(new ArrayList<>(equipments.stream().filter(e -> !e.getIsDuplicable()).toList()));
 
         // Populate Professor and Student data of transaction
+        log.info("Populating professor of Transaction");
         String profName = transaction.getProfessor().getName();
         transaction.setProfessor(profService.get(profName));
 
+        log.info("Populating student of Transaction");
         String studentNumber = transaction.getBorrower().getStudentNumber();
         transaction.setBorrower(studentService.get(studentNumber));
 
         // Set the transaction code
+        log.info("Generating txCode for Transaction");
         transaction.setTxCode(idGenerator.createId());
 
         // Set transaction status to pending
+        log.info("Setting status to PENDING of Transaction");
         transaction.setStatus(TxStatus.PENDING);
 
         // Set deleteFlag to false
+        log.info("Setting deleteFlag of Transaction to false");
         transaction.setDeleteFlag(false);
 
         // Add borrowed at in case its null
+        log.info("Add getBorrowedAt date to Transaction");
         if (transaction.getBorrowedAt() == null) transaction.setBorrowedAt(timeStampProvider.getNow());
-
-        log.info(transaction.toString());
         return txRepo.save(transaction);
     }
 

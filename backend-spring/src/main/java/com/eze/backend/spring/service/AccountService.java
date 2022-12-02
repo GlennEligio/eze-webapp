@@ -76,7 +76,6 @@ public class AccountService implements IService<Account>, IExcelService<Account>
             account.setCreatedAt(timeStampProvider.getNow());
             account.setActive(true);
             account.setDeleteFlag(false);
-            log.info(account.toString());
             return repository.save(account);
         }
         throw new ApiException("No username found in Account to create", HttpStatus.BAD_REQUEST);
