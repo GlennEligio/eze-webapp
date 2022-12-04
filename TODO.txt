@@ -5,3 +5,5 @@ TODOS:
 4. Add biometric functionlity to recognize the Student
 	> for now, we can use barcode(?) which should output student number to ease the inputting of student info in borrow and return form
 5. Add functionality for Room Scheduling (for room key borrow)
+6. Add functionality for Student to create Borrow Request
+7. Add functionality for Professor to to update Borrow Transactions status (PENDING, ACCEPTED, REJECTED)

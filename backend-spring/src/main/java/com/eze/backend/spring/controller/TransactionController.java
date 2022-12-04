@@ -43,6 +43,7 @@ public class TransactionController {
                                                    @RequestParam(required = false) Boolean returned,
                                                    @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime toDate,
                                                    @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fromDate) {
+        log.info("Fetching Transactions with params complete {}, historical {}, returned {}, fromDate {}, toDate {}", complete, historical, returned, fromDate, toDate);
         Stream<Transaction> transactions = service.getAll().stream();
 
         // if returned is false, only get transactions with no (duplicable) equipments in the "equipments" property
@@ -67,17 +68,18 @@ public class TransactionController {
 
         // historical will determine if we will use the equipment (current unreturned eqs) or equipmentHist (saved equipments history)
         // complete will determine if we will send the equipments with complete info or just send the number of equipments in transaction (unreturned or historical)
+        List<Transaction> transactionList = transactions.toList();
         if (Boolean.TRUE.equals(historical)) {
             if (Boolean.TRUE.equals(complete)) {
-                return ResponseEntity.ok(transactions.map(Transaction::toTransactionHistDto).toList());
+                return ResponseEntity.ok(transactionList.stream().map(Transaction::toTransactionHistDto).toList());
             } else {
-                return ResponseEntity.ok(transactions.map(Transaction::toTransactionHistListDto).toList());
+                return ResponseEntity.ok(transactionList.stream().map(Transaction::toTransactionHistListDto).toList());
             }
         } else {
             if (Boolean.TRUE.equals(complete)) {
-                return ResponseEntity.ok(transactions.map(Transaction::toTransactionDto).toList());
+                return ResponseEntity.ok(transactionList.stream().map(Transaction::toTransactionDto).toList());
             } else {
-                return ResponseEntity.ok(transactions.map(Transaction::toTransactionListDto).toList());
+                return ResponseEntity.ok(transactionList.stream().map(Transaction::toTransactionListDto).toList());
             }
         }
     }

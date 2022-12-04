@@ -12,9 +12,27 @@ export interface CreateUpdateProfessor {
   contactNumber: string;
 }
 
-const windowObj = window as any;
-const envObj = windowObj._env_;
-const BACKEND_URI = `http://${envObj.REACT_APP_BACKEND_SERVICE_URI}`;
+const envSettings = (window as any)._env_;
+
+const getBackendUri = () => {
+  if (
+    process.env.NODE_ENV === "development" &&
+    envSettings &&
+    envSettings.REACT_APP_BACKEND_SERVICE_URI_DEV
+  ) {
+    return envSettings.REACT_APP_BACKEND_SERVICE_URI_DEV;
+  } else if (
+    process.env.NODE_ENV === "production" &&
+    envSettings &&
+    envSettings.REACT_APP_BACKEND_SERVICE_URI_PROD
+  ) {
+    return envSettings.REACT_APP_BACKEND_SERVICE_URI_PROD;
+  } else {
+    return "http://localhost:8080";
+  }
+};
+
+const BACKEND_URI = getBackendUri();
 
 const getProfessors = async (requestConfig: RequestConfig) => {
   const responseObj: Professor[] = await fetch(

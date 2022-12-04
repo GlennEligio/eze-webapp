@@ -30,3 +30,6 @@ management:
 
 eze:
   secret-key: ${EZE_BACKEND_JWT_SECRET_KEY:somerandomstring}
+  sadmin-username: ${EZE_BACKEND_SADMIN_USERNAME:sadmin}
+  sadmin-password: ${EZE_BACKEND_SADMIN_PASSWORD:password}
+  sadmin-email: ${EZE_BACKEND_SADMIN_EMAIL:glenneligio@gmail.com}

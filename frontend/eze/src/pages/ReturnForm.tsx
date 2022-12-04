@@ -72,11 +72,16 @@ function ReturnForm() {
 
   // Get transactions on component mount
   useEffect(() => {
+    const params = new URLSearchParams({
+      returned: "false",
+      completed: "false",
+      historical: "false",
+    }).toString();
     const requestConfig: RequestConfig = {
       headers: {
         Authorization: `Bearer ${auth.accessToken}`,
       },
-      relativeUrl: "/api/v1/transactions?returned=false",
+      relativeUrl: "/api/v1/transactions?" + params,
     };
     getTransactions(requestConfig);
   }, [auth.accessToken]);

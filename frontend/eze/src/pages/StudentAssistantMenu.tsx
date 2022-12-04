@@ -9,9 +9,8 @@ import MenuHeader from "../components/Menu/MenuHeader";
 import MenuClock from "../components/Menu/MenuClock";
 import { ControlledMenu, MenuItem, useMenuState } from "@szhsin/react-menu";
 import MenuOffcanvas from "../components/Menu/MenuOffcanvas";
-import { YearLevel } from "../api/YearLevelService";
 
-const StudentMenu = () => {
+const StudentAssistantMenu = () => {
   const auth = useSelector((state: IRootState) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -162,4 +161,4 @@ const StudentMenu = () => {
   );
 };
 
-export default StudentMenu;
+export default StudentAssistantMenu;

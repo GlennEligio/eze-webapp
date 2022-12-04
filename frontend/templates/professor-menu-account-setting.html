@@ -90,15 +90,23 @@
                   <div>
                     <p><b>Personal Information</b></p>
                     <div class="mb-2">
-                      <label
-                        for="professorAccountContactNumber"
-                        class="form-label"
-                        >Contact Number</label
+                      <label for="studentAccountFullName" class="form-label"
+                        >Full name</label
                       >
                       <input
                         type="text"
                         class="form-control"
-                        id="professorAccountContactNumber"
+                        id="studentAccountFullName"
+                      />
+                    </div>
+                    <div class="mb-2">
+                      <label for="studentAccountEmail" class="form-label"
+                        >Email</label
+                      >
+                      <input
+                        type="email"
+                        class="form-control"
+                        id="studentAccountEmail"
                       />
                     </div>
                   </div>
@@ -127,7 +135,7 @@
                             <input
                               type="text"
                               class="form-control"
-                              id="accountProfileUrl"
+                              id="accounttProfileUrl"
                             />
                           </div>
                           <div>
@@ -162,11 +170,13 @@
         <div
           class="offcanvas offcanvas-start"
           tabindex="-1"
-          id="studentOffCanvas"
-          aria-labelledby="studentOffCanvasLabel"
+          id="accountOffCanvas"
+          aria-labelledby="accountOffCanvasLabel"
         >
           <div class="offcanvas-header">
-            <h5 class="offcanvas-title" id="studentOffCanvasLabel">Student</h5>
+            <h5 class="offcanvas-title" id="accountOffCanvasLabel">
+              Professor
+            </h5>
             <button
               type="button"
               class="btn-close"
