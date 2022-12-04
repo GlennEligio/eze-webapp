@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { Navigate } from "react-router-dom";
 import { IRootState } from "../store";
 import AdminMenu from "./AdminMenu";
-import StudentMenu from "./StudentMenu";
+import StudentAssistantMenu from "./StudentAssistantMenu";
 
 const Home = () => {
   const auth = useSelector((state: IRootState) => state.auth);
@@ -17,7 +17,7 @@ const Home = () => {
     ) {
       setHomeDisplay(<AdminMenu />);
     } else if (!!auth.accessToken && auth.accountType === "STUDENT_ASSISTANT") {
-      setHomeDisplay(<StudentMenu />);
+      setHomeDisplay(<StudentAssistantMenu />);
     } else {
       setHomeDisplay(<Navigate to="/login" />);
     }

@@ -9,6 +9,7 @@ import com.eze.backend.spring.exception.ApiException;
 import com.eze.backend.spring.model.Account;
 import com.eze.backend.spring.repository.AccountRepository;
 import com.eze.backend.spring.util.TimeStampProvider;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -40,6 +41,7 @@ import java.util.List;
 import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
+@Slf4j
 public class AccountServiceTest {
 
     @Mock
@@ -117,7 +119,7 @@ public class AccountServiceTest {
     void create_usingAvailableUsername_returnsNewAccount() {
         String encryptedPass = "EncryptedPassword";
         String oldPassword = account0.getPassword();
-        Account newAccount = new Account(0L, "Name0", "Username0", "Email0", encryptedPass, AccountType.SA, "http://sampleurl.com/profile0", LocalDateTime.now(), true, false);
+        Account newAccount = new Account(0L, "Name0", "Username0", "Email0", encryptedPass, AccountType.SA, "http://sampleurl.com/profile0", localDateTime, true, false);
         String availableUsername = newAccount.getUsername();
         Mockito.when(repository.findByUsername(availableUsername)).thenReturn(Optional.empty());
         Mockito.when(passwordEncoder.encode(oldPassword)).thenReturn(encryptedPass);

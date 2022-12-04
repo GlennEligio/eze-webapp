@@ -58,10 +58,20 @@ export interface CreateUpdateStudentDto {
 const envSettings = (window as any)._env_;
 
 const getBackendUri = () => {
-  if (process.env.NODE_ENV === "development") {
+  if (
+    process.env.NODE_ENV === "development" &&
+    envSettings &&
+    envSettings.REACT_APP_BACKEND_SERVICE_URI_DEV
+  ) {
     return envSettings.REACT_APP_BACKEND_SERVICE_URI_DEV;
-  } else if (process.env.NODE_ENV === "production") {
+  } else if (
+    process.env.NODE_ENV === "production" &&
+    envSettings &&
+    envSettings.REACT_APP_BACKEND_SERVICE_URI_PROD
+  ) {
     return envSettings.REACT_APP_BACKEND_SERVICE_URI_PROD;
+  } else {
+    return "http://localhost:8080";
   }
 };
 

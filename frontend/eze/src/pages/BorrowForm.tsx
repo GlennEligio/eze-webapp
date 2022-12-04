@@ -76,11 +76,16 @@ function BorrowForm() {
 
   // Get transactions on component mount
   useEffect(() => {
+    const params = new URLSearchParams({
+      returned: "false",
+      completed: "false",
+      historical: "false",
+    }).toString();
     const requestConfig: RequestConfig = {
       headers: {
         Authorization: `Bearer ${auth.accessToken}`,
       },
-      relativeUrl: "/api/v1/transactions?returned=false",
+      relativeUrl: "/api/v1/transactions?" + params,
     };
     getTransactions(requestConfig);
   }, [auth.accessToken]);
@@ -161,7 +166,12 @@ function BorrowForm() {
       createTransactionError === null &&
       createTransactionStatus === "completed"
     ) {
-      dispatch(transactionAction.addTransaction({ newTransaction }));
+      if (
+        newTransaction.equipmentsCount &&
+        newTransaction.equipmentsCount > 0
+      ) {
+        dispatch(transactionAction.addTransaction({ newTransaction }));
+      }
     }
   }, [newTransaction, createTransactionError, createTransactionStatus]);
 
