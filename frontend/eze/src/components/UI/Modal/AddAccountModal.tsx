@@ -12,7 +12,6 @@ import { accountActions } from "../../../store/accountSlice";
 import {
   validateContains,
   validateNotEmpty,
-  validatePattern,
   validateUrl,
 } from "../../../validation/validations";
 import useInput, { InputType } from "../../../hooks/useInput";
@@ -72,6 +71,8 @@ const AddAccountModal = () => {
     validateContains("Type", [
       AccountType.ADMIN,
       AccountType.STUDENT_ASSISTANT,
+      AccountType.PROF,
+      AccountType.STUDENT,
     ]),
     AccountType.STUDENT_ASSISTANT,
     InputType.SELECT
@@ -227,6 +228,8 @@ const AddAccountModal = () => {
                   <option value={AccountType.STUDENT_ASSISTANT}>
                     STUDENT ASSISTANT
                   </option>
+                  <option value={AccountType.PROF}>PROF</option>
+                  <option value={AccountType.STUDENT}>STUDENT</option>
                 </select>
                 <label htmlFor="newAccountType">Type</label>
               </div>

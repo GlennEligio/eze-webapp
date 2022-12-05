@@ -5,6 +5,8 @@ export enum AccountType {
   SADMIN = "SADMIN",
   ADMIN = "ADMIN",
   STUDENT_ASSISTANT = "SA",
+  STUDENT = "STUDENT",
+  PROF = "PROF",
 }
 
 export interface LoginRequestDto {
