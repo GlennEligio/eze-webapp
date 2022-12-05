@@ -1,10 +1,15 @@
-import React from "react";
+import React, { useState } from "react";
 import { useSelector } from "react-redux";
+import TransactionService, { Transaction } from "../api/TransactionService";
 import StudentMenuOffCanvas from "../components/StudentMenu/StudentMenuOffCanvas";
+import useHttp from "../hooks/useHttp";
+import useInput from "../hooks/useInput";
 import { IRootState } from "../store";
 
 const StudentMenu = () => {
   const auth = useSelector((state: IRootState) => state.auth);
+  const [currentTransaction, setCurrentTransaction] = useState<Transaction>();
+  const [historyTransaction, setHistoryTransaction] = useState<Transaction>();
 
   return (
     <>

@@ -74,6 +74,22 @@ const getTransactions = async (requestConfig: RequestConfig) => {
   return responseObj;
 };
 
+const getStudentTransaction = async (requestConfig: RequestConfig) => {
+  const responseObj: Transaction[] = await fetch(
+    `${BACKEND_URI}${requestConfig.relativeUrl}`,
+    {
+      method: requestConfig.method || "GET",
+      headers: requestConfig.headers != null ? requestConfig.headers : {},
+    }
+  ).then((response) => {
+    if (response.ok) {
+      return response.json();
+    }
+    throw new ApiError("Failed to fetch student transactions");
+  });
+  return responseObj;
+};
+
 const getTransactionByCode = async (requestConfig: RequestConfig) => {
   const responseObj: TransactionFull[] = await fetch(
     `${BACKEND_URI}${requestConfig.relativeUrl}`,
@@ -172,6 +188,7 @@ export const isValidTransaction = (t: CreateUpdateTransaction) => {
 
 export default {
   getTransactions,
+  getStudentTransaction,
   createTransaction,
   getTransactionByCode,
   returnEquipments,
