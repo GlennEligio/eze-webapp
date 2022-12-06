@@ -109,7 +109,7 @@ public class TransactionService implements IService<Transaction>, IExcelService<
 
         // Set the transaction code
         log.info("Generating txCode for Transaction");
-        transaction.setTxCode(idGenerator.createId());
+        transaction.setTxCode(idGenerator.createHexId());
 
         // Set transaction status to pending
         log.info("Setting status to PENDING of Transaction");

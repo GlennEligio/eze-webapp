@@ -5,7 +5,10 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class ObjectIdGenerator {
-    public String createId() {
+    public String createHexId() {
         return new ObjectId().toHexString();
+    }
+    public String createId() {
+        return new ObjectId().toString();
     }
 }

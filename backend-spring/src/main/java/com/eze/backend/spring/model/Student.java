@@ -10,6 +10,7 @@ import org.springframework.lang.NonNull;
 
 import javax.persistence.*;
 import javax.validation.Valid;
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
@@ -43,11 +44,18 @@ public class Student implements Serializable {
     @Valid
     private YearSection yearAndSection;
 
+    @OneToOne
+    @JoinColumn(name="studentAccountId", referencedColumnName = "username")
+    private Account studentAccount;
+
     @NotBlank(message = "Contact number can't be blank")
     @Pattern(regexp = "^(09|\\+639)\\d{9}$", message = "Contact number must be a valid PH mobile number")
     private String contactNumber;
     private String birthday;
     private String address;
+
+    @NotBlank(message = "Email cant be blank")
+    @Email(message = "Email must be a valid one", regexp=".+@.+\\..+")
     private String email;
     private String guardian;
     private String guardianNumber;
@@ -84,14 +92,14 @@ public class Student implements Serializable {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (!(o instanceof Student)) return false;
         Student student = (Student) o;
-        return Objects.equals(id, student.id) && Objects.equals(studentNumber, student.studentNumber) && Objects.equals(fullName, student.fullName) && Objects.equals(yearAndSection, student.yearAndSection) && Objects.equals(contactNumber, student.contactNumber) && Objects.equals(birthday, student.birthday) && Objects.equals(address, student.address) && Objects.equals(email, student.email) && Objects.equals(guardian, student.guardian) && Objects.equals(guardianNumber, student.guardianNumber) && Objects.equals(yearLevel, student.yearLevel) && Objects.equals(profile, student.profile) && Objects.equals(deleteFlag, student.deleteFlag);
+        return Objects.equals(id, student.id) && Objects.equals(studentNumber, student.studentNumber) && Objects.equals(fullName, student.fullName) && Objects.equals(yearAndSection, student.yearAndSection) && Objects.equals(studentAccount, student.studentAccount) && Objects.equals(contactNumber, student.contactNumber) && Objects.equals(birthday, student.birthday) && Objects.equals(address, student.address) && Objects.equals(email, student.email) && Objects.equals(guardian, student.guardian) && Objects.equals(guardianNumber, student.guardianNumber) && Objects.equals(yearLevel, student.yearLevel) && Objects.equals(profile, student.profile) && Objects.equals(deleteFlag, student.deleteFlag) && Objects.equals(transactions, student.transactions);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, studentNumber, fullName, yearAndSection, contactNumber, birthday, address, email, guardian, guardianNumber, yearLevel, profile, deleteFlag);
+        return Objects.hash(id, studentNumber, fullName, yearAndSection, studentAccount, contactNumber, birthday, address, email, guardian, guardianNumber, yearLevel, profile, deleteFlag, transactions);
     }
 
     public void update(@NonNull Student newStudent) {
@@ -130,6 +138,9 @@ public class Student implements Serializable {
         }
         if(newStudent.getProfile() != null) {
             this.setProfile(newStudent.getProfile());
+        }
+        if(newStudent.getStudentAccount() != null) {
+            this.setStudentAccount(newStudent.getStudentAccount());
         }
     }
 

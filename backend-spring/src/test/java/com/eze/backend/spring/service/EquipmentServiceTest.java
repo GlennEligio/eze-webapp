@@ -2,10 +2,8 @@ package com.eze.backend.spring.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import com.eze.backend.spring.enums.AccountType;
 import com.eze.backend.spring.enums.EqStatus;
 import com.eze.backend.spring.exception.ApiException;
-import com.eze.backend.spring.model.Account;
 import com.eze.backend.spring.model.Equipment;
 import com.eze.backend.spring.repository.EquipmentRepository;
 import com.eze.backend.spring.util.ObjectIdGenerator;
@@ -17,7 +15,6 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,7 +30,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.DateTimeException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -111,7 +107,7 @@ public class EquipmentServiceTest {
         Equipment updatedEq = new Equipment(encryptedCode, equipment0.getName(), equipment0.getBarcode(), equipment0.getStatus(), equipment0.getDefectiveSince(), equipment0.getIsDuplicable(), equipment0.getIsBorrowed(), equipment0.getDeleteFlag());
         Mockito.when(repository.findByEquipmentCode(equipment0.getEquipmentCode())).thenReturn(Optional.empty());
         Mockito.when(repository.findByBarcode(equipment0.getBarcode())).thenReturn(Optional.empty());
-        Mockito.when(idGenerator.createId()).thenReturn(encryptedCode);
+        Mockito.when(idGenerator.createHexId()).thenReturn(encryptedCode);
         Mockito.when(repository.save(updatedEq)).thenReturn(updatedEq);
 
         Equipment equipment = service.create(equipment0);

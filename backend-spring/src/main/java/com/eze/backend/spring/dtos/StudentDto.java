@@ -6,6 +6,7 @@ import org.hibernate.validator.constraints.URL;
 
 
 import javax.validation.Valid;
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
@@ -27,6 +28,8 @@ public class StudentDto {
     private String contactNumber;
     private String birthday;
     private String address;
+    @NotBlank(message = "Email can't be blank")
+    @Email(message = "Email must be a valid one", regexp=".+@.+\\..+")
     private String email;
     private String guardian;
     private String guardianNumber;

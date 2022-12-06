@@ -38,20 +38,34 @@ const MenuHeader: FC<MenuHeaderProps> = (props) => {
       });
   }, [props.imageUrl]);
 
-  const accountType =
-    props.type === "STUDENT_ASSISTANT" ? "Student Assistant" : "Administrator";
+  const accountType = (accountType: string) => {
+    switch (accountType) {
+      case "STUDENT_ASSISTANT":
+        return "Student Assistant";
+      case "ADMIN":
+        return "Administrator";
+      case "SADMIN":
+        return "Super Admin";
+      case "STUDENT":
+        return "Student";
+      case "PROF":
+        return "Professor";
+      default:
+        return "Invalid";
+    }
+  };
 
   return (
     <header>
       <div className="border-bottom border-3 border-secondary pt-2 gx-0">
         <div className="d-flex justify-content-between">
           <div className="my-auto">
-            <span className="fs-2">{accountType}</span>
+            <span className="fs-2">{accountType(props.type)}</span>
           </div>
           <div className="d-flex justify-content-end">
             <div className="d-flex flex-column justify-content-center">
               <span>{props.name}</span>
-              <span>{accountType}</span>
+              <span>{accountType(props.type)}</span>
             </div>
             <div className="d-flex align-items-center ms-3">
               <a

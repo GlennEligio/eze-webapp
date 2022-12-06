@@ -10,8 +10,6 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.bson.types.ObjectId;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -74,7 +72,7 @@ public class EquipmentService implements IService<Equipment>, IExcelService<Equi
                 throw new ApiException(alreadyExist(equipment.getEquipmentCode()), HttpStatus.BAD_REQUEST);
             }
         }
-        equipment.setEquipmentCode(idGenerator.createId());
+        equipment.setEquipmentCode(idGenerator.createHexId());
         equipment.setIsBorrowed(false);
         equipment.setDeleteFlag(false);
         log.info(equipment.toString());

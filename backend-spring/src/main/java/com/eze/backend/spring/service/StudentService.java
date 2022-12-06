@@ -1,11 +1,14 @@
 package com.eze.backend.spring.service;
 
 import com.eze.backend.spring.dtos.StudentListDto;
+import com.eze.backend.spring.enums.AccountType;
 import com.eze.backend.spring.exception.ApiException;
+import com.eze.backend.spring.model.Account;
 import com.eze.backend.spring.model.Student;
 import com.eze.backend.spring.model.YearLevel;
 import com.eze.backend.spring.model.YearSection;
 import com.eze.backend.spring.repository.StudentRepository;
+import com.eze.backend.spring.util.ObjectIdGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -32,11 +35,15 @@ public class StudentService implements IService<Student>, IExcelService<Student>
     private final StudentRepository repository;
     private final YearLevelService ylService;
     private final YearSectionService ysService;
+    private final AccountService accountService;
+    private final ObjectIdGenerator idGenerator;
 
-    public StudentService(StudentRepository repository, YearLevelService ylService, YearSectionService ysService) {
+    public StudentService(StudentRepository repository, YearLevelService ylService, YearSectionService ysService, AccountService accountService, ObjectIdGenerator idGenerator) {
         this.repository = repository;
         this.ylService = ylService;
         this.ysService = ysService;
+        this.accountService = accountService;
+        this.idGenerator = idGenerator;
     }
 
     @Override
@@ -58,6 +65,7 @@ public class StudentService implements IService<Student>, IExcelService<Student>
     }
 
     @Override
+    @Transactional
     public Student create(Student student) {
         log.info("Creating student {}", student);
         Optional<Student> studentOp = repository.findByStudentNumber(student.getStudentNumber());
@@ -69,6 +77,20 @@ public class StudentService implements IService<Student>, IExcelService<Student>
         student.setYearLevel(yearLevel);
         student.setYearAndSection(yearSection);
         student.setDeleteFlag(false);
+
+        // Creating account alongside the Student Creation
+        Account account = new Account();
+        account.setUsername(student.getStudentNumber());
+        // TODO: Send this to the student's email via JavaMailSender
+        String randomPassword = idGenerator.createId();
+        account.setPassword(randomPassword);
+        account.setEmail(student.getEmail());
+        account.setFullName(student.getFullName());
+        // TODO: Set a proper default image url
+        account.setProfile(student.getProfile());
+        account.setType(AccountType.STUDENT);
+        Account newAccount = accountService.create(account);
+        student.setStudentAccount(newAccount);
 
         return repository.save(student);
     }
@@ -126,7 +148,7 @@ public class StudentService implements IService<Student>, IExcelService<Student>
         for (Student student: students) {
             Optional<Student> studentOptional = repository.findByStudentNumber(student.getStudentNumber());
             if(studentOptional.isEmpty()){
-                repository.save(student);
+                create(student);
                 itemsAffected++;
             }else{
                 if(overwrite){

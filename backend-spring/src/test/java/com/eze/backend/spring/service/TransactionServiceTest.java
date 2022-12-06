@@ -35,7 +35,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.LongStream;
 
 @ExtendWith(MockitoExtension.class)
 @Slf4j
@@ -148,7 +147,7 @@ public class TransactionServiceTest {
         // isBorrowed of not duplicable Equipments is changes to true
         Equipment borrowedEquipment0 = new Equipment(eq0.getEquipmentCode(), eq0.getName(), eq0.getBarcode(), eq0.getStatus(), eq0.getDefectiveSince(), false, true, false);
         Transaction newTransaction = new Transaction(txCode0, List.of(borrowedEquipment0), List.of(borrowedEquipment0, eq1), student1, professor1, timeStamp, null, TxStatus.PENDING, false);
-        Mockito.when(idGenerator.createId()).thenReturn(txCode0);
+        Mockito.when(idGenerator.createHexId()).thenReturn(txCode0);
         Mockito.when(repository.findByTxCode(availableTxCode)).thenReturn(Optional.empty());
         Mockito.when(equipmentService.get(eq0.getEquipmentCode())).thenReturn(eq0);
         Mockito.when(equipmentService.get(eq1.getEquipmentCode())).thenReturn(eq1);

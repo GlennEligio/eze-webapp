@@ -31,8 +31,8 @@ class StudentRepositoryTest {
     void setup() {
         YearLevel yearLevel = new YearLevel(1, "First", false);
         YearSection yearSection = new YearSection("SectionName1", false, yearLevel);
-        student0 = new Student("2015-00129-MN-00", "FullName0", yearSection, "09062560574", "Birthday0", "Address0", "Email0", "Guardian0", "GuardianNumber0", yearLevel, "https://sampleprofile0.com", false);
-        Student student1 = new Student("2015-00129-MN-01", "FullName1", yearSection, "09062560571", "Birthday1", "Address1", "Email1", "Guardian1", "GuardianNumber1", yearLevel, "https://sampleprofile1.com", true);
+        student0 = new Student("2015-00129-MN-00", "FullName0", yearSection, "09062560574", "Birthday0", "Address0", "email0@gmail.com", "Guardian0", "GuardianNumber0", yearLevel, "https://sampleprofile0.com", false);
+        Student student1 = new Student("2015-00129-MN-01", "FullName1", yearSection, "09062560571", "Birthday1", "Address1" , "email1@gmail.com", "Guardian1", "GuardianNumber1", yearLevel, "https://sampleprofile1.com", true);
         entityManager.persist(yearLevel);
         entityManager.persist(yearSection);
         entityManager.persist(student0);

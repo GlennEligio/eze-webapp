@@ -3,11 +3,14 @@ package com.eze.backend.spring.service;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.eze.backend.spring.dtos.StudentListDto;
+import com.eze.backend.spring.enums.AccountType;
 import com.eze.backend.spring.exception.ApiException;
+import com.eze.backend.spring.model.Account;
 import com.eze.backend.spring.model.Student;
 import com.eze.backend.spring.model.YearLevel;
 import com.eze.backend.spring.model.YearSection;
 import com.eze.backend.spring.repository.StudentRepository;
+import com.eze.backend.spring.util.ObjectIdGenerator;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -27,6 +30,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -40,11 +44,16 @@ public class StudentServiceTest {
     private YearSectionService ysService;
     @Mock
     private YearLevelService ylService;
+    @Mock
+    private ObjectIdGenerator idGenerator;
+    @Mock
+    private AccountService accountService;
 
     @InjectMocks
     private StudentService service;
 
     private Student student0, student1;
+    private Account account0, account1;
     private YearLevel yearLevel;
     private YearSection yearSection;
     private List<Student> studentList;
@@ -53,8 +62,12 @@ public class StudentServiceTest {
     void setup() {
         yearLevel = new YearLevel(1, "First", false);
         yearSection = new YearSection("SectionName1", false, yearLevel);
-        student0 = new Student("2015-00129-MN-00", "FullName0", yearSection, "09062560574", "Birthday0", "Address0", "Email0", "Guardian0", "GuardianNumber0", yearLevel, "https://sampleprofile0.com", false);
-        student1 = new Student("2015-00129-MN-01", "FullName1", yearSection, "09062560571", "Birthday1", "Address1", "Email1", "Guardian1", "GuardianNumber1", yearLevel, "https://sampleprofile1.com", true);
+        student0 = new Student("2015-00129-MN-00", "FullName0", yearSection, "09062560574", "Birthday0", "Address0", "email0@gmail.com", "Guardian0", "GuardianNumber0", yearLevel, "https://sampleprofile0.com", false);
+        student1 = new Student("2015-00129-MN-01", "FullName1", yearSection, "09062560571", "Birthday1", "Address1", "email1@gmail.com", "Guardian1", "GuardianNumber1", yearLevel, "https://sampleprofile1.com", true);
+        account0 = new Account(0L, student0.getFullName(), student0.getStudentNumber(), student0.getEmail(), "EncryptedPassword", AccountType.STUDENT, student0.getProfile(), LocalDateTime.now(), true, false);
+        account1 = new Account(1L, student1.getFullName(), student1.getStudentNumber(), student1.getEmail(), "EncryptedPassword", AccountType.STUDENT, student1.getProfile(), LocalDateTime.now(), true, false);
+        student0.setStudentAccount(account0);
+        student1.setStudentAccount(account1);
         studentList = List.of(student1, student0);
     }
 
@@ -115,10 +128,13 @@ public class StudentServiceTest {
     @DisplayName("Create Student using available Student Number")
     void create_usingAvailableStudentNumber_returnsNewStudent() {
         String availableStudentNumber = student0.getStudentNumber();
+        Account newAccountToCreate = new Account(null, student0.getFullName(), student0.getStudentNumber(), student0.getEmail(), "EncryptedPassword", AccountType.STUDENT, student0.getProfile(), null, null, null);
         Mockito.when(repository.findByStudentNumber(availableStudentNumber)).thenReturn(Optional.empty());
         Mockito.when(ysService.get(student0.getYearAndSection().getSectionName())).thenReturn(student0.getYearAndSection());
         Mockito.when(ylService.get(student0.getYearLevel().getYearNumber())).thenReturn(student0.getYearLevel());
         Mockito.when(repository.save(student0)).thenReturn(student0);
+        Mockito.when(idGenerator.createId()).thenReturn(account0.getPassword());
+        Mockito.when(accountService.create(newAccountToCreate)).thenReturn(account0);
 
         Student student = service.create(student0);
 
@@ -364,6 +380,8 @@ public class StudentServiceTest {
             for (int i = 0; i < studentsResult.size(); i++) {
                 Student studentResult = studentsResult.get(i);
                 Student studentExpected = students.get(i);
+                // Set the Account to null since Account information is not included in Excel file
+                studentExpected.setStudentAccount(null);
                 assertEquals(studentExpected, studentResult);
             }
         } catch (IOException ignored) {

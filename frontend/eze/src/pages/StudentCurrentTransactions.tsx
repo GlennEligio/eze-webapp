@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { MouseEventHandler, useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import TransactionService, {
   Transaction,
@@ -13,7 +13,7 @@ const StudentCurrentTransactions = () => {
   const [currentTransaction, setCurrentTransaction] = useState<Transaction[]>(
     []
   );
-  const [status, setStatus] = useState<TxStatus>(TxStatus.PENDING);
+  const [status, setStatus] = useState<TxStatus>();
 
   const {
     sendRequest: getStudentCurrentTransactions,
@@ -22,6 +22,10 @@ const StudentCurrentTransactions = () => {
     status: getStudentCurrentTransactionsStatus,
     resetHttpState: getStudentCurrentTransactionsResetHttpState,
   } = useHttp<Transaction[]>(TransactionService.getStudentTransaction, true);
+
+  const statusClickHandler = (status: TxStatus) => {
+    setStatus(status);
+  };
 
   useEffect(() => {
     const params = new URLSearchParams({
@@ -93,22 +97,26 @@ const StudentCurrentTransactions = () => {
                         data-bs-toggle="dropdown"
                         aria-expanded="false"
                       >
-                        Status
+                        {status ? status : "Status"}
                       </button>
                       <ul className="dropdown-menu" style={{ zIndex: "1000" }}>
-                        <li>
-                          <a className="dropdown-item" href="#">
+                        <li
+                          onClick={() => statusClickHandler(TxStatus.PENDING)}
+                        >
+                          <a className="dropdown-item">
                             <i className="bi bi-hourglass-split"></i> Pending
                           </a>
                         </li>
-                        <li>
-                          <a className="dropdown-item" href="#">
+                        <li
+                          onClick={() => statusClickHandler(TxStatus.ACCEPTED)}
+                        >
+                          <a className="dropdown-item">
                             <i className="bi bi-check"></i> Accepted
                           </a>
                         </li>
-                        <li>
-                          <a className="dropdown-item" href="#">
-                            <i className="bi bi-x"></i>Rejected
+                        <li onClick={() => statusClickHandler(TxStatus.DENIED)}>
+                          <a className="dropdown-item">
+                            <i className="bi bi-x"></i>Denied
                           </a>
                         </li>
                       </ul>

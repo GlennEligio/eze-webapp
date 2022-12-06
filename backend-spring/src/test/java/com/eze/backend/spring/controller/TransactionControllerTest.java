@@ -90,8 +90,8 @@ public class TransactionControllerTest {
         timeStamp2 = LocalDateTime.of(2022, Month.APRIL, 24, 12, 45);
         yearLevel = new YearLevel(1, "First", false);
         yearSection = new YearSection("SectionName1", false, yearLevel);
-        student = new Student("2015-00129-MN-01", "FullName1", yearSection, "09062560571", "Birthday1", "Address1", "Email1", "Guardian1", "GuardianNumber1", yearLevel, "https://sampleprofile1.com", false);
-        student2 = new Student("2015-00129-MN-02", "FullName2", yearSection, "09062560571", "Birthday2", "Address2", "Email2", "Guardian2", "GuardianNumber2", yearLevel, "https://sampleprofile2.com", false);
+        student = new Student("2015-00129-MN-01", "FullName1", yearSection, "09062560571", "Birthday1", "Address1", "email1@gmail.com", "Guardian1", "GuardianNumber1", yearLevel, "https://sampleprofile1.com", false);
+        student2 = new Student("2015-00129-MN-02", "FullName2", yearSection, "09062560571", "Birthday2", "Address2", "email2@gmail.com", "Guardian2", "GuardianNumber2", yearLevel, "https://sampleprofile2.com", false);
         professor1 = new Professor("Name1", "+639062560571", false);
         professor2 = new Professor("Name2", "+639062560572", false);
         eq0 = new Equipment("EqCode0", "Name0", "Barcode0", EqStatus.GOOD, null, false, true, false);
