@@ -291,7 +291,7 @@ function BorrowForm() {
           <div className="pt-2 pb-2">
             <div className="d-flex justify-content-between">
               <div className="my-auto" onClick={backBtnHandler}>
-                <i className="bi bi-arrow-left-circle fs-1"></i>
+                <i className="bi bi-arrow-left-circle fs-1 back-button"></i>
               </div>
               <div className="d-flex justify-content-end">
                 <div className="d-flex align-items-center">

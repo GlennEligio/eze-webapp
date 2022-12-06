@@ -96,3 +96,7 @@
   background-color: #59a2ff;
   border-color: white;
 }
+
+.back-button {
+  cursor: pointer;
+}

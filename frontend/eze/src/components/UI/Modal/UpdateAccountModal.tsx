@@ -73,6 +73,8 @@ const UpdateAccountModal = () => {
     validateContains("Type", [
       AccountType.ADMIN,
       AccountType.STUDENT_ASSISTANT,
+      AccountType.STUDENT,
+      AccountType.PROF,
     ]),
     AccountType.STUDENT_ASSISTANT,
     InputType.SELECT
@@ -235,6 +237,8 @@ const UpdateAccountModal = () => {
                     <option value={AccountType.STUDENT_ASSISTANT}>
                       STUDENT ASSISTANT
                     </option>
+                    <option value={AccountType.STUDENT}>STUDENT</option>
+                    <option value={AccountType.PROF}>PROF</option>
                   </select>
                   <label htmlFor="updateAccountType">Type</label>
                 </div>
