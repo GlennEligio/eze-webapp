@@ -153,10 +153,6 @@ function AdminMenu() {
           </div>
         </main>
       </div>
-      {/* Footer */}
-      {/* <div className="row">
-        <MenuFooter onClick={logout} />
-      </div> */}
       <div>
         <MenuOffcanvas onLogoutClick={logout} />
       </div>

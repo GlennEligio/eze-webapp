@@ -1,368 +1,122 @@
-import React, { useState } from "react";
 import { useSelector } from "react-redux";
-import TransactionService, { Transaction } from "../api/TransactionService";
-import StudentMenuOffCanvas from "../components/StudentMenu/StudentMenuOffCanvas";
-import useHttp from "../hooks/useHttp";
-import useInput from "../hooks/useInput";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { MouseEventHandler, useEffect, useState } from "react";
 import { IRootState } from "../store";
+import { authActions } from "../store/authSlice";
+import EzeMenuButton from "../components/Menu/EzeMenuButton";
+import MenuHeader from "../components/Menu/MenuHeader";
+import MenuClock from "../components/Menu/MenuClock";
+import { ControlledMenu, MenuItem, useMenuState } from "@szhsin/react-menu";
+import MenuOffcanvas from "../components/Menu/MenuOffcanvas";
 
 const StudentMenu = () => {
   const auth = useSelector((state: IRootState) => state.auth);
-  const [currentTransaction, setCurrentTransaction] = useState<Transaction>();
-  const [historyTransaction, setHistoryTransaction] = useState<Transaction>();
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (
+      !!auth.accessToken &&
+      ["SADMIN", "STUDENT_ASSISTANT", "ADMIN", "STUDENT"].includes(
+        auth.accountType
+      )
+    )
+      return;
+    navigate("/unauthorized");
+  }, [auth.accessToken, auth.accountType, navigate]);
+
+  const logout = () => {
+    dispatch(authActions.removeAuth());
+  };
 
   return (
-    <>
-      <div className="container-lg d-flex flex-column h-100">
-        <div className="row">
-          <header>
-            <div className="pt-1 pb-2">
-              <div className="d-flex justify-content-between">
-                <div className="my-auto">
-                  <span>
-                    <a
-                      data-bs-toggle="offcanvas"
-                      href="#studentOffCanvas"
-                      role="button"
-                    >
-                      <i className="bi bi-list fs-1 me-4 back-button"></i>
-                    </a>
-                  </span>
-                </div>
-                <div className="d-flex justify-content-end">
-                  <div className="d-flex align-items-center">
-                    <i className="bi bi-house-fill fs-1"></i>
-                  </div>
-                  <div className="d-flex flex-column justify-content-center ms-3 flex-grow-1">
-                    <span className="fs-3">Home</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </header>
-        </div>
-        {/* <!-- Latest current transactions --> */}
-        <div className="row">
-          <div className="col d-flex justify-content-start ps-3">
-            <h5>Latest Current Transactions</h5>
-          </div>
-        </div>
-        <div className="row h-30">
-          <main className="col-12 d-flex flex-column h-100">
-            <div className="row mt-2 gx-0 overflow-auto">
-              <div className="col">
-                <div className="table-responsive-xxl">
-                  <table
-                    className="table table-sm table-hover"
-                    style={{ minWidth: "1500px" }}
-                  >
-                    <thead className="table-dark">
-                      <tr>
-                        <th>Transaction Code</th>
-                        <th>Borrower</th>
-                        <th>Year and Section</th>
-                        <th>Equipment Count</th>
-                        <th>Professor</th>
-                        <th>Borrowed At</th>
-                        <th>Returned At</th>
-                        <th>Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td>123123123</td>
-                        <td>John Doe</td>
-                        <td>BSECE 1-3</td>
-                        <td>3</td>
-                        <td>Prof John Doe</td>
-                        <td>April 24 123123</td>
-                        <td>APril 24 2132312</td>
-                        <td>ACCEPTED</td>
-                      </tr>
-                      <tr>
-                        <td>123123123</td>
-                        <td>John Doe</td>
-                        <td>BSECE 1-3</td>
-                        <td>3</td>
-                        <td>Prof John Doe</td>
-                        <td>April 24 123123</td>
-                        <td>APril 24 2132312</td>
-                        <td>ACCEPTED</td>
-                      </tr>
-                      <tr>
-                        <td>123123123</td>
-                        <td>John Doe</td>
-                        <td>BSECE 1-3</td>
-                        <td>3</td>
-                        <td>Prof John Doe</td>
-                        <td>April 24 123123</td>
-                        <td>APril 24 2132312</td>
-                        <td>ACCEPTED</td>
-                      </tr>
-                      <tr>
-                        <td>123123123</td>
-                        <td>John Doe</td>
-                        <td>BSECE 1-3</td>
-                        <td>3</td>
-                        <td>Prof John Doe</td>
-                        <td>April 24 123123</td>
-                        <td>APril 24 2132312</td>
-                        <td>ACCEPTED</td>
-                      </tr>
-                      <tr>
-                        <td>123123123</td>
-                        <td>John Doe</td>
-                        <td>BSECE 1-3</td>
-                        <td>3</td>
-                        <td>Prof John Doe</td>
-                        <td>April 24 123123</td>
-                        <td>APril 24 2132312</td>
-                        <td>ACCEPTED</td>
-                      </tr>
-                      <tr>
-                        <td>123123123</td>
-                        <td>John Doe</td>
-                        <td>BSECE 1-3</td>
-                        <td>3</td>
-                        <td>Prof John Doe</td>
-                        <td>April 24 123123</td>
-                        <td>APril 24 2132312</td>
-                        <td>ACCEPTED</td>
-                      </tr>
-                      <tr>
-                        <td>123123123</td>
-                        <td>John Doe</td>
-                        <td>BSECE 1-3</td>
-                        <td>3</td>
-                        <td>Prof John Doe</td>
-                        <td>April 24 123123</td>
-                        <td>APril 24 2132312</td>
-                        <td>ACCEPTED</td>
-                      </tr>
-                      <tr>
-                        <td>123123123</td>
-                        <td>John Doe</td>
-                        <td>BSECE 1-3</td>
-                        <td>3</td>
-                        <td>Prof John Doe</td>
-                        <td>April 24 123123</td>
-                        <td>APril 24 2132312</td>
-                        <td>ACCEPTED</td>
-                      </tr>
-                      <tr>
-                        <td>123123123</td>
-                        <td>John Doe</td>
-                        <td>BSECE 1-3</td>
-                        <td>3</td>
-                        <td>Prof John Doe</td>
-                        <td>April 24 123123</td>
-                        <td>APril 24 2132312</td>
-                        <td>ACCEPTED</td>
-                      </tr>
-                      <tr>
-                        <td>123123123</td>
-                        <td>John Doe</td>
-                        <td>BSECE 1-3</td>
-                        <td>3</td>
-                        <td>Prof John Doe</td>
-                        <td>April 24 123123</td>
-                        <td>APril 24 2132312</td>
-                        <td>ACCEPTED</td>
-                      </tr>
-                      <tr>
-                        <td>123123123</td>
-                        <td>John Doe</td>
-                        <td>BSECE 1-3</td>
-                        <td>3</td>
-                        <td>Prof John Doe</td>
-                        <td>April 24 123123</td>
-                        <td>APril 24 2132312</td>
-                        <td>ACCEPTED</td>
-                      </tr>
-                      <tr>
-                        <td>123123123</td>
-                        <td>John Doe</td>
-                        <td>BSECE 1-3</td>
-                        <td>3</td>
-                        <td>Prof John Doe</td>
-                        <td>April 24 123123</td>
-                        <td>APril 24 2132312</td>
-                        <td>ACCEPTED</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          </main>
-        </div>
-        <br />
-        <br />
-        {/* <!-- Latests transaction history --> */}
-        <div className="row">
-          <div className="col d-flex justify-content-start align-items-end ps-3">
-            <h5>Latest Transaction History</h5>
-          </div>
-        </div>
-        <div className="row h-30">
-          <main className="col-12 d-flex flex-column h-100">
-            <div className="row mt-2 gx-0 overflow-auto">
-              <div className="col">
-                <div className="table-responsive-xxl">
-                  <table
-                    className="table table-sm table-hover"
-                    style={{ minWidth: "1500px" }}
-                  >
-                    <thead className="table-dark">
-                      <tr>
-                        <th>Transaction Code</th>
-                        <th>Borrower</th>
-                        <th>Year and Section</th>
-                        <th>Equipment Count</th>
-                        <th>Professor</th>
-                        <th>Borrowed At</th>
-                        <th>Returned At</th>
-                        <th>Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td>123123123</td>
-                        <td>John Doe</td>
-                        <td>BSECE 1-3</td>
-                        <td>3</td>
-                        <td>Prof John Doe</td>
-                        <td>April 24 123123</td>
-                        <td>APril 24 2132312</td>
-                        <td>ACCEPTED</td>
-                      </tr>
-                      <tr>
-                        <td>123123123</td>
-                        <td>John Doe</td>
-                        <td>BSECE 1-3</td>
-                        <td>3</td>
-                        <td>Prof John Doe</td>
-                        <td>April 24 123123</td>
-                        <td>APril 24 2132312</td>
-                        <td>ACCEPTED</td>
-                      </tr>
-                      <tr>
-                        <td>123123123</td>
-                        <td>John Doe</td>
-                        <td>BSECE 1-3</td>
-                        <td>3</td>
-                        <td>Prof John Doe</td>
-                        <td>April 24 123123</td>
-                        <td>APril 24 2132312</td>
-                        <td>ACCEPTED</td>
-                      </tr>
-                      <tr>
-                        <td>123123123</td>
-                        <td>John Doe</td>
-                        <td>BSECE 1-3</td>
-                        <td>3</td>
-                        <td>Prof John Doe</td>
-                        <td>April 24 123123</td>
-                        <td>APril 24 2132312</td>
-                        <td>ACCEPTED</td>
-                      </tr>
-                      <tr>
-                        <td>123123123</td>
-                        <td>John Doe</td>
-                        <td>BSECE 1-3</td>
-                        <td>3</td>
-                        <td>Prof John Doe</td>
-                        <td>April 24 123123</td>
-                        <td>APril 24 2132312</td>
-                        <td>ACCEPTED</td>
-                      </tr>
-                      <tr>
-                        <td>123123123</td>
-                        <td>John Doe</td>
-                        <td>BSECE 1-3</td>
-                        <td>3</td>
-                        <td>Prof John Doe</td>
-                        <td>April 24 123123</td>
-                        <td>APril 24 2132312</td>
-                        <td>ACCEPTED</td>
-                      </tr>
-                      <tr>
-                        <td>123123123</td>
-                        <td>John Doe</td>
-                        <td>BSECE 1-3</td>
-                        <td>3</td>
-                        <td>Prof John Doe</td>
-                        <td>April 24 123123</td>
-                        <td>APril 24 2132312</td>
-                        <td>ACCEPTED</td>
-                      </tr>
-                      <tr>
-                        <td>123123123</td>
-                        <td>John Doe</td>
-                        <td>BSECE 1-3</td>
-                        <td>3</td>
-                        <td>Prof John Doe</td>
-                        <td>April 24 123123</td>
-                        <td>APril 24 2132312</td>
-                        <td>ACCEPTED</td>
-                      </tr>
-                      <tr>
-                        <td>123123123</td>
-                        <td>John Doe</td>
-                        <td>BSECE 1-3</td>
-                        <td>3</td>
-                        <td>Prof John Doe</td>
-                        <td>April 24 123123</td>
-                        <td>APril 24 2132312</td>
-                        <td>ACCEPTED</td>
-                      </tr>
-                      <tr>
-                        <td>123123123</td>
-                        <td>John Doe</td>
-                        <td>BSECE 1-3</td>
-                        <td>3</td>
-                        <td>Prof John Doe</td>
-                        <td>April 24 123123</td>
-                        <td>APril 24 2132312</td>
-                        <td>ACCEPTED</td>
-                      </tr>
-                      <tr>
-                        <td>123123123</td>
-                        <td>John Doe</td>
-                        <td>BSECE 1-3</td>
-                        <td>3</td>
-                        <td>Prof John Doe</td>
-                        <td>April 24 123123</td>
-                        <td>APril 24 2132312</td>
-                        <td>ACCEPTED</td>
-                      </tr>
-                      <tr>
-                        <td>123123123</td>
-                        <td>John Doe</td>
-                        <td>BSECE 1-3</td>
-                        <td>3</td>
-                        <td>Prof John Doe</td>
-                        <td>April 24 123123</td>
-                        <td>APril 24 2132312</td>
-                        <td>ACCEPTED</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          </main>
-        </div>
-      </div>
-      <div>
-        <StudentMenuOffCanvas
-          accountName={auth.fullName}
-          accountProfileUrl={auth.profile}
-          key={auth.username}
-          accountType={auth.accountType === "STUDENT" ? "STUDENT" : "PROFESSOR"}
+    <div className="container-md d-flex flex-column h-100">
+      {/* <!-- Header --> */}
+      <div className="row">
+        <MenuHeader
+          name={auth.fullName}
+          type={auth.accountType}
+          key={auth.accessToken}
+          data-bs-target="#menuOffCanvas"
+          data-bs-toggle="offcanvas"
+          imageUrl={auth.profile}
         />
       </div>
-    </>
+      {/* <!-- Main --> */}
+      <div className="row">
+        <main className="col-12">
+          <div className="mt-2 d-flex flex-column gx-0">
+            <div className="row flex-grow-1 gx-2">
+              {/* <!-- First column SA-Menu --> */}
+              <div className="col-3 d-flex flex-column">
+                {/* <!-- Borrow Equipment --> */}
+                <div className="row gx-0 flex-grow-1">
+                  <EzeMenuButton
+                    backgroundColor="#41d696"
+                    destPage="/student/borrow"
+                    imageLoc="/img/resized_add.jpg"
+                    title="Borrow Equipment"
+                    key={"Student Borrow"}
+                  />
+                </div>
+                {/* <!-- Account Setting --> */}
+                <div className="row gx-0 gy-1 flex-grow-1 mt-1">
+                  <EzeMenuButton
+                    backgroundColor="#d68a3a"
+                    imageLoc="/img/User Accounts.png"
+                    title="Account Setting"
+                    key="Student Account Setting"
+                    destPage="/student/account-setting"
+                  />
+                </div>
+              </div>
+              {/* <!-- Second column SA-Menu--> */}
+              <div className="col-3 d-flex flex-column">
+                {/* <!-- Student Current Transactions--> */}
+                <div className="row gx-0 flex-grow-1">
+                  <EzeMenuButton
+                    backgroundColor="#48ac3f"
+                    destPage="/student/current-transactions"
+                    imageLoc="/img/Sync Center.png"
+                    title="Current Transactions"
+                    key={"Student Current Transactions"}
+                  />
+                </div>
+                {/* <!-- Student Database --> */}
+                <div className="row gx-0 gy-1 flex-grow-1 mt-1">
+                  <EzeMenuButton
+                    backgroundColor="#00aeef"
+                    destPage="/student/history-transactions"
+                    imageLoc="/img/Documents Library.png"
+                    title="Student Database"
+                    key={"Student Database"}
+                  />
+                </div>
+              </div>
+              <div className="col-6 d-flex flex-column">
+                <div className="row gx-0 border border-dark border-1">
+                  <div className="col">
+                    <img
+                      style={{ maxWidth: "100%" }}
+                      src="/img/twitter_header_photo_1.png"
+                      alt="EZE twitter logo"
+                    />
+                  </div>
+                </div>
+                <MenuClock />
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+      {/* <div className="row">
+        <MenuFooter onClick={logout} />
+      </div> */}
+      <div>
+        <MenuOffcanvas onLogoutClick={logout} />
+      </div>
+    </div>
   );
 };
 

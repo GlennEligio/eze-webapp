@@ -4,6 +4,12 @@ import { isValidProfessor, Professor } from "./ProfessorService";
 import { isValidStudent, StudentFull } from "./StudentService";
 import validator from "validator";
 
+export enum TxStatus {
+  PENDING = "PENDING",
+  ACCEPTED = "ACCEPTED",
+  DENIED = "DENIED",
+}
+
 export interface Transaction {
   txCode: string;
   equipmentsCount: number;
@@ -32,7 +38,7 @@ export interface CreateUpdateTransaction {
   equipments: Equipment[];
   borrower: StudentFull;
   professor: Professor;
-  status: "PENDING" | "ACCEPTED" | "DENIED";
+  status: TxStatus;
 }
 
 const envSettings = (window as any)._env_;

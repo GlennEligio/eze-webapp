@@ -18,7 +18,7 @@ const EzeMenuButton: FC<PropsWithChildren<EzeMenuButtonProps>> = (props) => {
 
   return (
     <div
-      className={`col d-flex flex-column align-items-center ${
+      className={`col d-flex flex-column align-items-center justify-content-center ${
         props.leftSpacer ? "me-2" : ""
       }`}
       style={{ backgroundColor: props.backgroundColor }}
@@ -34,7 +34,7 @@ const EzeMenuButton: FC<PropsWithChildren<EzeMenuButtonProps>> = (props) => {
         alt={props.title}
       />
       {props.children}
-      <span className="fs-4 text-white mt-auto text-center">{props.title}</span>
+      <span className="fs-4 text-white text-center">{props.title}</span>
     </div>
   );
 };

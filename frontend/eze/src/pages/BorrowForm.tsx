@@ -6,6 +6,7 @@ import TransactionService, {
   Transaction,
   CreateUpdateTransaction,
   isValidTransaction,
+  TxStatus,
 } from "../api/TransactionService";
 import EquipmentService, { Equipment } from "../api/EquipmentService";
 import { useSelector } from "react-redux";
@@ -244,7 +245,7 @@ function BorrowForm() {
         borrower: student!,
         equipments: equipments,
         professor: professor!,
-        status: "PENDING",
+        status: TxStatus.PENDING,
       };
 
       if (!isValidTransaction(newTransaction)) {
