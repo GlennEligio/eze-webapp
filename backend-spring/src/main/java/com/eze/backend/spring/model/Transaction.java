@@ -70,7 +70,7 @@ public class Transaction implements Serializable {
     private LocalDateTime borrowedAt;
     private LocalDateTime returnedAt;
 
-    @Enumerated(EnumType.ORDINAL)
+    @Enumerated(EnumType.STRING)
     @EnumNamePattern(regexp = "^(PENDING|ACCEPTED|DENIED)", message = "Transaction's status can only either be 'PENDING', 'ACCEPTED', or 'DENIED'")
     private TxStatus status;
     private Boolean deleteFlag;

@@ -30,7 +30,7 @@ public class Account implements Serializable {
     private String email;
     @NotBlank(message = "Password can't be blank")
     private String password;
-    @Enumerated(EnumType.ORDINAL)
+    @Enumerated(EnumType.STRING)
     private AccountType type;
     @URL(message = "Profile image url must be a valid url", regexp = "^(http|https)://.*")
     private String profile;

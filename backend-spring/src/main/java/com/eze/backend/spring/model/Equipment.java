@@ -40,7 +40,7 @@ public class Equipment implements Serializable {
     @NotBlank(message = "Equipment's barcode can't be blank")
     private String barcode;
 
-    @Enumerated(EnumType.ORDINAL)
+    @Enumerated(EnumType.STRING)
     @EnumNamePattern(regexp = "^(DEFECTIVE|GOOD)", message = "Equipment's status can only either be 'DEFECTIVE' or 'GOOD'")
     private EqStatus status;
     private LocalDateTime defectiveSince;

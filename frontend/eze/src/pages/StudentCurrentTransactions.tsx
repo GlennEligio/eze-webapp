@@ -69,7 +69,23 @@ const StudentCurrentTransactions = () => {
     getStudentCurrentTransactionsStatus,
   ]);
 
-  const searchTransactions = () => {};
+  const searchClickHandler = () => {
+    const params = new URLSearchParams({
+      historical: "false",
+      returned: "false",
+      status: status!.toString(),
+    });
+    const requestConfig: RequestConfig = {
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`,
+      },
+      method: "GET",
+      relativeUrl:
+        `/api/v1/transactions/student/${auth.username}?` + params.toString(),
+    };
+
+    getStudentCurrentTransactions(requestConfig);
+  };
 
   const backBtnClickHandler = () => {
     navigate("/");
@@ -139,7 +155,10 @@ const StudentCurrentTransactions = () => {
                       <input type="datetime-local" className="form-control" />
                     </div>
                     <div className="d-flex">
-                      <button className="btn btn-dark me-2">
+                      <button
+                        className="btn btn-dark me-2"
+                        onClick={() => searchClickHandler()}
+                      >
                         <i className="bi bi-search"></i> Search
                       </button>
                       <div className="dropdown">
