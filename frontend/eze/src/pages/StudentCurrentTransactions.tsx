@@ -1,4 +1,9 @@
-import React, { MouseEventHandler, useEffect, useState } from "react";
+import React, {
+  FormEventHandler,
+  MouseEventHandler,
+  useEffect,
+  useState,
+} from "react";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -7,6 +12,7 @@ import TransactionService, {
   TxStatus,
 } from "../api/TransactionService";
 import TransactionItem from "../components/Transaction/TransactionItem";
+import CancelTransactionModal from "../components/UI/Modal/CancelTransactionModal";
 import TransactionDetailsModal from "../components/UI/Modal/TransactionDetailsModal";
 import MiniClock from "../components/UI/Other/MiniClock";
 import useHttp, { RequestConfig } from "../hooks/useHttp";
@@ -69,7 +75,9 @@ const StudentCurrentTransactions = () => {
     getStudentCurrentTransactionsStatus,
   ]);
 
-  const searchClickHandler = () => {
+  const searchTxSubmitHandler: FormEventHandler = (event) => {
+    event.preventDefault();
+
     const params = new URLSearchParams({
       historical: "false",
       returned: "false",
@@ -144,7 +152,7 @@ const StudentCurrentTransactions = () => {
           <main className="col-12 d-flex flex-column h-100">
             <div className="row mt-2 gx-1">
               <div className="col d-flex align-items-center justify-content-end">
-                <form className="w-100">
+                <form className="w-100" onSubmit={searchTxSubmitHandler}>
                   <div className="d-flex justify-content-end">
                     <div className="d-flex align-items-center me-4">
                       <div className="me-2 fs-5">From:</div>
@@ -155,10 +163,7 @@ const StudentCurrentTransactions = () => {
                       <input type="datetime-local" className="form-control" />
                     </div>
                     <div className="d-flex">
-                      <button
-                        className="btn btn-dark me-2"
-                        onClick={() => searchClickHandler()}
-                      >
+                      <button className="btn btn-dark me-2">
                         <i className="bi bi-search"></i> Search
                       </button>
                       <div className="dropdown">
@@ -264,7 +269,21 @@ const StudentCurrentTransactions = () => {
             historical: "false",
           }).toString()}
           type="BORROW/RETURN"
-        />
+        >
+          <button
+            className="btn btn-danger"
+            data-bs-toggle="modal"
+            data-bs-target="#cancelTransactionModal"
+          >
+            Cancel
+          </button>
+        </TransactionDetailsModal>
+        {transaction.selectedTransaction && (
+          <CancelTransactionModal
+            previousModalId="#cancelTransactionModal"
+            selectedTxCode={transaction.selectedTransaction.txCode}
+          />
+        )}
       </div>
     </>
   );

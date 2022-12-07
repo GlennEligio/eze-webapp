@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, PropsWithChildren } from "react";
 import useHttp, { RequestConfig } from "../../../hooks/useHttp";
 import TransactionService, {
   TransactionFull,
@@ -9,11 +9,12 @@ import { IRootState } from "../../../store";
 interface TransactionDetailsModalProps {
   params: string;
   type: "HISTORY" | "BORROW/RETURN";
+  cancelModalTarget?: string;
 }
 
-const TransactionDetailsModal: React.FC<TransactionDetailsModalProps> = (
-  props
-) => {
+const TransactionDetailsModal: React.FC<
+  PropsWithChildren<TransactionDetailsModalProps>
+> = (props) => {
   const auth = useSelector((state: IRootState) => state.auth);
   const transaction = useSelector((state: IRootState) => state.transaction);
   const [txCode, setTxCode] = useState("");
@@ -178,13 +179,16 @@ const TransactionDetailsModal: React.FC<TransactionDetailsModalProps> = (
               <label htmlFor="transactionReturnedAt">Returned At</label>
             </div>
             <div className="modal-footer">
-              <button
-                type="button"
-                className="btn btn-secondary"
-                data-bs-dismiss="modal"
-              >
-                Close
-              </button>
+              <div className="d-flex justify-content-end">
+                <button
+                  type="button"
+                  className="btn btn-secondary me-2"
+                  data-bs-dismiss="modal"
+                >
+                  Close
+                </button>
+                {props.children}
+              </div>
             </div>
           </div>
         </div>

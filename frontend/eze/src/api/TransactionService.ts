@@ -145,6 +145,24 @@ const returnEquipments = async (requestConfig: RequestConfig) => {
   return responseObj;
 };
 
+const cancelTransaction = async (requestConfig: RequestConfig) => {
+  const responseObj: boolean = await fetch(
+    !!requestConfig.relativeUrl
+      ? `${BACKEND_URI}${requestConfig.relativeUrl}`
+      : `${BACKEND_URI}/api/v1/transaction`,
+    {
+      method: requestConfig.method || "DELETE",
+      headers: requestConfig.headers || {},
+    }
+  ).then((response) => {
+    if (response.ok) {
+      return true;
+    }
+    throw new ApiError("Failed to cancel transaction");
+  });
+  return responseObj;
+};
+
 const upload = async (jwt: string, formData: FormData) => {
   return await fetch(`${BACKEND_URI}/api/v1/transactions/upload`, {
     method: "POST",
@@ -198,6 +216,7 @@ export default {
   createTransaction,
   getTransactionByCode,
   returnEquipments,
+  cancelTransaction,
   download,
   upload,
 };

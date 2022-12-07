@@ -6,11 +6,21 @@ interface RequestStatusMessageProps {
   status: "pending" | "completed" | null;
   loadingMessage: string;
   successMessage: string;
+  startMessage?: string;
 }
 
 const RequestStatusMessage: React.FC<RequestStatusMessageProps> = (props) => {
   let MessageDisplay = <></>;
   let requestClassName = "";
+  if (props.status === null && !!props.startMessage) {
+    requestClassName = "pending";
+    MessageDisplay = (
+      <>
+        <i className="bi bi-exclamation-diamond-fill"></i>
+        <span>{props.startMessage}</span>
+      </>
+    );
+  }
   if (props.status === "pending") {
     requestClassName = "pending";
     MessageDisplay = (

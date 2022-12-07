@@ -50,12 +50,9 @@ public class SecurityConfiguration {
                 // TODO: Configure route guarding for other account types
                 .antMatchers("/api/v1/accounts/login", "/api/v1/accounts/register", "/actuator/**").permitAll()
                 .antMatchers(HttpMethod.GET, "/**").authenticated()
-                .antMatchers(HttpMethod.GET, "/api/v1/transactions/professor/*").hasAuthority("PROF")
-                .antMatchers(HttpMethod.GET, "/api/v1/transactions/student/*").hasAuthority("STUDENT")
-                .antMatchers(HttpMethod.POST, "/**").hasAnyAuthority("SADMIN", "ADMIN", "STUDENT_ASSISTANT")
-                .antMatchers(HttpMethod.PUT, "/**").hasAnyAuthority("SADMIN", "ADMIN", "STUDENT_ASSISTANT")
-                .antMatchers(HttpMethod.DELETE, "/**").hasAnyAuthority("SADMIN", "ADMIN", "STUDENT_ASSISTANT")
-                .anyRequest().authenticated();
+                .antMatchers("/api/v1/transactions/professor/*").hasAuthority("PROF")
+                .antMatchers("/api/v1/transactions/student/*").hasAuthority("STUDENT")
+                .anyRequest().hasAnyAuthority("SADMIN", "ADMIN", "STUDENT_ASSISTANT");
         return http.build();
     }
 

@@ -14,6 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.CurrentSecurityContext;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,6 +25,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -44,7 +48,7 @@ public class TransactionController {
                                                    @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime toDate,
                                                    @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fromDate) {
         log.info("Fetching Transactions with params complete {}, historical {}, returned {}, fromDate {}, toDate {}", complete, historical, returned, fromDate, toDate);
-        Stream<Transaction> transactions = service.getAll().stream();
+        Stream<Transaction> transactions = service.getAllNotDeleted().stream();
 
         // if returned is false, only get transactions with no (duplicable) equipments in the "equipments" property
         if (returned != null) {
@@ -211,8 +215,25 @@ public class TransactionController {
         return ResponseEntity.ok(dtoResponse);
     }
 
+    // TODO: Create test case for
+    // NOTE: Needs to be put before the DELETE /api/transaction/{code} since Spring MVC routes the request for this endpoint to that
+    @DeleteMapping("/transactions/student/{code}")
+    public ResponseEntity<Object> cancelStudentTransaction(@PathVariable String code,
+                                                           @CurrentSecurityContext(expression = "authentication") Authentication authentication) {
+        log.info("Cancelling transaction with code {} and authentication {}", code, authentication.toString());
+        Transaction transaction = service.get(code);
+        String studentUsername = transaction.getBorrower().getStudentNumber();
+        String studentUsernameInAuth = ((UserDetails) authentication.getPrincipal()).getUsername();
+        if(!studentUsername.equals(studentUsernameInAuth)) {
+            throw new ApiException("Student can only delete their own transaction", HttpStatus.FORBIDDEN);
+        }
+        service.softDelete(transaction.getTxCode());
+        return ResponseEntity.ok().build();
+    }
+
     @DeleteMapping("/transactions/{code}")
     public ResponseEntity<Object> deleteTransaction(@PathVariable("code") String code) {
+        log.info("Deleting a transaction with code {}", code);
         service.softDelete(code);
         return ResponseEntity.ok().build();
     }
