@@ -118,9 +118,14 @@ public class TransactionControllerTest {
     @DisplayName("Get all returned Transaction using valid Auth")
     @WithMockUser(authorities = "STUDENT_ASSISTANT")
     void getTransactions_withReturnedParamTrueUsingValidAuth_returns200OK() throws Exception {
-        List<Transaction> returnedTranscation = transactionList.stream().filter(t -> t.getEquipments().isEmpty()).toList();
+        List<Transaction> txNotDeleted = transactionList.stream().filter(t -> !t.getDeleteFlag()).toList();
+        List<Transaction> returnedTranscation = txNotDeleted.stream()
+                .filter(t -> t.getEquipments()
+                .stream()
+                .filter(equipment -> !equipment.getIsDuplicable())
+                .toList().isEmpty()).toList();
         List<TransactionListDto> transactionListDtosResponse = returnedTranscation.stream().map(Transaction::toTransactionListDto).toList();
-        when(service.getAll()).thenReturn(transactionList);
+        when(service.getAllNotDeleted()).thenReturn(txNotDeleted);
         String completeParam = "false";
         String historicalParam = "false";
         String returnedParam = "true";
@@ -138,9 +143,13 @@ public class TransactionControllerTest {
     @DisplayName("Get all non returned Transaction using valid Auth")
     @WithMockUser(authorities = "STUDENT_ASSISTANT")
     void getTransactions_withReturnedParamFalseUsingValidAuth_returns200OK() throws Exception {
-        List<Transaction> unreturnedTranscation = transactionList.stream().filter(t -> !t.getEquipments().isEmpty()).toList();
+        List<Transaction> txNotDeleted = transactionList.stream().filter(t -> !t.getDeleteFlag()).toList();
+        List<Transaction> unreturnedTranscation = txNotDeleted.stream().filter(t -> !t.getEquipments()
+                .stream()
+                .filter(equipment -> !equipment.getIsDuplicable())
+                .toList().isEmpty()).toList();
         List<TransactionListDto> transactionListDtosResponse = unreturnedTranscation.stream().map(Transaction::toTransactionListDto).toList();
-        when(service.getAll()).thenReturn(transactionList);
+        when(service.getAllNotDeleted()).thenReturn(txNotDeleted);
         String completeParam = "false";
         String historicalParam = "false";
         String returnedParam = "false";
@@ -158,11 +167,12 @@ public class TransactionControllerTest {
     @DisplayName("Get all Transaction with from and to date range using valid Auth")
     @WithMockUser(authorities = "STUDENT_ASSISTANT")
     void getTransactions_withFromAndToParamsUsingValidAuth_returns200OKWithTransactionsWithinDateRange() throws Exception {
+        List<Transaction> txNotDeleted = transactionList.stream().filter(t -> !t.getDeleteFlag()).toList();
         LocalDateTime fromDate = LocalDateTime.of(2022, Month.APRIL, 22, 22, 12, 45);
         LocalDateTime toDate = LocalDateTime.of(2022, Month.APRIL, 27, 22, 12, 45);
-        List<Transaction> transactionsDateRange = transactionList.stream().filter(t -> t.getBorrowedAt().isAfter(fromDate) && t.getBorrowedAt().isBefore(toDate)).toList();
+        List<Transaction> transactionsDateRange = txNotDeleted.stream().filter(t -> t.getBorrowedAt().isAfter(fromDate) && t.getBorrowedAt().isBefore(toDate)).toList();
         List<TransactionListDto> transactionListDtoResponse = transactionsDateRange.stream().map(Transaction::toTransactionListDto).toList();
-        when(service.getAll()).thenReturn(transactionList);
+        when(service.getAllNotDeleted()).thenReturn(txNotDeleted);
         String completeParam = "false";
         String historicalParam = "false";
         String responseJson = mapper.writeValueAsString(transactionListDtoResponse);
@@ -180,8 +190,9 @@ public class TransactionControllerTest {
     @DisplayName("Get all historical Transaction with complete info using valid Auth")
     @WithMockUser(authorities = "STUDENT_ASSISTANT")
     void getTransactions_WithHistoricalTrueAndCompleteTrueUsingValidAuth_returns200OKAndHistoricalAndCompleteTransaction() throws Exception {
-        List<TransactionHistDto> transactionListDtoResponse = transactionList.stream().map(Transaction::toTransactionHistDto).toList();
-        when(service.getAll()).thenReturn(transactionList);
+        List<Transaction> txNotDeleted = transactionList.stream().filter(t -> !t.getDeleteFlag()).toList();
+        List<TransactionHistDto> transactionListDtoResponse = txNotDeleted.stream().map(Transaction::toTransactionHistDto).toList();
+        when(service.getAllNotDeleted()).thenReturn(txNotDeleted);
         String completeParam = "true";
         String historicalParam = "true";
         String responseJson = mapper.writeValueAsString(transactionListDtoResponse);
@@ -197,8 +208,9 @@ public class TransactionControllerTest {
     @DisplayName("Get all historical Transaction with incomplete info using valid Auth")
     @WithMockUser(authorities = "STUDENT_ASSISTANT")
     void getTransactions_WithHistoricalTrueAndCompleteFalseUsingValidAuth_returns200OKAndHistoricalAndIncompleteTransaction() throws Exception {
-        List<TransactionHistListDto> transactionListDtoResponse = transactionList.stream().map(Transaction::toTransactionHistListDto).toList();
-        when(service.getAll()).thenReturn(transactionList);
+        List<Transaction> txNotDeleted = transactionList.stream().filter(t -> !t.getDeleteFlag()).toList();
+        List<TransactionHistListDto> transactionListDtoResponse = txNotDeleted.stream().map(Transaction::toTransactionHistListDto).toList();
+        when(service.getAllNotDeleted()).thenReturn(txNotDeleted);
         String completeParam = "false";
         String historicalParam = "true";
         String responseJson = mapper.writeValueAsString(transactionListDtoResponse);
@@ -214,8 +226,9 @@ public class TransactionControllerTest {
     @DisplayName("Get all non-historical Transaction with complete info using valid Auth")
     @WithMockUser(authorities = "STUDENT_ASSISTANT")
     void getTransactions_WithHistoricalFalseAndCompleteTrueUsingValidAuth_returns200OKAndNonHistoricalAndCompleteTransaction() throws Exception {
-        List<TransactionDto> transactionListDtoResponse = transactionList.stream().map(Transaction::toTransactionDto).toList();
-        when(service.getAll()).thenReturn(transactionList);
+        List<Transaction> txNotDeleted = transactionList.stream().filter(t -> !t.getDeleteFlag()).toList();
+        List<TransactionDto> transactionListDtoResponse = txNotDeleted.stream().map(Transaction::toTransactionDto).toList();
+        when(service.getAllNotDeleted()).thenReturn(txNotDeleted);
         String completeParam = "true";
         String historicalParam = "false";
         String responseJson = mapper.writeValueAsString(transactionListDtoResponse);
@@ -231,8 +244,9 @@ public class TransactionControllerTest {
     @DisplayName("Get all non-historical Transaction with incomplete info using valid Auth")
     @WithMockUser(authorities = "STUDENT_ASSISTANT")
     void getTransactions_WithHistoricalFalseAndCompleteFalseUsingValidAuth_returns200OKAndNonHistoricalAndIncompleteTransaction() throws Exception {
-        List<TransactionListDto> transactionListDtoResponse = transactionList.stream().map(Transaction::toTransactionListDto).toList();
-        when(service.getAll()).thenReturn(transactionList);
+        List<Transaction> txNotDeleted = transactionList.stream().filter(t -> !t.getDeleteFlag()).toList();
+        List<TransactionListDto> transactionListDtoResponse = txNotDeleted.stream().map(Transaction::toTransactionListDto).toList();
+        when(service.getAllNotDeleted()).thenReturn(txNotDeleted);
         String completeParam = "false";
         String historicalParam = "false";
         String responseJson = mapper.writeValueAsString(transactionListDtoResponse);
@@ -803,6 +817,33 @@ public class TransactionControllerTest {
         mockMvc.perform(get("/api/v1/transactions/student/" + validStudentNumber)
                         .param("returned", returnedParam)
                         .param("historical", historicalParam))
+                .andExpect(status().isOk())
+                .andExpect(content().json(responseJson));
+    }
+
+    @Test
+    @DisplayName("Get Student Transaction with from and to date range using valid Auth")
+    @WithMockUser(authorities = "STUDENT_ASSISTANT")
+    void getStudentTransactions_withFromAndToParamsUsingValidAuth_returns200OKWithTransactionsWithinDateRange() throws Exception {
+        LocalDateTime fromDate = LocalDateTime.of(2022, Month.APRIL, 22, 22, 12, 45);
+        LocalDateTime toDate = LocalDateTime.of(2022, Month.APRIL, 27, 22, 12, 45);
+        String validStudentNumber = student.getStudentNumber();
+        List<Transaction> studentTransactions = transactionList.stream()
+                .filter(t -> !t.getDeleteFlag())
+                .filter(t -> t.getBorrower().getStudentNumber().equalsIgnoreCase(validStudentNumber)).toList();
+        List<Transaction> unreturnedStudentTransactions = studentTransactions.stream().filter(t -> !t.getEquipments().isEmpty()).toList();
+        List<Transaction> filteredFinalTransactions = unreturnedStudentTransactions.stream().filter(t -> t.getBorrowedAt().isAfter(fromDate) && t.getBorrowedAt().isBefore(toDate)).toList();
+        List<TransactionHistListDto> dtoResponse = filteredFinalTransactions.stream().map(Transaction::toTransactionHistListDto).toList();
+        when(service.getStudentTransactions(validStudentNumber)).thenReturn(studentTransactions);
+        String returnedParam = "false"; //
+        String historicalParam = "false"; // default value of historical parameter is false
+        String responseJson = mapper.writeValueAsString(dtoResponse);
+
+        mockMvc.perform(get("/api/v1/transactions/student/" + validStudentNumber)
+                        .param("returned", returnedParam)
+                        .param("historical", historicalParam)
+                        .param("toDate", toDate.toString())
+                        .param("fromDate", fromDate.toString()))
                 .andExpect(status().isOk())
                 .andExpect(content().json(responseJson));
     }
