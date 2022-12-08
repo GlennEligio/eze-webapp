@@ -25,18 +25,15 @@ const StudentCurrentTransactions = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [status, setStatus] = useState<TxStatus>();
+  const [toDate, setToDate] = useState("");
+  const [fromDate, setFromDate] = useState("");
 
   const {
     sendRequest: getStudentCurrentTransactions,
     data: studentCurrentTransactions,
     error: getStudentCurrentTransactionsError,
     status: getStudentCurrentTransactionsStatus,
-    resetHttpState: getStudentCurrentTransactionsResetHttpState,
   } = useHttp<Transaction[]>(TransactionService.getStudentTransaction, true);
-
-  const statusClickHandler = (status: TxStatus) => {
-    setStatus(status);
-  };
 
   // Prepopulate the table of current transactions
   useEffect(() => {
@@ -63,11 +60,13 @@ const StudentCurrentTransactions = () => {
       getStudentCurrentTransactionsError === null &&
       studentCurrentTransactions
     ) {
-      dispatch(
-        transactionAction.addTransactions({
-          transactions: studentCurrentTransactions,
-        })
-      );
+      if (studentCurrentTransactions instanceof Array) {
+        dispatch(
+          transactionAction.addTransactions({
+            transactions: studentCurrentTransactions,
+          })
+        );
+      }
     }
   }, [
     studentCurrentTransactions,
@@ -81,7 +80,9 @@ const StudentCurrentTransactions = () => {
     const params = new URLSearchParams({
       historical: "false",
       returned: "false",
-      status: status!.toString(),
+      status: status ? status : "",
+      fromDate,
+      toDate,
     });
     const requestConfig: RequestConfig = {
       headers: {
@@ -116,6 +117,14 @@ const StudentCurrentTransactions = () => {
         selectedTransaction,
       })
     );
+  };
+
+  const resetSearchBtnHandler: MouseEventHandler = (event) => {
+    event.preventDefault();
+
+    setStatus(undefined);
+    setToDate("");
+    setFromDate("");
   };
 
   return (
@@ -156,11 +165,21 @@ const StudentCurrentTransactions = () => {
                   <div className="d-flex justify-content-end">
                     <div className="d-flex align-items-center me-4">
                       <div className="me-2 fs-5">From:</div>
-                      <input type="datetime-local" className="form-control" />
+                      <input
+                        type="datetime-local"
+                        className="form-control"
+                        onChange={(e) => setFromDate(e.target.value)}
+                        value={fromDate}
+                      />
                     </div>
                     <div className="d-flex align-items-center me-4">
                       <div className="me-2 fs-5">To:</div>
-                      <input type="datetime-local" className="form-control" />
+                      <input
+                        type="datetime-local"
+                        className="form-control"
+                        onChange={(e) => setToDate(e.target.value)}
+                        value={toDate}
+                      />
                     </div>
                     <div className="d-flex">
                       <button className="btn btn-dark me-2">
@@ -179,32 +198,31 @@ const StudentCurrentTransactions = () => {
                           className="dropdown-menu"
                           style={{ zIndex: "1000" }}
                         >
-                          <li
-                            onClick={() => statusClickHandler(TxStatus.PENDING)}
-                          >
+                          <li onClick={() => setStatus(undefined)}>
+                            <a className="dropdown-item">All</a>
+                          </li>
+                          <li onClick={() => setStatus(TxStatus.PENDING)}>
                             <a className="dropdown-item">
                               <i className="bi bi-hourglass-split"></i> Pending
                             </a>
                           </li>
-                          <li
-                            onClick={() =>
-                              statusClickHandler(TxStatus.ACCEPTED)
-                            }
-                          >
+                          <li onClick={() => setStatus(TxStatus.ACCEPTED)}>
                             <a className="dropdown-item">
                               <i className="bi bi-check"></i> Accepted
                             </a>
                           </li>
-                          <li
-                            onClick={() => statusClickHandler(TxStatus.DENIED)}
-                          >
+                          <li onClick={() => setStatus(TxStatus.DENIED)}>
                             <a className="dropdown-item">
                               <i className="bi bi-x"></i>Denied
                             </a>
                           </li>
                         </ul>
                       </div>
-                      <button className="btn btn-dark">
+                      <button
+                        className="btn btn-dark"
+                        type={"button"}
+                        onClick={resetSearchBtnHandler}
+                      >
                         <i className="bi bi-arrow-repeat"></i> Reset
                       </button>
                     </div>
@@ -278,12 +296,14 @@ const StudentCurrentTransactions = () => {
             Cancel
           </button>
         </TransactionDetailsModal>
-        {transaction.selectedTransaction && (
-          <CancelTransactionModal
-            previousModalId="#cancelTransactionModal"
-            selectedTxCode={transaction.selectedTransaction.txCode}
-          />
-        )}
+        <CancelTransactionModal
+          previousModalId="#cancelTransactionModal"
+          selectedTxCode={
+            transaction.selectedTransaction
+              ? transaction.selectedTransaction.txCode
+              : ""
+          }
+        />
       </div>
     </>
   );

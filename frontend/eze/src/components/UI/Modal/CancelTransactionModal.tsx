@@ -32,7 +32,7 @@ const CancelTransactionModal: React.FC<CancelTransactionModalProps> = (
       );
       dispatch(
         transactionAction.updateSelectedTransaction({
-          selectedTransaction: null,
+          selectedTransaction: {},
         })
       );
     }

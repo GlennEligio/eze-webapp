@@ -92,18 +92,32 @@ public class TransactionController {
     public ResponseEntity<List<?>> getStudentTransactions(@PathVariable String studentNumber,
                                                           @RequestParam(defaultValue = "false") boolean returned,
                                                           @RequestParam(defaultValue = "false") boolean historical,
-                                                          @RequestParam(required = false) String status) {
+                                                          @RequestParam(required = false) String status,
+                                                          @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime toDate,
+                                                          @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fromDate) {
+        log.info("Fetching Student Transactions with following params");
+        log.info("Student number: {}", studentNumber);
         Stream<Transaction> studentTransactions = service.getStudentTransactions(studentNumber).stream();
-        if (status != null) {
+
+        // if fromDate and toDate is present, filter the transactions again
+        log.info("To and From Dates {}, {}", toDate, fromDate);
+        if (fromDate != null && toDate != null) {
+            studentTransactions = studentTransactions.filter(t -> t.getBorrowedAt().isAfter(fromDate) && t.getBorrowedAt().isBefore(toDate));
+        }
+
+        log.info("Status {}", status);
+        if (status != null && !status.isBlank()) {
             studentTransactions = studentTransactions.filter(t -> t.getStatus().getName().equalsIgnoreCase(status));
         }
 
+        log.info("Returned {}", returned);
         if (returned) {
             studentTransactions = studentTransactions.filter(t -> t.getEquipments().isEmpty());
         } else {
             studentTransactions = studentTransactions.filter(t -> !t.getEquipments().isEmpty());
         }
 
+        log.info("Historical {}", historical);
         if (historical) {
             List<TransactionHistListDto> transactionHistListDto = studentTransactions.map(Transaction::toTransactionHistListDto).toList();
             return ResponseEntity.ok(transactionHistListDto);
