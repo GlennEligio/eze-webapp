@@ -15,6 +15,7 @@ import Home from "./pages/Home";
 import Professors from "./pages/Professors";
 import TransactionHistory from "./pages/TransactionHistory";
 import StudentCurrentTransactions from "./pages/StudentCurrentTransactions";
+import StudentBorrowForm from "./pages/StudentBorrowForm";
 
 const App = () => {
   const auth = useSelector((state: IRootState) => state.auth);
@@ -42,6 +43,7 @@ const App = () => {
             <Route path="/students" element={<Students />} />
             <Route path="/faculty" element={<Professors />} />
             <Route path="/history" element={<TransactionHistory />} />
+            <Route path="/student/borrow" element={<StudentBorrowForm />} />
             <Route
               path="/student/current-transactions"
               element={<StudentCurrentTransactions />}

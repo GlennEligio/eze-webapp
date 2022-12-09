@@ -1,10 +1,8 @@
 package com.eze.backend.spring.controller;
 
 import com.eze.backend.spring.dtos.ProfessorDto;
-import com.eze.backend.spring.dtos.StudentListDto;
 import com.eze.backend.spring.exception.ApiException;
 import com.eze.backend.spring.model.Professor;
-import com.eze.backend.spring.model.Student;
 import com.eze.backend.spring.service.ProfessorService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -14,10 +12,8 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.json.JSONArray;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -25,20 +21,18 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.security.core.parameters.P;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
-import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -100,6 +94,23 @@ class ProfessorControllerTest {
         String responseJson = mapper.writeValueAsString(dtoResponse);
 
         mockMvc.perform(get("/api/v1/professors"))
+                .andExpect(status().isOk())
+                .andExpect(content().json(responseJson));
+    }
+
+    @Test
+    @DisplayName("Get all Professors with name request param using valid Auth")
+    @WithMockUser(authorities = "STUDENT_ASSISTANT")
+    void getProfessors_withNameRequestParamUsingValidAuth_returns200OK() throws Exception {
+        String nameQuery = "Name1";
+        List<Professor> profNotDeleted = professorList.stream().filter(p -> !p.getDeleteFlag()).toList();
+        List<Professor> filteredProfessors = profNotDeleted.stream().filter(p -> p.getName().toLowerCase().contains(nameQuery.toLowerCase())).toList();
+        List<ProfessorDto> dtoResponse = filteredProfessors.stream().map(Professor::toProfessorDto).toList();
+        when(service.getAllNotDeleted()).thenReturn(profNotDeleted);
+        String responseJson = mapper.writeValueAsString(dtoResponse);
+
+        mockMvc.perform(get("/api/v1/professors")
+                        .param("name", nameQuery))
                 .andExpect(status().isOk())
                 .andExpect(content().json(responseJson));
     }

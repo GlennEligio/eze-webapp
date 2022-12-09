@@ -30,8 +30,11 @@ public class ProfessorController {
     private ProfessorService service;
 
     @GetMapping("/professors")
-    public ResponseEntity<List<ProfessorDto>> getProfessors() {
+    public ResponseEntity<List<ProfessorDto>> getProfessors(@RequestParam(required = false) String name) {
         List<Professor> professors = service.getAllNotDeleted();
+        if(name != null && !name.isBlank()) {
+            professors = professors.stream().filter(p -> p.getName().toLowerCase().contains(name.toLowerCase())).toList();
+        }
         List<ProfessorDto> professorDtoList = professors.stream().map(Professor::toProfessorDto).toList();
         return ResponseEntity.ok(professorDtoList);
     }
