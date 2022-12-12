@@ -31,7 +31,7 @@ public class EquipmentRepositoryTest {
     @BeforeEach
     void setup() {
         equipment0 = new Equipment("EqCode0", "Name0", "Barcode0", EqStatus.GOOD, LocalDateTime.now(), false, false, false);
-        Equipment equipment1 = new Equipment("EqCode01", "Name1", "Barcode1", EqStatus.GOOD, LocalDateTime.now(), true, false, true);
+        Equipment equipment1 = new Equipment("EqCode01", "Name1", "Barcode1", EqStatus.GOOD, LocalDateTime.now(), true, false, false);
         Equipment equipment2 = new Equipment("EqCode02", "Name2", "Barcode2", EqStatus.GOOD, LocalDateTime.now(), false, true, true);
         equipmentList = new ArrayList<>();
         equipmentList.add(equipment0);

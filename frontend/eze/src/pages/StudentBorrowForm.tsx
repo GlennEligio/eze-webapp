@@ -100,12 +100,21 @@ const StudentBorrowForm = () => {
   };
 
   const addEquipmentItemHandler = (newEq: Equipment) => {
-    setEquipmentList((prevEqList) => {
+    setSelectedEquipments((prevEqList) => {
       const itemDoesNotExist = prevEqList.every(
         (eq) => eq.barcode !== newEq.barcode
       );
       if (!itemDoesNotExist) return prevEqList;
       return [...prevEqList, newEq];
+    });
+  };
+
+  const removeEquipmentItemHandler = (eqToRemove: Equipment) => {
+    console.log("Removing equipment");
+    setSelectedEquipments((prevEqList) => {
+      return prevEqList.filter(
+        (eq) => eq.equipmentCode !== eqToRemove.equipmentCode
+      );
     });
   };
 
@@ -187,10 +196,7 @@ const StudentBorrowForm = () => {
                 <i className="bi bi-caret-right-fill fs-4"></i>
               </div>
               <div className="col-5">
-                <ul
-                  className="list-group"
-                  style={{ maxHeight: "30vh", overflowY: "auto" }}
-                >
+                <ul className="list-group">
                   {/* Selected Professor */}
                   {selectedProfessor && (
                     <SearchItemResult
@@ -202,7 +208,7 @@ const StudentBorrowForm = () => {
                       }
                       retrieveItemDetails={() => {}}
                       modalIdTarget=""
-                      key="Selected Professor List Item"
+                      key={selectedProfessor.name + "selected"}
                     />
                   )}
                 </ul>
@@ -214,7 +220,7 @@ const StudentBorrowForm = () => {
             <div className="col-6">
               <ul
                 className="list-group"
-                style={{ maxHeight: "20vh", overflowY: "auto" }}
+                style={{ height: "20vh", overflowY: "auto" }}
               >
                 {professorList &&
                   professorList.map((p) => {
@@ -264,56 +270,22 @@ const StudentBorrowForm = () => {
             <div className="col-6">
               <ul
                 className="list-group"
-                style={{ maxHeight: "20vh", overflowY: "auto" }}
+                style={{ height: "20vh", overflowY: "auto" }}
               >
-                <li className="list-group-item">
-                  <div className="d-flex justify-content-between">
-                    <a href="">Equipment no. 1</a>
-                    <i className="bi bi-plus-lg"></i>
-                  </div>
-                </li>
-                <li className="list-group-item">
-                  <div className="d-flex justify-content-between">
-                    <a href="">Equipment no.2</a>
-                    <i className="bi bi-plus-lg"></i>
-                  </div>
-                </li>
-                <li className="list-group-item">
-                  <div className="d-flex justify-content-between">
-                    <a href="">Equipment no. 3</a>
-                    <i className="bi bi-plus-lg"></i>
-                  </div>
-                </li>
-                <li className="list-group-item">
-                  <div className="d-flex justify-content-between">
-                    <a href="">Equipment no. 3</a>
-                    <i className="bi bi-plus-lg"></i>
-                  </div>
-                </li>
-                <li className="list-group-item">
-                  <div className="d-flex justify-content-between">
-                    <a href="">Equipment no. 3</a>
-                    <i className="bi bi-plus-lg"></i>
-                  </div>
-                </li>
-                <li className="list-group-item">
-                  <div className="d-flex justify-content-between">
-                    <a href="">Equipment no. 3</a>
-                    <i className="bi bi-plus-lg"></i>
-                  </div>
-                </li>
-                <li className="list-group-item">
-                  <div className="d-flex justify-content-between">
-                    <a href="">Equipment no. 3</a>
-                    <i className="bi bi-plus-lg"></i>
-                  </div>
-                </li>
-                <li className="list-group-item">
-                  <div className="d-flex justify-content-between">
-                    <a href="">Equipment no. 3</a>
-                    <i className="bi bi-plus-lg"></i>
-                  </div>
-                </li>
+                {equipmentList &&
+                  equipmentList.map((eq) => {
+                    return (
+                      <SearchItemResult
+                        action="ADD"
+                        addItem={() => addEquipmentItemHandler(eq)}
+                        itemName={eq.name}
+                        modalIdTarget="equipmentsDetail"
+                        removeItem={() => {}}
+                        retrieveItemDetails={() => {}}
+                        key={eq.name + "result"}
+                      />
+                    );
+                  })}
               </ul>
             </div>
             <div className="col-1 d-flex justify-content-center align-items-center">
@@ -323,68 +295,22 @@ const StudentBorrowForm = () => {
             <div className="col-5">
               <ul
                 className="list-group"
-                style={{ maxHeight: "20vh", overflowY: "auto" }}
+                style={{ height: "20vh", overflowY: "auto" }}
               >
-                <li className="list-group-item">
-                  <div className="d-flex justify-content-between">
-                    <a href="">Equipment no. 1</a>
-                    <i className="bi bi-dash-lg"></i>
-                  </div>
-                </li>
-                <li className="list-group-item">
-                  <div className="d-flex justify-content-between">
-                    <a href="">Equipment no. 2</a>
-                    <i className="bi bi-dash-lg"></i>
-                  </div>
-                </li>
-                <li className="list-group-item">
-                  <div className="d-flex justify-content-between">
-                    <a href="">Equipment no. 3</a>
-                    <i className="bi bi-dash-lg"></i>
-                  </div>
-                </li>
-                <li className="list-group-item">
-                  <div className="d-flex justify-content-between">
-                    <a href="">Equipment no. 3</a>
-                    <i className="bi bi-dash-lg"></i>
-                  </div>
-                </li>
-                <li className="list-group-item">
-                  <div className="d-flex justify-content-between">
-                    <a href="">Equipment no. 3</a>
-                    <i className="bi bi-dash-lg"></i>
-                  </div>
-                </li>
-                <li className="list-group-item">
-                  <div className="d-flex justify-content-between">
-                    <a href="">Equipment no. 3</a>
-                    <i className="bi bi-dash-lg"></i>
-                  </div>
-                </li>
-                <li className="list-group-item">
-                  <div className="d-flex justify-content-between">
-                    <a href="">Equipment no. 3</a>
-                    <i className="bi bi-dash-lg"></i>
-                  </div>
-                </li>
-                <li className="list-group-item">
-                  <div className="d-flex justify-content-between">
-                    <a href="">Equipment no. 3</a>
-                    <i className="bi bi-dash-lg"></i>
-                  </div>
-                </li>
-                <li className="list-group-item">
-                  <div className="d-flex justify-content-between">
-                    <a href="">Equipment no. 3</a>
-                    <i className="bi bi-dash-lg"></i>
-                  </div>
-                </li>
-                <li className="list-group-item">
-                  <div className="d-flex justify-content-between">
-                    <a href="">Equipment no. 3</a>
-                    <i className="bi bi-dash-lg"></i>
-                  </div>
-                </li>
+                {selectedEquipments &&
+                  selectedEquipments.map((eq) => {
+                    return (
+                      <SearchItemResult
+                        action="REMOVE"
+                        addItem={() => {}}
+                        itemName={eq.name}
+                        modalIdTarget="equipmentsDetail"
+                        removeItem={() => removeEquipmentItemHandler(eq)}
+                        retrieveItemDetails={() => {}}
+                        key={eq.name + "selected"}
+                      />
+                    );
+                  })}
               </ul>
             </div>
           </div>
