@@ -228,7 +228,11 @@ public class EquipmentService implements IService<Equipment>, IExcelService<Equi
         }
     }
 
-    public List<Equipment> getAllNotBorrowed() {
+    public List<Equipment> getAllNonBorrowedAndNotDeleted() {
         return repository.findByIsBorrowed(false);
+    }
+
+    public List<Equipment> searchByName(String name) {
+        return repository.findByNameContaining(name);
     }
 }

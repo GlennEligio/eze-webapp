@@ -56,7 +56,7 @@ public class EquipmentControllerTest {
 
     private MockMvc mockMvc;
     private ObjectMapper mapper;
-    private Equipment eq0, eq1, eq2;
+    private Equipment eq0, eq1, eq2, eq3;
     private List<Equipment> equipmentList;
 
     @BeforeAll
@@ -74,8 +74,9 @@ public class EquipmentControllerTest {
     void setupEach() {
         eq0 = new Equipment("EqCode0", "Name0", "Barcode0", EqStatus.GOOD, LocalDateTime.now(), false, false, false);
         eq1 = new Equipment("EqCode1", "Name1", "Barcode1", EqStatus.GOOD, LocalDateTime.now(), true, false, true);
-        eq2 = new Equipment("EqCode2", "Name2", "Barcode2", EqStatus.GOOD, LocalDateTime.now(), false, true, true);
-        equipmentList = List.of(eq0, eq1);
+        eq2 = new Equipment("EqCode2", "Name2", "Barcode2", EqStatus.GOOD, LocalDateTime.now(), false, true, false);
+        eq3 = new Equipment("EqCode3", "Name3", "Barcode3", EqStatus.GOOD, LocalDateTime.now(), false, true, false);
+        equipmentList = List.of(eq0, eq1, eq2, eq3);
     }
 
     @Test
@@ -111,6 +112,26 @@ public class EquipmentControllerTest {
                         .param("isBorrowed", "false"))
                 .andExpect(status().isOk())
                 .andExpect(content().json(responseJson));
+    }
+
+    @Test
+    @DisplayName("Get all equipments that matches the name query parameter")
+    @WithMockUser(authorities = "STUDENT")
+    void getEquipments_whenNameAndValueParamExist_returns200OK_returns200OKWithEquipmentsWhoseNameMatches() throws Exception{
+        String nameQuery = "1";
+        List<Equipment> eqNotDeleted = equipmentList.stream().filter(e -> !e.getDeleteFlag()).toList();
+        List<Equipment> eqNotDeletedAndNonBorrowed = equipmentList.stream().filter(e -> !e.getDeleteFlag() && !e.getIsBorrowed()).toList();
+        List<Equipment> eqWithMatchingName = eqNotDeletedAndNonBorrowed.stream().filter(e -> e.getName().contains(nameQuery)).toList();
+        String borrowedParam = "false";
+        String queryParam = "name";
+        String jsonResponse = mapper.writeValueAsString(eqWithMatchingName);
+
+        mockMvc.perform(get("/api/v1/equipments")
+                .param("value", nameQuery)
+                .param("borrowed", borrowedParam)
+                .param("query", queryParam))
+                .andExpect(status().isOk())
+                .andExpect(content().json(jsonResponse));
     }
 
     @Test
@@ -194,6 +215,8 @@ public class EquipmentControllerTest {
     void download_withValidAuth_returns200OK() throws Exception {
         eq0.setId(0L);
         eq1.setId(1L);
+        eq2.setId(2L);
+        eq3.setId(3L);
         MockMultipartFile multipartFile = createMultipartFile(equipmentList, CORRECT_CONTENT_TYPE);
         when(service.getAll()).thenReturn(equipmentList);
         when(service.listToExcel(equipmentList)).thenReturn(new ByteArrayInputStream(multipartFile.getBytes()));
@@ -208,6 +231,8 @@ public class EquipmentControllerTest {
     void upload_withInvalidAuth_returns403Forbidden() throws Exception {
         eq0.setId(0L);
         eq1.setId(1L);
+        eq2.setId(2L);
+        eq3.setId(3L);
         MockMultipartFile multipartFile = createMultipartFile(equipmentList, CORRECT_CONTENT_TYPE);
 
         mockMvc.perform(multipart(HttpMethod.POST,"/api/v1/equipments/upload")
@@ -221,6 +246,8 @@ public class EquipmentControllerTest {
     void upload_withValidAuthAndIncorrectContentType_returns400BadRequest() throws Exception {
         eq0.setId(0L);
         eq1.setId(1L);
+        eq2.setId(2L);
+        eq3.setId(3L);
         MockMultipartFile multipartFile = createMultipartFile(equipmentList, INCORRECT_CONTENT_TYPE);
 
         mockMvc.perform(multipart(HttpMethod.POST, "/api/v1/equipments/upload")
@@ -234,6 +261,8 @@ public class EquipmentControllerTest {
     void upload_withValidAuthAndCorrectContentType_returns200OK() throws Exception{
         eq0.setId(0L);
         eq1.setId(1L);
+        eq2.setId(2L);
+        eq3.setId(3L);
         MockMultipartFile multipartFile = createMultipartFile(equipmentList, CORRECT_CONTENT_TYPE);
         when(service.excelToList(multipartFile)).thenReturn(equipmentList);
         when(service.addOrUpdate(equipmentList, false)).thenReturn(0);

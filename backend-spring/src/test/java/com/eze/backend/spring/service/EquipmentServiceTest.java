@@ -393,10 +393,20 @@ public class EquipmentServiceTest {
         List<Equipment> nonBorrowedEquipments = equipmentList.stream().filter(e -> !e.getIsBorrowed()).toList();
         Mockito.when(repository.findByIsBorrowed(false)).thenReturn(nonBorrowedEquipments);
 
-        List<Equipment> equipments = service.getAllNotBorrowed();
+        List<Equipment> equipments = service.getAllNonBorrowedAndNotDeleted();
 
         assertNotNull(equipments);
         assertEquals(0, equipments.stream().filter(Equipment::getIsBorrowed).count());
         assertEquals(nonBorrowedEquipments, equipments);
+    }
+
+    @Test
+    @DisplayName("Find all equipments by name")
+    void searchEquipmentsByName_returnsEquipmentsWhoseNameContainsString() {
+        String nameQuery = "1";
+        List<Equipment> expectedList = equipmentList.stream().filter(t -> t.getName().contains(nameQuery)).toList();
+        Mockito.when(repository.findByNameContaining(nameQuery)).thenReturn(expectedList);
+
+        List<Equipment> resultList = service.searchByName(nameQuery);
     }
 }

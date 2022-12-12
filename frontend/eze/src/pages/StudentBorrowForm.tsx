@@ -6,7 +6,7 @@ import React, {
 } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { Equipment } from "../api/EquipmentService";
+import EquipmentService, { Equipment } from "../api/EquipmentService";
 import ProfessorService, { Professor } from "../api/ProfessorService";
 import SearchItemResult from "../components/StudentBorrow/SearchItemResult";
 import useHttp, { RequestConfig } from "../hooks/useHttp";
@@ -27,11 +27,18 @@ const StudentBorrowForm = () => {
     status: getProfessorsStatus,
     sendRequest: getProfessors,
   } = useHttp<Professor[]>(ProfessorService.getProfessors, false);
+  const {
+    data: equipments,
+    error: getEquipmentsError,
+    status: getEquipmentsStatus,
+    sendRequest: getEquipments,
+  } = useHttp<Equipment[]>(EquipmentService.getEquipments, false);
 
+  // populate professor search list state based on professor useHttp
   useEffect(() => {
     if (
       professors &&
-      getProfessorsError !== null &&
+      getProfessorsError === null &&
       getProfessorsStatus === "completed"
     ) {
       if (professors instanceof Array) {
@@ -39,6 +46,19 @@ const StudentBorrowForm = () => {
       }
     }
   }, [professors, , getProfessorsStatus, getProfessorsError]);
+
+  // populate equipment search list state based on equipment useHttp states
+  useEffect(() => {
+    if (
+      equipments &&
+      getEquipmentsError === null &&
+      getEquipmentsStatus === "completed"
+    ) {
+      if (equipments instanceof Array) {
+        setEquipmentList(equipments);
+      }
+    }
+  }, [equipments, getEquipmentsStatus, getEquipmentsError]);
 
   const backBtnClickHandler: MouseEventHandler = (event) => {
     event.preventDefault();
@@ -48,16 +68,12 @@ const StudentBorrowForm = () => {
   const searchProfessorHandler: FormEventHandler = (event) => {
     event.preventDefault();
 
-    const param = new URLSearchParams({
-      name: professorName,
-    }).toString();
-
     const requestConfig: RequestConfig = {
       headers: {
         Authorization: `Bearer ${auth.accessToken}`,
       },
       method: "GET",
-      relativeUrl: `/api/v1/transactions/${param}`,
+      relativeUrl: `/api/v1/professors?name=${professorName.toString()}`,
     };
 
     getProfessors(requestConfig);
@@ -65,6 +81,40 @@ const StudentBorrowForm = () => {
 
   const searchEquipmentHandler: FormEventHandler = (event) => {
     event.preventDefault();
+
+    const params = new URLSearchParams({
+      isBorrowed: "false",
+      query: "name",
+      value: equipmentName,
+    }).toString();
+
+    const requestConfig: RequestConfig = {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`,
+      },
+      relativeUrl: `/api/v1/equipments?${params}`,
+    };
+
+    getEquipments(requestConfig);
+  };
+
+  const addEquipmentItemHandler = (newEq: Equipment) => {
+    setEquipmentList((prevEqList) => {
+      const itemDoesNotExist = prevEqList.every(
+        (eq) => eq.barcode !== newEq.barcode
+      );
+      if (!itemDoesNotExist) return prevEqList;
+      return [...prevEqList, newEq];
+    });
+  };
+
+  const addProfessorItemHandler = (newProf: Professor) => {
+    setSelectedProfessor(newProf);
+  };
+
+  const removeProfessorItemHandler = (prof: Professor) => {
+    setSelectedProfessor(undefined);
   };
 
   return (
@@ -112,7 +162,7 @@ const StudentBorrowForm = () => {
             </div>
           </div>
           {/* <!-- Professor --> */}
-          <form>
+          <form onSubmit={searchProfessorHandler}>
             <div className="row">
               <label htmlFor="borrowProfessor" className="form-label">
                 Professor
@@ -141,12 +191,20 @@ const StudentBorrowForm = () => {
                   className="list-group"
                   style={{ maxHeight: "30vh", overflowY: "auto" }}
                 >
-                  <li className="list-group-item">
-                    <div className="d-flex justify-content-between">
-                      <a href="">Professor 1</a>
-                      <i className="bi bi-plus-lg"></i>
-                    </div>
-                  </li>
+                  {/* Selected Professor */}
+                  {selectedProfessor && (
+                    <SearchItemResult
+                      action="REMOVE"
+                      addItem={() => {}}
+                      itemName={selectedProfessor.name}
+                      removeItem={() =>
+                        removeProfessorItemHandler(selectedProfessor)
+                      }
+                      retrieveItemDetails={() => {}}
+                      modalIdTarget=""
+                      key="Selected Professor List Item"
+                    />
+                  )}
                 </ul>
               </div>
             </div>
@@ -158,18 +216,25 @@ const StudentBorrowForm = () => {
                 className="list-group"
                 style={{ maxHeight: "20vh", overflowY: "auto" }}
               >
-                <li className="list-group-item">
-                  <div className="d-flex justify-content-between">
-                    <a href="">Professor no. 1</a>
-                    <i className="bi bi-dash-lg"></i>
-                  </div>
-                </li>
-                <SearchItemResult action="ADD" addItem={} />
+                {professorList &&
+                  professorList.map((p) => {
+                    return (
+                      <SearchItemResult
+                        action="ADD"
+                        addItem={() => addProfessorItemHandler(p)}
+                        itemName={p.name}
+                        removeItem={() => {}}
+                        retrieveItemDetails={() => {}}
+                        modalIdTarget=""
+                        key={p.name}
+                      />
+                    );
+                  })}
               </ul>
             </div>
           </div>
           {/* <!-- Equipment borrow form --> */}
-          <form>
+          <form onSubmit={searchEquipmentHandler}>
             <div className="row">
               {/* <!-- Equipment Search box --> */}
               <div className="col-6">

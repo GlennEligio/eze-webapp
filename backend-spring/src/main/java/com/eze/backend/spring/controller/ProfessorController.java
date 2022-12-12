@@ -31,6 +31,7 @@ public class ProfessorController {
 
     @GetMapping("/professors")
     public ResponseEntity<List<ProfessorDto>> getProfessors(@RequestParam(required = false) String name) {
+        log.info("Search professor by name {}", name);
         List<Professor> professors = service.getAllNotDeleted();
         if(name != null && !name.isBlank()) {
             professors = professors.stream().filter(p -> p.getName().toLowerCase().contains(name.toLowerCase())).toList();

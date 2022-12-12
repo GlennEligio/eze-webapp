@@ -44,7 +44,9 @@ const BACKEND_URI = getBackendUri();
 
 const getEquipments = async (requestConfig: RequestConfig) => {
   const responseObj: Equipment[] = await fetch(
-    `${BACKEND_URI}/api/v1/equipments`,
+    requestConfig.relativeUrl
+      ? `${BACKEND_URI}${requestConfig.relativeUrl}`
+      : `${BACKEND_URI}/api/v1/equipments`,
     {
       method: requestConfig.method || "GET",
       headers: requestConfig.headers != null ? requestConfig.headers : {},

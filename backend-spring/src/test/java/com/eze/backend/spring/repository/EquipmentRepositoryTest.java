@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.eze.backend.spring.enums.EqStatus;
 import com.eze.backend.spring.model.Equipment;
-import com.eze.backend.spring.repository.EquipmentRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,8 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
-import javax.persistence.EntityManager;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,12 +26,17 @@ public class EquipmentRepositoryTest {
     private TestEntityManager entityManager;
 
     private Equipment equipment0;
+    private List<Equipment> equipmentList;
 
     @BeforeEach
     void setup() {
         equipment0 = new Equipment("EqCode0", "Name0", "Barcode0", EqStatus.GOOD, LocalDateTime.now(), false, false, false);
         Equipment equipment1 = new Equipment("EqCode01", "Name1", "Barcode1", EqStatus.GOOD, LocalDateTime.now(), true, false, true);
         Equipment equipment2 = new Equipment("EqCode02", "Name2", "Barcode2", EqStatus.GOOD, LocalDateTime.now(), false, true, true);
+        equipmentList = new ArrayList<>();
+        equipmentList.add(equipment0);
+        equipmentList.add(equipment1);
+        equipmentList.add(equipment2);
         entityManager.persist(equipment0);
         entityManager.persist(equipment1);
         entityManager.persist(equipment2);
@@ -106,5 +110,15 @@ public class EquipmentRepositoryTest {
         List<Equipment> nonBorrowedEquipments = repository.findByIsBorrowed(false);
 
         assertEquals(0, nonBorrowedEquipments.stream().filter(Equipment::getIsBorrowed).count());
+    }
+
+    @Test
+    @DisplayName("Find equipments whose name contains the string input")
+    void findByNameContaining_returnsEquipmentsWhoseNameContainsTheString() {
+        String nameQuery = "1";
+        List<Equipment> expectedList = equipmentList.stream().filter(e -> e.getName().contains(nameQuery)).toList();
+        List<Equipment> resultList = repository.findByNameContaining(nameQuery);
+
+        assertEquals(expectedList, resultList);
     }
 }

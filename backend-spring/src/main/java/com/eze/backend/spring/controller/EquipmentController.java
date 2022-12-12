@@ -32,9 +32,15 @@ public class EquipmentController {
     private EquipmentService equipmentService;
 
     @GetMapping("/equipments")
-    public ResponseEntity<List<EquipmentDto>> getEquipments(@RequestParam(required = false) Boolean isBorrowed) {
+    public ResponseEntity<List<EquipmentDto>> getEquipments(@RequestParam(required = false) Boolean isBorrowed,
+                                                            @RequestParam(required = false) String query,
+                                                            @RequestParam(required = false) String value) {
+        log.info("Fetching equipments with params isBorrowed {}, query {}, value {}", isBorrowed, query, value);
         Stream<Equipment> equipments = equipmentService.getAllNotDeleted().stream();
-        if(isBorrowed != null) {
+        if (query != null && !query.isBlank() && "name".equals(query)) {
+            equipments = equipmentService.searchByName(value).stream();
+        }
+        if (isBorrowed != null) {
             equipments = equipments.filter(e -> e.getIsBorrowed().equals(isBorrowed));
         }
         List<EquipmentDto> dtoResponse = equipments.map(Equipment::toEquipmentDto).toList();

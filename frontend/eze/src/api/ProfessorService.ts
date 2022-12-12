@@ -36,7 +36,7 @@ const BACKEND_URI = getBackendUri();
 
 const getProfessors = async (requestConfig: RequestConfig) => {
   const responseObj: Professor[] = await fetch(
-    `${BACKEND_URI}/api/v1/professors`,
+    `${BACKEND_URI}${requestConfig.relativeUrl}`,
     {
       method: requestConfig.method || "GET",
       headers: requestConfig.headers != null ? requestConfig.headers : {},
@@ -68,7 +68,9 @@ const getProfessorByName = async (requestConfig: RequestConfig) => {
 
 const createProfessor = async (requestConfig: RequestConfig) => {
   const responseObj: Professor = await fetch(
-    `${BACKEND_URI}/api/v1/professors`,
+    requestConfig.relativeUrl
+      ? `${BACKEND_URI}${requestConfig.relativeUrl}`
+      : `${BACKEND_URI}/api/v1/professors`,
     {
       method: requestConfig.method || "POST",
       body: requestConfig.body ? JSON.stringify(requestConfig.body) : null,
