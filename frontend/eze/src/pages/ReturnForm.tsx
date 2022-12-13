@@ -10,7 +10,7 @@ import { transactionAction } from "../store/transactionSlice";
 import useHttp, { RequestConfig } from "../hooks/useHttp";
 import { useDispatch } from "react-redux";
 import TransactionItem from "../components/Transaction/TransactionItem";
-import TransactionDetailsModal from "../components/UI/Modal/TransactionDetailsModal";
+import ShowTransactionDetails from "../components/UI/Modal/ShowTransactionDetails";
 import validator from "validator";
 
 function ReturnForm() {
@@ -485,7 +485,7 @@ function ReturnForm() {
         </div>
       </div>
       <div>
-        <TransactionDetailsModal
+        <ShowTransactionDetails
           params={new URLSearchParams({ complete: "true" }).toString()}
           type="BORROW/RETURN"
         />

@@ -15,7 +15,7 @@ import { transactionAction } from "../store/transactionSlice";
 import useHttp, { RequestConfig } from "../hooks/useHttp";
 import { useDispatch } from "react-redux";
 import TransactionItem from "../components/Transaction/TransactionItem";
-import TransactionDetailsModal from "../components/UI/Modal/TransactionDetailsModal";
+import ShowTransactionDetails from "../components/UI/Modal/ShowTransactionDetails";
 import validator from "validator";
 
 function BorrowForm() {
@@ -240,9 +240,13 @@ function BorrowForm() {
   // Borrow Equipments handler
   const borrowEquipmentHandler = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (student !== undefined && professor !== undefined) {
+    if (
+      student !== undefined &&
+      professor !== undefined &&
+      equipments.length > 0
+    ) {
       const newTransaction: CreateUpdateTransaction = {
-        borrower: student!,
+        borrower: student,
         equipments: equipments,
         professor: professor!,
         status: TxStatus.PENDING,
@@ -486,7 +490,7 @@ function BorrowForm() {
         </div>
       </div>
       <div>
-        <TransactionDetailsModal
+        <ShowTransactionDetails
           params={new URLSearchParams({ complete: "true" }).toString()}
           type="BORROW/RETURN"
         />

@@ -6,14 +6,14 @@ import TransactionService, {
 import { useSelector } from "react-redux";
 import { IRootState } from "../../../store";
 
-interface TransactionDetailsModalProps {
+interface ShowTransactionDetailsProps {
   params: string;
   type: "HISTORY" | "BORROW/RETURN";
   cancelModalTarget?: string;
 }
 
-const TransactionDetailsModal: React.FC<
-  PropsWithChildren<TransactionDetailsModalProps>
+const ShowTransactionDetails: React.FC<
+  PropsWithChildren<ShowTransactionDetailsProps>
 > = (props) => {
   const auth = useSelector((state: IRootState) => state.auth);
   const transaction = useSelector((state: IRootState) => state.transaction);
@@ -197,4 +197,4 @@ const TransactionDetailsModal: React.FC<
   );
 };
 
-export default TransactionDetailsModal;
+export default ShowTransactionDetails;

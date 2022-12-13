@@ -220,6 +220,26 @@ public class TransactionController {
         return ResponseEntity.status(HttpStatus.CREATED).body(transactionListDto);
     }
 
+    @PostMapping("/transactions/student")
+    public ResponseEntity<Object> createStudentTransaction(@Valid @RequestBody CreateUpdateTransactionDto dto,
+                                                           @RequestParam(required = false, defaultValue = "false") Boolean complete,
+                                                            @CurrentSecurityContext(expression = "authentication") Authentication authentication) {
+        Transaction transactionToCreate = Transaction.toTransaction(dto);
+        String studentUsername = transactionToCreate.getBorrower().getStudentNumber();
+        String studentUsernameInAuth = ((UserDetails) authentication.getPrincipal()).getUsername();
+        if(!studentUsername.equals(studentUsernameInAuth)) {
+            throw new ApiException("Student can only delete their own transaction", HttpStatus.FORBIDDEN);
+        }
+
+        Transaction createdTransaction = service.create(transactionToCreate);
+        if (Boolean.TRUE.equals(complete)) {
+            TransactionDto transactionDto = Transaction.toTransactionDto(createdTransaction);
+            return ResponseEntity.status(HttpStatus.CREATED).body(transactionDto);
+        }
+        TransactionListDto transactionListDto = Transaction.toTransactionListDto(createdTransaction);
+        return ResponseEntity.status(HttpStatus.CREATED).body(transactionListDto);
+    }
+
     @PutMapping("/transactions")
     public ResponseEntity<TransactionDto> updateTransaction(@Valid @RequestBody CreateUpdateTransactionDto dto,
                                                             @RequestParam String code) {
@@ -229,12 +249,10 @@ public class TransactionController {
         return ResponseEntity.ok(dtoResponse);
     }
 
-    // TODO: Create test case for
-    // NOTE: Needs to be put before the DELETE /api/transaction/{code} since Spring MVC routes the request for this endpoint to that
     @DeleteMapping("/transactions/student/{code}")
     public ResponseEntity<Object> cancelStudentTransaction(@PathVariable String code,
                                                            @CurrentSecurityContext(expression = "authentication") Authentication authentication) {
-        log.info("Cancelling transaction with code {} and authentication {}", code, authentication.toString());
+        log.info("Cancelling transaction with code {} and principal {}", code, authentication.toString());
         Transaction transaction = service.get(code);
         String studentUsername = transaction.getBorrower().getStudentNumber();
         String studentUsernameInAuth = ((UserDetails) authentication.getPrincipal()).getUsername();

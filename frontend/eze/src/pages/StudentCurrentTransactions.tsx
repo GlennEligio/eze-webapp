@@ -6,14 +6,14 @@ import React, {
 } from "react";
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import TransactionService, {
   Transaction,
   TxStatus,
 } from "../api/TransactionService";
 import TransactionItem from "../components/Transaction/TransactionItem";
 import CancelTransactionModal from "../components/UI/Modal/CancelTransactionModal";
-import TransactionDetailsModal from "../components/UI/Modal/TransactionDetailsModal";
+import ShowTransactionDetails from "../components/UI/Modal/ShowTransactionDetails";
 import MiniClock from "../components/UI/Other/MiniClock";
 import useHttp, { RequestConfig } from "../hooks/useHttp";
 import { IRootState } from "../store";
@@ -281,7 +281,7 @@ const StudentCurrentTransactions = () => {
         </div>
       </div>
       <div>
-        <TransactionDetailsModal
+        <ShowTransactionDetails
           params={new URLSearchParams({
             complete: "true",
             historical: "false",
@@ -295,7 +295,7 @@ const StudentCurrentTransactions = () => {
           >
             Cancel
           </button>
-        </TransactionDetailsModal>
+        </ShowTransactionDetails>
         <CancelTransactionModal
           previousModalId="#cancelTransactionModal"
           selectedTxCode={

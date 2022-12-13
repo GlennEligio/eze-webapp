@@ -6,7 +6,7 @@ import TransactionService, { Transaction } from "../api/TransactionService";
 import useHttp, { RequestConfig } from "../hooks/useHttp";
 import MiniClock from "../components/UI/Other/MiniClock";
 import TransactionItem from "../components/Transaction/TransactionItem";
-import TransactionDetailsModal from "../components/UI/Modal/TransactionDetailsModal";
+import ShowTransactionDetails from "../components/UI/Modal/ShowTransactionDetails";
 import { transactionAction } from "../store/transactionSlice";
 import { useDispatch } from "react-redux";
 import fileDownload from "js-file-download";
@@ -235,7 +235,7 @@ function TransactionHistory() {
         </div>
       </div>
       <div>
-        <TransactionDetailsModal
+        <ShowTransactionDetails
           params={new URLSearchParams({
             complete: "true",
             historical: "true",

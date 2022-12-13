@@ -944,6 +944,87 @@ public class TransactionControllerTest {
                 .andExpect(content().json(responseJson));
     }
 
+    @Test
+    @DisplayName("Cancel Transaction using invalid Auth and valid Code returns 403 Forbidden")
+    public void cancelStudentTransaction_withInvalidAuth_returns403Forbidden() throws Exception {
+        String validTxCode = tx0.getTxCode();
+        mockMvc.perform(delete("/api/v1/transactions/student/" + validTxCode))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("Cancel Transaction with valid Auth, valid Code, and mismatch student in Auth and Transaction returns 403 Forbidden")
+    @WithMockUser(authorities = "STUDENT", username = "DifferentUsername")
+    void cancelStudentTransaction_withValidAuthAndValidCodeButDifferentStudentNumber_returns403Forbidden() throws Exception {
+        String validTxCode = tx0.getTxCode();
+        when(service.get(validTxCode)).thenReturn(tx0);
+
+        mockMvc.perform(delete("/api/v1/transactions/student/" + validTxCode))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("Cancel Transaction using valid Auth, and invalid Code returns 404 Not Found")
+    @WithMockUser(authorities = "STUDENT")
+    public void cancelStudentTransaction_withValidAuthAndInvalidCode_returns404NotFound() throws Exception {
+        String invalidTxCode = tx0.getTxCode();
+        when(service.get(invalidTxCode)).thenThrow(new ApiException("Transaction not found", HttpStatus.NOT_FOUND));
+
+        mockMvc.perform(delete("/api/v1/transactions/student/" + invalidTxCode))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("Cancel an already cancelled Transaction using valid Auth, valid Code, and matching Student number, and returns 400 Bad Request")
+    @WithMockUser(authorities = "STUDENT", username = "2015-00129-MN-01")
+    void cancelStudentTransaction_withValidAuthInvalidCodeMatchingStudent_returns400BadRequest() throws Exception {
+        String txCodeOfAlreadyCancelledTx = tx0.getTxCode();
+        when(service.get(txCodeOfAlreadyCancelledTx)).thenReturn(tx0);
+        doThrow(new ApiException("Transaction already cancelled", HttpStatus.BAD_REQUEST)).when(service).softDelete(txCodeOfAlreadyCancelledTx);
+
+        mockMvc.perform(delete("/api/v1/transactions/student/" + txCodeOfAlreadyCancelledTx))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("Cancel Transaction using valid Auth, valid Code, and matching Student number, and returns 200OK")
+    @WithMockUser(authorities = "STUDENT", username = "2015-00129-MN-01")
+    void cancelStudentTransaction_withValidAuthValidCodeAndMatchingStudentUsername_returns200OK() throws Exception{
+        String validTxCode = tx0.getTxCode();
+        when(service.get(validTxCode)).thenReturn(tx0);
+        doNothing().when(service).softDelete(validTxCode);
+
+        mockMvc.perform(delete("/api/v1/transactions/student/" + validTxCode))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("Create Student Transaction using valid Auth and returns 201 Created")
+    @WithMockUser(authorities = "STUDENT", username = "2015-00129-MN-02")
+    void createStudentTransaction_withValidAuth_returns201Created() throws Exception {
+        List<EquipmentDto> equipmentDtos = tx1.getEquipments().stream().map(Equipment::toEquipmentDto).toList();
+        ProfessorDto professorDto = Professor.toProfessorDto(tx1.getProfessor());
+        StudentDto studentDto = Student.toStudentDto(tx1.getBorrower());
+        CreateUpdateTransactionDto requestDto = new CreateUpdateTransactionDto(equipmentDtos, studentDto, professorDto, "PENDING");
+        Transaction transactionToCreate = Transaction.toTransaction(requestDto);
+        Transaction transactionCreated = Transaction.toTransaction(requestDto);
+        transactionCreated.setTxCode("Random code");
+        transactionCreated.setId(999L);
+        transactionCreated.setBorrowedAt(LocalDateTime.now());
+        TransactionDto responseDto = Transaction.toTransactionDto(transactionCreated);
+        when(service.create(transactionToCreate)).thenReturn(transactionCreated);
+        String completeParam = "true";
+        String requestJson = mapper.writeValueAsString(requestDto);
+        String responseJson = mapper.writeValueAsString(responseDto);
+
+        mockMvc.perform(post("/api/v1/transactions/student")
+                .param("complete", completeParam)
+                .content(requestJson)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(responseJson))
+                .andExpect(status().isCreated());
+    }
+
     public MockMultipartFile createMultipartFile(List<Transaction> transactions, String contentType) {
         try {
             // remove duplicable eqs and returned equipments (isBorrowed is false)

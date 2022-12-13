@@ -51,6 +51,7 @@ public class SecurityConfiguration {
                 .antMatchers("/api/v1/accounts/login", "/api/v1/accounts/register", "/actuator/**").permitAll()
                 .antMatchers(HttpMethod.GET, "/**").authenticated()
                 .antMatchers("/api/v1/transactions/professor/*").hasAuthority("PROF")
+                .antMatchers("/api/v1/transactions/student").hasAuthority("STUDENT")
                 .antMatchers("/api/v1/transactions/student/*").hasAuthority("STUDENT")
                 .anyRequest().hasAnyAuthority("SADMIN", "ADMIN", "STUDENT_ASSISTANT");
         return http.build();
