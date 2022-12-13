@@ -6,6 +6,7 @@ import React, {
 } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import validator from "validator";
 import EquipmentService, { Equipment } from "../api/EquipmentService";
 import ProfessorService, { Professor } from "../api/ProfessorService";
 import StudentService, { StudentFull } from "../api/StudentService";
@@ -13,7 +14,6 @@ import SearchItemResult from "../components/StudentBorrow/SearchItemResult";
 import AddTransaction from "../components/UI/Modal/AddTransaction";
 import ShowEquipmentDetails from "../components/UI/Modal/ShowEquipmentDetails";
 import ShowProfessorDetails from "../components/UI/Modal/ShowProfessorDetails";
-import ShowTransactionDetails from "../components/UI/Modal/ShowTransactionDetails";
 import useHttp, { RequestConfig } from "../hooks/useHttp";
 import { IRootState } from "../store";
 
@@ -46,7 +46,23 @@ const StudentBorrowForm = () => {
     data: studentData,
     error: getStudentByStudentNumberError,
     status: getStudentByStudentNumberStatus,
-  } = useHttp<StudentFull>(StudentService.getStudentByStudentNumber, true);
+  } = useHttp<StudentFull>(StudentService.getStudentByStudentNumber, false);
+
+  // on mount, fetch the student info
+  useEffect(() => {
+    // check if studentNumber input is present
+    if (validator.isEmpty(auth.username)) return;
+    const params = { complete: "true" };
+    const requestConfig: RequestConfig = {
+      headers: {
+        Authorization: `Bearer ${auth.accessToken}`,
+      },
+      relativeUrl: `/api/v1/students/${auth.username}?${new URLSearchParams(
+        params
+      ).toString()}`,
+    };
+    getStudentByStudentNumber(requestConfig);
+  }, [auth.username]);
 
   // populate professor search list state based on professor useHttp
   useEffect(() => {
@@ -154,6 +170,14 @@ const StudentBorrowForm = () => {
   const removeProfessorItemHandler = (prof: Professor) => {
     setSelectedProfessor(undefined);
   };
+
+  const resetSearchList = () => {
+    setProfessorList([]);
+    setEquipmentList([]);
+  };
+
+  const completeTransactionInfo =
+    student && selectedEquipments.length > 0 && selectedProfessor;
 
   return (
     <>
@@ -351,7 +375,14 @@ const StudentBorrowForm = () => {
             <hr />
             <div className="row">
               <div className="col d-flex justify-content-end">
-                <button className="btn btn-success" type="submit">
+                <button
+                  className="btn btn-success"
+                  type="button"
+                  data-bs-target="#addStudentTransaction"
+                  data-bs-toggle="modal"
+                  onClick={() => resetSearchList()}
+                  disabled={!completeTransactionInfo}
+                >
                   Borrow Equipments
                 </button>
               </div>
@@ -362,7 +393,16 @@ const StudentBorrowForm = () => {
       <div>
         <ShowProfessorDetails selectedProfessor={profDetailsToShow} />
         <ShowEquipmentDetails equipmentToShow={eqDetailsToShow} />
-        <AddTransaction student={} />
+        {completeTransactionInfo && (
+          <AddTransaction
+            student={student}
+            professor={selectedProfessor}
+            accessToken={auth.accessToken}
+            equipments={selectedEquipments}
+            params={new URLSearchParams({ complete: "true" }).toString()}
+            key={"Add Transaction Modal"}
+          />
+        )}
       </div>
     </>
   );

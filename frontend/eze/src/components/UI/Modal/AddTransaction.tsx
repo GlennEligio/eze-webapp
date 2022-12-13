@@ -1,25 +1,13 @@
-import React, {
-  useState,
-  useEffect,
-  useRef,
-  PropsWithChildren,
-  FormEventHandler,
-} from "react";
+import React, { PropsWithChildren, FormEventHandler } from "react";
 import useHttp, { RequestConfig } from "../../../hooks/useHttp";
 import TransactionService, {
   CreateUpdateTransaction,
   TransactionFull,
   TxStatus,
 } from "../../../api/TransactionService";
-import { useSelector } from "react-redux";
-import { IRootState } from "../../../store";
 import { Equipment } from "../../../api/EquipmentService";
 import { Professor } from "../../../api/ProfessorService";
-import {
-  isValidStudent,
-  Student,
-  StudentFull,
-} from "../../../api/StudentService";
+import { StudentFull } from "../../../api/StudentService";
 import RequestStatusMessage from "../Other/RequestStatusMessage";
 
 interface AddTransactionProps {
@@ -38,7 +26,7 @@ const AddTransaction: React.FC<PropsWithChildren<AddTransactionProps>> = (
     data,
     error,
     status,
-  } = useHttp<TransactionFull>(TransactionService.createTransaction, true);
+  } = useHttp<TransactionFull>(TransactionService.createTransaction, false);
 
   // Fetch transaction details when selectedTransaction changes
   const createTransactionSubmitHandler: FormEventHandler = (event) => {
@@ -58,10 +46,11 @@ const AddTransaction: React.FC<PropsWithChildren<AddTransactionProps>> = (
     const requestConfig: RequestConfig = {
       headers: {
         Authorization: `Bearer ${props.accessToken}`,
+        "Content-type": "application/json",
       },
       body: requestBody,
       method: "POST",
-      relativeUrl: `/api/v1/student?${params}`,
+      relativeUrl: `/api/v1/transactions/student?${params}`,
     };
 
     createTransaction(requestConfig);
@@ -70,7 +59,7 @@ const AddTransaction: React.FC<PropsWithChildren<AddTransactionProps>> = (
   return (
     <div
       className="modal fade"
-      id="addTransactionModal"
+      id="addStudentTransaction"
       tabIndex={-1}
       aria-labelledby="addTransactionModalLabel"
       aria-hidden="true"
@@ -94,6 +83,7 @@ const AddTransaction: React.FC<PropsWithChildren<AddTransactionProps>> = (
                   error={error}
                   key={"Add Transaction"}
                   loadingMessage="Creating Transaction..."
+                  startMessage="Do you want to create this request?"
                   status={status}
                   successMessage="Transaction added"
                 />

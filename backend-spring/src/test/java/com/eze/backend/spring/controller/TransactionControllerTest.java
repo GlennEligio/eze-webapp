@@ -999,9 +999,84 @@ public class TransactionControllerTest {
     }
 
     @Test
-    @DisplayName("Create Student Transaction using valid Auth and returns 201 Created")
+    @DisplayName("Create Student Transaction using invalid Auth returns 403 Forbidden")
+    void createStudentTransaction_withInvalidAuth_returns403Forbidden() throws Exception {
+        List<EquipmentDto> equipmentDtos = tx1.getEquipments().stream().map(Equipment::toEquipmentDto).toList();
+        ProfessorDto professorDto = Professor.toProfessorDto(tx1.getProfessor());
+        StudentDto studentDto = Student.toStudentDto(tx1.getBorrower());
+        CreateUpdateTransactionDto requestDto = new CreateUpdateTransactionDto(equipmentDtos, studentDto, professorDto, "PENDING");
+        String requestJson = mapper.writeValueAsString(requestDto);
+
+        mockMvc.perform(post("/api/v1/transactions/student")
+                        .content(requestJson)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("Create Student Transaction using valid Auth and malformed payload returns 400 BadRequest")
+    @WithMockUser(authorities = "STUDENT")
+    void createStudentTransaction_withValidAuthAndMalformedPayload_returns400BadRequest() throws Exception {
+        List<EquipmentDto> equipmentDtos = tx1.getEquipments().stream().map(Equipment::toEquipmentDto).toList();
+        ProfessorDto professorDto = Professor.toProfessorDto(tx1.getProfessor());
+        StudentDto studentDto = Student.toStudentDto(tx1.getBorrower());
+        String invalidTxStatus = "INVALID TX STATUS";
+        CreateUpdateTransactionDto requestDto = new CreateUpdateTransactionDto(equipmentDtos, studentDto, professorDto, invalidTxStatus);
+        String requestJson = mapper.writeValueAsString(requestDto);
+
+        mockMvc.perform(post("/api/v1/transactions/student")
+                        .content(requestJson)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("Create Student Transaction using mismatched Student from Auth and transaction returns 403 Forbidden")
+    @WithMockUser(authorities = "STUDENT", username = "2015-00129-MN-69")
+    void createStudentTransaction_withMismatchedStudentNumberInAuthAndTransaction_returns403Forbidden() throws Exception {
+        List<EquipmentDto> equipmentDtos = tx1.getEquipments().stream().map(Equipment::toEquipmentDto).toList();
+        ProfessorDto professorDto = Professor.toProfessorDto(tx1.getProfessor());
+        StudentDto studentDto = Student.toStudentDto(tx1.getBorrower());
+        CreateUpdateTransactionDto requestDto = new CreateUpdateTransactionDto(equipmentDtos, studentDto, professorDto, "PENDING");
+        String requestJson = mapper.writeValueAsString(requestDto);
+
+        mockMvc.perform(post("/api/v1/transactions/student")
+                        .content(requestJson)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("Create Student Transaction using complete param false, valid Auth, proper payload, matching student number returns 201 Created with incomplete Transaction details")
     @WithMockUser(authorities = "STUDENT", username = "2015-00129-MN-02")
-    void createStudentTransaction_withValidAuth_returns201Created() throws Exception {
+    void createStudentTransaction_withCompleteParamFalseAndValidAuthPayloadAndUsername_returns201Created() throws Exception {
+        List<EquipmentDto> equipmentDtos = tx1.getEquipments().stream().map(Equipment::toEquipmentDto).toList();
+        ProfessorDto professorDto = Professor.toProfessorDto(tx1.getProfessor());
+        StudentDto studentDto = Student.toStudentDto(tx1.getBorrower());
+        CreateUpdateTransactionDto requestDto = new CreateUpdateTransactionDto(equipmentDtos, studentDto, professorDto, "PENDING");
+        Transaction transactionToCreate = Transaction.toTransaction(requestDto);
+        Transaction transactionCreated = Transaction.toTransaction(requestDto);
+        transactionCreated.setTxCode("Random code");
+        transactionCreated.setId(999L);
+        transactionCreated.setBorrowedAt(LocalDateTime.now());
+        TransactionListDto responseDto = Transaction.toTransactionListDto(transactionCreated);
+        when(service.create(transactionToCreate)).thenReturn(transactionCreated);
+        String completeParam = "false";
+        String requestJson = mapper.writeValueAsString(requestDto);
+        String responseJson = mapper.writeValueAsString(responseDto);
+
+        mockMvc.perform(post("/api/v1/transactions/student")
+                        .param("complete", completeParam)
+                        .content(requestJson)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().json(responseJson))
+                .andExpect(status().isCreated());
+    }
+
+    @Test
+    @DisplayName("Create Student Transaction using complete param true, valid Auth, proper payload, matching student number returns 201 Created with complete Transaction details")
+    @WithMockUser(authorities = "STUDENT", username = "2015-00129-MN-02")
+    void createStudentTransaction_withCompleteParamTrueAndValidAuthPayloadAndUsername_returns201Created() throws Exception {
         List<EquipmentDto> equipmentDtos = tx1.getEquipments().stream().map(Equipment::toEquipmentDto).toList();
         ProfessorDto professorDto = Professor.toProfessorDto(tx1.getProfessor());
         StudentDto studentDto = Student.toStudentDto(tx1.getBorrower());

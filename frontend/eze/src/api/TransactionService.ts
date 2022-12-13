@@ -114,7 +114,9 @@ const getTransactionByCode = async (requestConfig: RequestConfig) => {
 
 const createTransaction = async (requestConfig: RequestConfig) => {
   const responseObj: Transaction = await fetch(
-    `${BACKEND_URI}/api/v1/transactions`,
+    requestConfig.relativeUrl
+      ? `${BACKEND_URI}${requestConfig.relativeUrl}`
+      : `${BACKEND_URI}/api/v1/transactions`,
     {
       method: requestConfig.method || "POST",
       body: requestConfig.body ? JSON.stringify(requestConfig.body) : null,
