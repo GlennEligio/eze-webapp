@@ -14,7 +14,7 @@ import Unauthorized from "./pages/Unauthorized";
 import Home from "./pages/Home";
 import Professors from "./pages/Professors";
 import TransactionHistory from "./pages/TransactionHistory";
-import StudentCurrentTransactions from "./pages/StudentCurrentTransactions";
+import StudentTransactions from "./pages/StudentTransactions";
 import StudentBorrowForm from "./pages/StudentBorrowForm";
 import AccountSetting from "./pages/AccountSetting";
 
@@ -48,7 +48,27 @@ const App = () => {
             <Route path="/account/settings" element={<AccountSetting />} />
             <Route
               path="/student/current-transactions"
-              element={<StudentCurrentTransactions />}
+              element={
+                <StudentTransactions
+                  historical="false"
+                  cancellable={true}
+                  returned="false"
+                  type="BORROW/RETURN"
+                  pageTitle="Current Transactions"
+                />
+              }
+            />
+            <Route
+              path="/student/history-transactions"
+              element={
+                <StudentTransactions
+                  historical="true"
+                  cancellable={false}
+                  returned="true"
+                  type="HISTORY"
+                  pageTitle="Transaction History"
+                />
+              }
             />
           </>
         )}

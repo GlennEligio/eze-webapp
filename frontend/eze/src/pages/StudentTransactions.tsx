@@ -19,7 +19,15 @@ import useHttp, { RequestConfig } from "../hooks/useHttp";
 import { IRootState } from "../store";
 import { transactionAction } from "../store/transactionSlice";
 
-const StudentCurrentTransactions = () => {
+interface StudentTransactionsProps {
+  historical: "true" | "false";
+  returned: "true" | "false";
+  cancellable: boolean;
+  type: "HISTORY" | "BORROW/RETURN";
+  pageTitle: string;
+}
+
+const StudentTransactions: React.FC<StudentTransactionsProps> = (props) => {
   const auth = useSelector((state: IRootState) => state.auth);
   const transaction = useSelector((state: IRootState) => state.transaction);
   const dispatch = useDispatch();
@@ -29,17 +37,17 @@ const StudentCurrentTransactions = () => {
   const [fromDate, setFromDate] = useState("");
 
   const {
-    sendRequest: getStudentCurrentTransactions,
-    data: studentCurrentTransactions,
-    error: getStudentCurrentTransactionsError,
-    status: getStudentCurrentTransactionsStatus,
+    sendRequest: getStudentTransactions,
+    data: studentTransactions,
+    error: getStudentTransactionsError,
+    status: getStudentTransactionsStatus,
   } = useHttp<Transaction[]>(TransactionService.getStudentTransaction, true);
 
   // Prepopulate the table of current transactions
   useEffect(() => {
     const params = new URLSearchParams({
-      historical: "false",
-      returned: "false",
+      historical: props.historical,
+      returned: props.returned,
     });
     const requestConfig: RequestConfig = {
       headers: {
@@ -50,36 +58,44 @@ const StudentCurrentTransactions = () => {
         `/api/v1/transactions/student/${auth.username}?` + params.toString(),
     };
 
-    getStudentCurrentTransactions(requestConfig);
+    getStudentTransactions(requestConfig);
   }, []);
 
   // Populate Transaction State when a successful getCurrentTransaction request happens
   useEffect(() => {
     if (
-      getStudentCurrentTransactionsStatus === "completed" &&
-      getStudentCurrentTransactionsError === null &&
-      studentCurrentTransactions
+      getStudentTransactionsStatus === "completed" &&
+      getStudentTransactionsError === null &&
+      studentTransactions
     ) {
-      if (studentCurrentTransactions instanceof Array) {
+      if (studentTransactions instanceof Array) {
+        let transactionDisplay: Transaction[];
+        if (props.historical) {
+          transactionDisplay = [...studentTransactions].map((t) => {
+            return { ...t, equipmentsCount: t.equipmentsHistCount };
+          });
+        } else {
+          transactionDisplay = [...studentTransactions];
+        }
         dispatch(
           transactionAction.addTransactions({
-            transactions: studentCurrentTransactions,
+            transactions: transactionDisplay,
           })
         );
       }
     }
   }, [
-    studentCurrentTransactions,
-    getStudentCurrentTransactionsError,
-    getStudentCurrentTransactionsStatus,
+    studentTransactions,
+    getStudentTransactionsError,
+    getStudentTransactionsStatus,
   ]);
 
   const searchTxSubmitHandler: FormEventHandler = (event) => {
     event.preventDefault();
 
     const params = new URLSearchParams({
-      historical: "false",
-      returned: "false",
+      historical: props.historical,
+      returned: props.returned,
       status: status ? status : "",
       fromDate,
       toDate,
@@ -93,7 +109,7 @@ const StudentCurrentTransactions = () => {
         `/api/v1/transactions/student/${auth.username}?` + params.toString(),
     };
 
-    getStudentCurrentTransactions(requestConfig);
+    getStudentTransactions(requestConfig);
   };
 
   const backBtnClickHandler = () => {
@@ -150,7 +166,7 @@ const StudentCurrentTransactions = () => {
                     <i className="bi bi-clock-history fs-1"></i>
                   </div>
                   <div className="d-flex flex-column justify-content-center ms-3 flex-grow-1">
-                    <span className="fs-3">Current Transactions</span>
+                    <span className="fs-3">{props.pageTitle}</span>
                   </div>
                 </div>
               </div>
@@ -284,29 +300,33 @@ const StudentCurrentTransactions = () => {
         <ShowTransactionDetails
           params={new URLSearchParams({
             complete: "true",
-            historical: "false",
+            historical: props.historical,
           }).toString()}
-          type="BORROW/RETURN"
+          type={props.type}
         >
-          <button
-            className="btn btn-danger"
-            data-bs-toggle="modal"
-            data-bs-target="#cancelTransactionModal"
-          >
-            Cancel
-          </button>
+          {props.cancellable && (
+            <button
+              className="btn btn-danger"
+              data-bs-toggle="modal"
+              data-bs-target="#cancelTransactionModal"
+            >
+              Cancel
+            </button>
+          )}
         </ShowTransactionDetails>
-        <CancelTransactionModal
-          previousModalId="#cancelTransactionModal"
-          selectedTxCode={
-            transaction.selectedTransaction
-              ? transaction.selectedTransaction.txCode
-              : ""
-          }
-        />
+        {props.cancellable && (
+          <CancelTransactionModal
+            previousModalId="#cancelTransactionModal"
+            selectedTxCode={
+              transaction.selectedTransaction
+                ? transaction.selectedTransaction.txCode
+                : ""
+            }
+          />
+        )}
       </div>
     </>
   );
 };
 
-export default StudentCurrentTransactions;
+export default StudentTransactions;

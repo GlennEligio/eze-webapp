@@ -89,8 +89,8 @@ const StudentMenu = () => {
                     backgroundColor="#00aeef"
                     destPage="/student/history-transactions"
                     imageLoc="/img/Documents Library.png"
-                    title="Student Database"
-                    key={"Student Database"}
+                    title="Transaction History"
+                    key={"Transaction History"}
                   />
                 </div>
               </div>
