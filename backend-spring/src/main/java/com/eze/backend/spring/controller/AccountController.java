@@ -3,7 +3,7 @@ package com.eze.backend.spring.controller;
 import com.eze.backend.spring.dtos.EzeUserDetails;
 import com.eze.backend.spring.dtos.LoginRequestDto;
 import com.eze.backend.spring.dtos.LoginResponseDto;
-import com.eze.backend.spring.dtos.RegisterRequestDto;
+import com.eze.backend.spring.dtos.CreateUpdateAccountDto;
 import com.eze.backend.spring.enums.AccountType;
 import com.eze.backend.spring.model.Account;
 import com.eze.backend.spring.exception.ApiException;
@@ -15,7 +15,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.compress.utils.IOUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.annotation.CurrentSecurityContext;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,8 +29,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -60,9 +65,9 @@ public class AccountController {
     }
 
     @PostMapping("/accounts/register")
-    public ResponseEntity<LoginResponseDto> register(@Valid @RequestBody RegisterRequestDto registerRequestDto) {
+    public ResponseEntity<LoginResponseDto> register(@Valid @RequestBody CreateUpdateAccountDto registerRequestDto) {
         log.info("Account with username {} is registering", registerRequestDto.getUsername());
-        Account account = registerRequestDto.createAccount();
+        Account account = Account.toAccount(registerRequestDto);
         Account accountSaved = service.create(account);
         log.info("Account with username {} is registered", accountSaved.getUsername());
         EzeUserDetails userDetails = (EzeUserDetails) service.loadUserByUsername(accountSaved.getUsername());
@@ -105,7 +110,15 @@ public class AccountController {
     }
 
     @GetMapping("/accounts/{username}")
-    public ResponseEntity<Account> getAccount(@PathVariable("username") String username) {
+    public ResponseEntity<Account> getAccount(@PathVariable("username") String username,
+                                              @CurrentSecurityContext(expression = "authentication") Authentication authentication) {
+        UsernamePasswordAuthenticationToken authenticationToken = (UsernamePasswordAuthenticationToken) authentication;
+        String usernameInAuth = ((UserDetails) authenticationToken.getPrincipal()).getUsername();
+        Collection<GrantedAuthority> authorities = authenticationToken.getAuthorities();
+        boolean isAdmin = authorities.contains(new SimpleGrantedAuthority("ADMIN")) || authorities.contains(new SimpleGrantedAuthority("SADMIN"));
+        if(!isAdmin && !username.equals(usernameInAuth)) {
+            throw new ApiException("Updating information of other dto is not allowed", HttpStatus.FORBIDDEN);
+        }
         return ResponseEntity.ok(service.get(username));
     }
 
@@ -115,9 +128,18 @@ public class AccountController {
     }
 
     @PutMapping("/accounts/{username}")
-    public ResponseEntity<Account> updateAccount(@Valid @RequestBody Account account,
-                                                 @PathVariable("username") String username) {
-        return ResponseEntity.ok(service.update(account, username));
+    public ResponseEntity<Account> updateAccount(@Valid @RequestBody CreateUpdateAccountDto dto,
+                                                 @PathVariable("username") String username,
+                                                 @CurrentSecurityContext(expression = "authentication") Authentication authentication) {
+        Account accountToUpdate = Account.toAccount(dto);
+        UsernamePasswordAuthenticationToken authenticationToken = (UsernamePasswordAuthenticationToken) authentication;
+        String usernameInAuth = ((UserDetails) authenticationToken.getPrincipal()).getUsername();
+        Collection<GrantedAuthority> authorities = authenticationToken.getAuthorities();
+        boolean isAdmin = authorities.contains(new SimpleGrantedAuthority("ADMIN")) || authorities.contains(new SimpleGrantedAuthority("SADMIN"));
+        if(!isAdmin && !username.equals(usernameInAuth)) {
+            throw new ApiException("Updating information of other dto is not allowed", HttpStatus.FORBIDDEN);
+        }
+        return ResponseEntity.ok(service.update(accountToUpdate, username));
     }
 
     @DeleteMapping("/accounts/{username}")
@@ -125,6 +147,4 @@ public class AccountController {
         service.softDelete(username);
         return ResponseEntity.ok().build();
     }
-
-
 }

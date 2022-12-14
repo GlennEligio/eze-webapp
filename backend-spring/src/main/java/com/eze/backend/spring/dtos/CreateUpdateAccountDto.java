@@ -11,7 +11,7 @@ import javax.validation.constraints.NotBlank;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class RegisterRequestDto {
+public class CreateUpdateAccountDto {
     @NotBlank(message = "Username cant be blank")
     private String username;
     @NotBlank(message = "Password can't be blank")
@@ -22,14 +22,4 @@ public class RegisterRequestDto {
     private String email;
     @URL(message = "Profile image url must be a valid url", regexp = "^(http|https)://.*")
     private String profile;
-
-    public Account createAccount() {
-        Account account = new Account();
-        account.setUsername(this.username);
-        account.setPassword(this.password);
-        account.setFullName(this.fullName);
-        account.setEmail(this.email);
-        account.setProfile(this.profile);
-        return account;
-    }
 }

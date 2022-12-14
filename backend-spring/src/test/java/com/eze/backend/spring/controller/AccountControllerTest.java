@@ -8,7 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.eze.backend.spring.dtos.EzeUserDetails;
 import com.eze.backend.spring.dtos.LoginRequestDto;
 import com.eze.backend.spring.dtos.LoginResponseDto;
-import com.eze.backend.spring.dtos.RegisterRequestDto;
+import com.eze.backend.spring.dtos.CreateUpdateAccountDto;
 import com.eze.backend.spring.enums.AccountType;
 import com.eze.backend.spring.exception.ApiException;
 import com.eze.backend.spring.model.Account;
@@ -17,7 +17,6 @@ import com.eze.backend.spring.util.JwtUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import lombok.With;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -37,7 +36,6 @@ import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.test.context.support.WithSecurityContext;
 import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
@@ -138,8 +136,8 @@ public class AccountControllerTest {
     @DisplayName("Register User")
     @WithAnonymousUser
     void register_usingValidRegisterData_returns200OKWithAccessTokens() throws Exception {
-        RegisterRequestDto registerRequestDto = new RegisterRequestDto(account0.getUsername(), account0.getPassword(), account0.getFullName(), account0.getFullName(), account0.getProfile());
-        Account accountToCreate = registerRequestDto.createAccount();
+        CreateUpdateAccountDto registerRequestDto = new CreateUpdateAccountDto(account0.getUsername(), account0.getPassword(), account0.getFullName(), account0.getFullName(), account0.getProfile());
+        Account accountToCreate = Account.toAccount(registerRequestDto);
         String accessToken = "AccessToken0";
         String refreshToken = "RefreshToken0";
         LoginResponseDto responseDto = new LoginResponseDto(userDetails.getUsername(), userDetails.getAuthorities().stream().findFirst().get().toString(), userDetails.getFullName(), accessToken, refreshToken, userDetails.getProfile());
@@ -238,13 +236,23 @@ public class AccountControllerTest {
 
     @Test
     @DisplayName("Get non-existent Account using valid Authority")
-    @WithMockUser(authorities = "STUDENT_ASSISTANT")
+    @WithMockUser(authorities = "STUDENT_ASSISTANT", username = "Username0")
     void getAccount_withValidAuthorityAndNonExistentAccount_returns404NotFound() throws Exception {
         String accountUsername = account0.getUsername();
         when(service.get(accountUsername)).thenThrow(new ApiException("No account was found", HttpStatus.NOT_FOUND));
 
         mockMvc.perform(get("/api/v1/accounts/" + accountUsername))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("Get Account using valid Authority (non-admin) and mismatched username returns 403 Forbidden")
+    @WithMockUser(authorities = "STUDENT_ASSISTANT", username = "MISMATCHED USERNAME")
+    void getAccount_withValidAuthorityAndMismatchedUsername_returns404NotFound() throws Exception {
+        String accountUsername = account0.getUsername();
+
+        mockMvc.perform(get("/api/v1/accounts/" + accountUsername))
+                .andExpect(status().isForbidden());
     }
 
     @Test
@@ -302,7 +310,7 @@ public class AccountControllerTest {
 
     @Test
     @DisplayName("Update Account with valid Authority and malformed payload")
-    @WithMockUser(authorities = "STUDENT_ASSISTANT")
+    @WithMockUser(authorities = "STUDENT_ASSISTANT", username = "Username0")
     void updateAccount_withValidAuthAndMalformedPayload_returns401BadRequest() throws Exception {
         account0.setProfile("Invalid Profile url");
         String json = mapper.writeValueAsString(account0);
@@ -316,12 +324,56 @@ public class AccountControllerTest {
     }
 
     @Test
-    @DisplayName("Update Account with valid Auth and proper payload")
-    @WithMockUser(authorities = "STUDENT_ASSISTANT")
-    void updateAccount_withValidAuthAndProperPayload_returns200OK() throws Exception {
+    @DisplayName("Update Account with username of non-existent account returns 404 Not Found")
+    @WithMockUser(authorities = "ADMIN", username = "non-existent username")
+    void updateAccount_withNonExistentAccount_returns404NotFound() throws Exception {
+        CreateUpdateAccountDto requestDto = new CreateUpdateAccountDto();
+        String nonExistentAccountUsername = "non-existent username";
+        requestDto.setUsername(nonExistentAccountUsername);
+        requestDto.setPassword(account0.getPassword());
+        requestDto.setFullName(account0.getFullName());
+        requestDto.setEmail(account0.getEmail());
+        requestDto.setProfile(account0.getProfile());
+        Account accountToUpdate = Account.toAccount(requestDto);
+        account0.setUsername(nonExistentAccountUsername);
+        String json = mapper.writeValueAsString(requestDto);
+        String username = account0.getUsername();
+        when(service.update(accountToUpdate, username)).thenThrow(new ApiException("Account not found", HttpStatus.NOT_FOUND));
+
+        mockMvc.perform(put("/api/v1/accounts/" + username)
+                        .content(json)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("Update Account with non-admin account, mismatched username returns 403 Forbidden")
+    @WithMockUser(authorities = "STUDENT_ASSISTANT", username = "INVALID USERNAME")
+    void updateAccount_withNonAdminAccountAndMismatchedUsername_returns200OK() throws Exception {
         String username = account0.getUsername();
         String json = mapper.writeValueAsString(account0);
         when(service.update(account0, username)).thenReturn(account0);
+
+        mockMvc.perform(put("/api/v1/accounts/" + username)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("Update Account with non-admin account, valid Auth, matching username, proper payload returns 200 OK")
+    @WithMockUser(authorities = "STUDENT_ASSISTANT", username = "Username0")
+    void updateAccount_withValidAuthAndProperPayload_returns200OK() throws Exception {
+        CreateUpdateAccountDto requestDto = new CreateUpdateAccountDto();
+        requestDto.setUsername(account0.getUsername());
+        requestDto.setPassword(account0.getPassword());
+        requestDto.setFullName(account0.getFullName());
+        requestDto.setEmail(account0.getEmail());
+        requestDto.setProfile(account0.getProfile());
+        Account accountToUpdate = Account.toAccount(requestDto);
+        String username = account0.getUsername();
+        String json = mapper.writeValueAsString(requestDto);
+        when(service.update(accountToUpdate, username)).thenReturn(account0);
 
         mockMvc.perform(put("/api/v1/accounts/" + username)
                 .contentType(MediaType.APPLICATION_JSON)

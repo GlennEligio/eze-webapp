@@ -49,6 +49,7 @@ public class SecurityConfiguration {
         http.authorizeRequests()
                 // TODO: Configure route guarding for other account types
                 .antMatchers("/api/v1/accounts/login", "/api/v1/accounts/register", "/actuator/**").permitAll()
+                .antMatchers(HttpMethod.PUT, "/api/v1/accounts/*").authenticated()
                 .antMatchers(HttpMethod.GET, "/**").authenticated()
                 .antMatchers("/api/v1/transactions/professor/*").hasAuthority("PROF")
                 .antMatchers("/api/v1/transactions/student").hasAuthority("STUDENT")

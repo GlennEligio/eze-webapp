@@ -132,3 +132,21 @@ export const validateUrl = (inputName: string) => {
     };
   };
 };
+
+export const validateEmail = (inputEmail: string) => {
+  return (inputValue: any) => {
+    let errorMessage = "";
+    let valueIsValid = true;
+
+    if (!validator.isEmail(inputValue)) {
+      errorMessage = `${inputEmail} must be a valid email`;
+      console.log(errorMessage);
+      valueIsValid = false;
+    }
+
+    return {
+      valueIsValid,
+      errorMessage,
+    };
+  };
+};

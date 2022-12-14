@@ -3,7 +3,6 @@ package com.eze.backend.spring.service;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.eze.backend.spring.dtos.EzeUserDetails;
-import com.eze.backend.spring.dtos.RegisterRequestDto;
 import com.eze.backend.spring.enums.AccountType;
 import com.eze.backend.spring.exception.ApiException;
 import com.eze.backend.spring.model.Account;
@@ -23,12 +22,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.multipart.MultipartFile;
 

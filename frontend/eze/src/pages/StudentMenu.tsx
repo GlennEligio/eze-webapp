@@ -67,7 +67,7 @@ const StudentMenu = () => {
                     imageLoc="/img/User Accounts.png"
                     title="Account Setting"
                     key="Student Account Setting"
-                    destPage="/student/account-setting"
+                    destPage="/account/settings"
                   />
                 </div>
               </div>

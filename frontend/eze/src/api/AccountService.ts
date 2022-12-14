@@ -39,8 +39,8 @@ export interface CreateUpdateAccountDto {
   password: string;
   fullName: string;
   email: string;
-  type: AccountType;
-  active: boolean;
+  type?: AccountType;
+  active?: boolean;
   profile: string;
 }
 
@@ -97,6 +97,24 @@ const getAccounts = async (requestConfig: RequestConfig) => {
   return responseObj;
 };
 
+const getAccountByUsername = async (requestConfig: RequestConfig) => {
+  const responseObj: Account = await fetch(
+    requestConfig.relativeUrl
+      ? `${BACKEND_URI}${requestConfig.relativeUrl}`
+      : `${BACKEND_URI}/api/v1/accounts`,
+    {
+      method: requestConfig.method || "GET",
+      headers: requestConfig.headers != null ? requestConfig.headers : {},
+    }
+  ).then((response) => {
+    if (response.ok) {
+      return response.json();
+    }
+    throw new ApiError("Failed to fetch account");
+  });
+  return responseObj;
+};
+
 const createAccount = async (requestConfig: RequestConfig) => {
   const responseObj: Account = await fetch(`${BACKEND_URI}/api/v1/accounts`, {
     method: requestConfig.method || "POST",
@@ -113,7 +131,9 @@ const createAccount = async (requestConfig: RequestConfig) => {
 
 const updateAccount = async (requestConfig: RequestConfig) => {
   const responseObj: Account = await fetch(
-    `${BACKEND_URI}${requestConfig.relativeUrl}` as string,
+    requestConfig.relativeUrl
+      ? `${BACKEND_URI}${requestConfig.relativeUrl}`
+      : `${BACKEND_URI}/api/v1/accounts`,
     {
       method: requestConfig.method || "PUT",
       body: requestConfig.body ? JSON.stringify(requestConfig.body) : null,
@@ -175,7 +195,7 @@ export const isValidAccount = (account: CreateUpdateAccountDto) => {
     console.log("Empty password");
     valid = false;
   }
-  if (validator.isEmpty(account.type)) {
+  if (validator.isEmpty(account.type || "")) {
     console.log("Empty type");
     valid = false;
   }
@@ -189,6 +209,7 @@ export const isValidAccount = (account: CreateUpdateAccountDto) => {
 export default {
   login,
   getAccounts,
+  getAccountByUsername,
   createAccount,
   updateAccount,
   deleteAccount,

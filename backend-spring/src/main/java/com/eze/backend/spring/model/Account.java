@@ -1,5 +1,6 @@
 package com.eze.backend.spring.model;
 
+import com.eze.backend.spring.dtos.CreateUpdateAccountDto;
 import com.eze.backend.spring.enums.AccountType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -91,5 +92,15 @@ public class Account implements Serializable {
         if(newAccount.getDeleteFlag() != null) {
             this.setDeleteFlag(newAccount.getDeleteFlag());
         }
+    }
+
+    public static Account toAccount(CreateUpdateAccountDto dto) {
+        Account account = new Account();
+        account.setUsername(dto.getUsername());
+        account.setPassword(dto.getPassword());
+        account.setFullName(dto.getFullName());
+        account.setEmail(dto.getEmail());
+        account.setProfile(dto.getProfile());
+        return account;
     }
 }
