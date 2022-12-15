@@ -36,8 +36,8 @@ public class TransactionRepositoryTest {
         YearSection yearSection = new YearSection("SectionName1", false, yearLevel);
         student1 = new Student("2015-00129-MN-01", "FullName1", yearSection, "09062560571", "Birthday1", "Address1", "email1@gmail.com", "Guardian1", "GuardianNumber1", yearLevel, "https://sampleprofile1.com", true);
         student2 = new Student("2015-00129-MN-02", "FullName2", yearSection, "09062560572", "Birthday2", "Address2", "email2@gmail.com", "Guardian2", "GuardianNumber2", yearLevel, "https://sampleprofile2.com", true);
-        professor1 = new Professor("Name1", "+639062560571", false);
-        professor2 = new Professor("Name2", "+639062560572", false);
+        professor1 = new Professor("Name1", "+639062560571", false, "email0@gmail.com", "https://sampleimage0.com");
+        professor2 = new Professor("Name2", "+639062560572", false, "email1@gmail.com", "https://sampleimage1.com");
         Equipment equipment0 = new Equipment("EqCode0", "Name0", "Barcode0", EqStatus.GOOD, LocalDateTime.now(), true, false, false);
         Equipment equipment1 = new Equipment("EqCode01", "Name1", "Barcode1", EqStatus.GOOD, LocalDateTime.now(), true, false, false);
 

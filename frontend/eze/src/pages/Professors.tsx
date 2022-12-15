@@ -148,12 +148,17 @@ const Professors = () => {
           {/* <!-- User info table --> */}
           <div className="row mt-2 gx-0 overflow-auto">
             <div className="table-responsive-xxl">
-              <table className="table table-hover">
+              <table
+                className="table table-hover"
+                style={{ maxWidth: "1300px" }}
+              >
                 <thead className="table-dark">
                   <tr>
                     <th>Id</th>
                     <th>Name</th>
                     <th>Contact Number</th>
+                    <th>Email</th>
+                    <th>Profile image url</th>
                   </tr>
                 </thead>
                 <tbody>

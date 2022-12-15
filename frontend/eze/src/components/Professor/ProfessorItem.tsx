@@ -17,6 +17,8 @@ const ProfessorItem: React.FC<ProfessorItemProps> = (props) => {
       <td>{props.professor.id}</td>
       <td>{props.professor.name}</td>
       <td>{props.professor.contactNumber}</td>
+      <td>{props.professor.email}</td>
+      <td>{props.professor.profile}</td>
     </tr>
   );
 };

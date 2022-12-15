@@ -92,8 +92,8 @@ public class TransactionControllerTest {
         yearSection = new YearSection("SectionName1", false, yearLevel);
         student = new Student("2015-00129-MN-01", "FullName1", yearSection, "09062560571", "Birthday1", "Address1", "email1@gmail.com", "Guardian1", "GuardianNumber1", yearLevel, "https://sampleprofile1.com", false);
         student2 = new Student("2015-00129-MN-02", "FullName2", yearSection, "09062560571", "Birthday2", "Address2", "email2@gmail.com", "Guardian2", "GuardianNumber2", yearLevel, "https://sampleprofile2.com", false);
-        professor1 = new Professor("Name1", "+639062560571", false);
-        professor2 = new Professor("Name2", "+639062560572", false);
+        professor1 = new Professor("Name1", "+639062560571", false, "email0@gmail.com", "https://sampleimage0.com");
+        professor2 = new Professor("Name2", "+639062560572", false, "email1@gmail.com", "https://sampleimage1.com");
         eq0 = new Equipment("EqCode0", "Name0", "Barcode0", EqStatus.GOOD, null, false, true, false);
         eq1 = new Equipment("EqCode1", "Name1", "Barcode1", EqStatus.GOOD, null, true, false, false);
         eq2 = new Equipment("EqCode2", "Name2", "Barcode2", EqStatus.GOOD, null, false, false, false);

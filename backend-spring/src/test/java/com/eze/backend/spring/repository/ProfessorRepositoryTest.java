@@ -26,8 +26,8 @@ class ProfessorRepositoryTest {
 
     @BeforeEach
     void setup() {
-        professor0 = new Professor("Name0", "+639062560574", false);
-        Professor professor1 = new Professor("Name1", "+639062560574", true);
+        professor0 = new Professor("Name0", "+639062560574", false, "email0@gmail.com", "https://sampleimage0.com");
+        Professor professor1 = new Professor("Name1", "+639062560574", true, "email1@gmail.com", "https://sampleimage1.com");
         entityManager.persist(professor0);
         entityManager.persist(professor1);
     }

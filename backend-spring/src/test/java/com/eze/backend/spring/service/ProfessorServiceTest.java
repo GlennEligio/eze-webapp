@@ -2,10 +2,13 @@ package com.eze.backend.spring.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.eze.backend.spring.enums.AccountType;
 import com.eze.backend.spring.exception.ApiException;
+import com.eze.backend.spring.model.Account;
 import com.eze.backend.spring.model.Professor;
 import com.eze.backend.spring.model.YearSection;
 import com.eze.backend.spring.repository.ProfessorRepository;
+import com.eze.backend.spring.util.ObjectIdGenerator;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -25,6 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -35,16 +39,25 @@ public class ProfessorServiceTest {
     @Mock
     private ProfessorRepository repository;
 
+    @Mock
+    private ObjectIdGenerator idGenerator;
+
+    @Mock
+    private AccountService accountService;
+
     @InjectMocks
     private ProfessorService service;
 
     private List<Professor> professorList;
     private Professor professor0, professor1;
+    private Account account0, account1;
 
     @BeforeEach
     void setup() {
-        professor0 = new Professor("Name0", "+639062560574", false);
-        professor1 = new Professor("Name1", "+639062560574", true);
+        professor0 = new Professor("Name0", "+639062560574", false, "email0@gmail.com", "https://sampleimage0.com");
+        professor1 = new Professor("Name1", "+639062560574", true, "email1@gmail.com", "https://sampleimage1.com");
+        account0 = new Account(0L, professor0.getName(), professor0.getName(), professor0.getEmail(), "EncryptedPassword", AccountType.PROF, professor0.getProfile(), LocalDateTime.now(), true, false);
+        account1 = new Account(1L, professor1.getName(), professor1.getName(), professor1.getEmail(), "EncryptedPassword", AccountType.PROF, professor1.getProfile(), LocalDateTime.now(), true, false);
         professorList = List.of(professor1, professor0);
     }
 
@@ -98,6 +111,9 @@ public class ProfessorServiceTest {
         String availableName = professor0.getName();
         Mockito.when(repository.findByName(availableName)).thenReturn(Optional.empty());
         Mockito.when(repository.save(professor0)).thenReturn(professor0);
+        Mockito.when(idGenerator.createId()).thenReturn(account0.getPassword());
+        Account accountToCreate = new Account(null, professor0.getName(), professor0.getName(), professor0.getEmail(), "EncryptedPassword", AccountType.PROF, professor0.getProfile(), null, null, null);
+        Mockito.when(accountService.create(accountToCreate)).thenReturn(account0);
 
         Professor professor = service.create(professor0);
 
@@ -127,7 +143,7 @@ public class ProfessorServiceTest {
     @DisplayName("Update existing Professor")
     void update_withExistingProfessor_returnsUpdatedProfessor() {
         String validName = professor0.getName();
-        Professor updatedProfessor = new Professor(professor0.getName(), professor0.getContactNumber(), !professor0.getDeleteFlag());
+        Professor updatedProfessor = new Professor(professor0.getName(), professor0.getContactNumber(), !professor0.getDeleteFlag(), professor0.getEmail(), professor0.getProfile());
         Mockito.when(repository.findByName(validName)).thenReturn(Optional.of(professor0));
         Mockito.when(repository.save(updatedProfessor)).thenReturn(updatedProfessor);
 
@@ -223,7 +239,7 @@ public class ProfessorServiceTest {
     @Test
     @DisplayName("Add or Update with different data and overwrite false")
     void addOrUpdate_withDifferentDataAndOverwriteFalse_returnZero() {
-        Professor updatedProfessor0 = new Professor(professor0.getName(), professor0.getContactNumber(), !professor0.getDeleteFlag());
+        Professor updatedProfessor0 = new Professor(professor0.getName(), professor0.getContactNumber(), !professor0.getDeleteFlag(), professor0.getEmail(), professor0.getProfile());
         List<Professor> professors = List.of(updatedProfessor0, professor1);
         Mockito.when(repository.findByName(professor0.getName())).thenReturn(Optional.of(professor0));
         Mockito.when(repository.findByName(professor1.getName())).thenReturn(Optional.of(professor1));
@@ -236,7 +252,7 @@ public class ProfessorServiceTest {
     @Test
     @DisplayName("Add or Update with different data and overwrite true")
     void addOrUpdate_withDifferentDataAndOverwriteFalse_returnsNonZero() {
-        Professor updatedProfessor0 = new Professor(professor0.getName(), professor0.getContactNumber(), !professor0.getDeleteFlag());
+        Professor updatedProfessor0 = new Professor(professor0.getName(), professor0.getContactNumber(), !professor0.getDeleteFlag(), professor0.getEmail(), professor0.getProfile());
         List<Professor> professors = List.of(updatedProfessor0, professor1);
         Mockito.when(repository.findByName(professor0.getName())).thenReturn(Optional.of(professor0));
         Mockito.when(repository.findByName(professor1.getName())).thenReturn(Optional.of(professor1));
@@ -253,7 +269,7 @@ public class ProfessorServiceTest {
             professor0.setId(0L);
             professor1.setId(1L);
             List<Professor> professors = List.of(professor0, professor1);
-            List<String> columns = List.of("ID", "Name", "Contact Number", "Delete flag");
+            List<String> columns = List.of("ID", "Name", "Contact Number", "Delete flag", "Email", "Profile image url");
 
             ByteArrayInputStream inputStream = service.listToExcel(professors);
             XSSFWorkbook workbook = new XSSFWorkbook(inputStream);
@@ -273,6 +289,8 @@ public class ProfessorServiceTest {
                 assertEquals(professor.getName(), row.getCell(1).getStringCellValue());
                 assertEquals(professor.getContactNumber(), row.getCell(2).getStringCellValue());
                 assertEquals(professor.getDeleteFlag(), row.getCell(3).getBooleanCellValue());
+                assertEquals(professor.getEmail(), row.getCell(4).getStringCellValue());
+                assertEquals(professor.getProfile(), row.getCell(5).getStringCellValue());
             }
         } catch (IOException ignored) {
 
@@ -289,7 +307,7 @@ public class ProfessorServiceTest {
             XSSFWorkbook workbook = new XSSFWorkbook();
             Sheet sheet = workbook.createSheet("Professors");
 
-            List<String> columns = List.of("ID", "Name", "Contact Number", "Delete flag");
+            List<String> columns = List.of("ID", "Name", "Contact Number", "Delete flag", "Email", "Profile image url");
 
             // Creating header row
             Row headerRow = sheet.createRow(0);
@@ -306,6 +324,8 @@ public class ProfessorServiceTest {
                 dataRow.createCell(1).setCellValue(prof.getName());
                 dataRow.createCell(2).setCellValue(prof.getContactNumber());
                 dataRow.createCell(3).setCellValue(prof.getDeleteFlag());
+                dataRow.createCell(4).setCellValue(prof.getEmail());
+                dataRow.createCell(5).setCellValue(prof.getProfile());
             }
 
             // Making size of the columns auto resize to fit data

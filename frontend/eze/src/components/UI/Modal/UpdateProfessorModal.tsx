@@ -9,8 +9,10 @@ import { IRootState } from "../../../store";
 import { useDispatch } from "react-redux";
 import { professorActions } from "../../../store/professorSlice";
 import {
+  validateEmail,
   validateNotEmpty,
   validatePhMobileNumber,
+  validateUrl,
 } from "../../../validation/validations";
 import useInput, { InputType } from "../../../hooks/useInput";
 import RequestStatusMessage from "../Other/RequestStatusMessage";
@@ -56,6 +58,24 @@ const UpdateProfessorModal: React.FC<UpdateProfessorModalProps> = (props) => {
     "",
     InputType.TEXT
   );
+  const {
+    value: profile,
+    hasError: profileInputHasError,
+    isValid: profileIsValid,
+    valueChangeHandler: profileChangeHandler,
+    inputBlurHandler: profileBlurHandler,
+    reset: resetProfileInput,
+    errorMessage: profileErrorMessage,
+  } = useInput(validateUrl("Profile image url"), "", InputType.TEXT);
+  const {
+    value: email,
+    hasError: emailInputHasError,
+    isValid: emailIsValid,
+    valueChangeHandler: emailChangeHandler,
+    inputBlurHandler: emailBlurHandler,
+    reset: resetEmailInput,
+    errorMessage: emailErrorMessage,
+  } = useInput(validateEmail("Email"), "", InputType.TEXT);
 
   // Add the received Professor to the Redux
   useEffect(() => {
@@ -85,15 +105,20 @@ const UpdateProfessorModal: React.FC<UpdateProfessorModalProps> = (props) => {
     }
   }, []);
 
+  const completeProfessorInfo =
+    nameIsValid && contactNumberIsValid && emailIsValid && profileIsValid;
+
   const updateProfessorHandler = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     console.log("Updating Professor");
     const updatedProfessor: CreateUpdateProfessor = {
       name,
       contactNumber,
+      email,
+      profile,
     };
 
-    if (!nameIsValid || !contactNumberIsValid) {
+    if (!completeProfessorInfo) {
       console.log("Invalid professor");
       return;
     }
@@ -173,6 +198,34 @@ const UpdateProfessorModal: React.FC<UpdateProfessorModalProps> = (props) => {
                   </label>
                 </div>
               </div>
+              <div className={emailInputHasError ? "invalid" : ""}>
+                {emailInputHasError && <span>{emailErrorMessage}</span>}
+                <div className="form-floating mb-3">
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="newProfessorEmail"
+                    onChange={emailChangeHandler}
+                    onBlur={emailBlurHandler}
+                    value={email}
+                  />
+                  <label htmlFor="newProfessorEmail">Email</label>
+                </div>
+              </div>
+              <div className={profileInputHasError ? "invalid" : ""}>
+                {profileInputHasError && <span>{profileErrorMessage}</span>}
+                <div className="form-floating mb-3">
+                  <input
+                    type="text"
+                    className="form-control"
+                    id="newProfessorProfile"
+                    onChange={profileChangeHandler}
+                    onBlur={profileBlurHandler}
+                    value={profile}
+                  />
+                  <label htmlFor="newProfessorProfile">Profile image url</label>
+                </div>
+              </div>
               <div className="modal-footer">
                 <button
                   type="button"
@@ -181,7 +234,11 @@ const UpdateProfessorModal: React.FC<UpdateProfessorModalProps> = (props) => {
                 >
                   Close
                 </button>
-                <button type="submit" className="btn btn-primary">
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  disabled={!completeProfessorInfo}
+                >
                   Update
                 </button>
               </div>

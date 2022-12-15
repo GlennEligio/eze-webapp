@@ -5,11 +5,15 @@ export interface Professor {
   id: number;
   name: string;
   contactNumber: string;
+  email: string;
+  profile: string;
 }
 
 export interface CreateUpdateProfessor {
   name: string;
   contactNumber: string;
+  email: string;
+  profile: string;
 }
 
 const envSettings = (window as any)._env_;

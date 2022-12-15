@@ -72,8 +72,8 @@ class ProfessorControllerTest {
 
     @BeforeEach
     void setupEach() {
-        prof0 = new Professor("Name0", "+639062560574", false);
-        prof1 = new Professor("Name1", "+639062560574", true);
+        prof0 = new Professor("Name0", "+639062560574", false, "email0@gmail.com", "https://sampleimage0.com");
+        prof1 = new Professor("Name1", "+639062560574", true, "email1@gmail.com", "https://sampleimage1.com");
         professorList = List.of(prof1, prof0);
     }
 
@@ -219,7 +219,7 @@ class ProfessorControllerTest {
     @Test
     @DisplayName("Create Professor using invalid Auth")
     void createProfessor_usingInvalidAuth_returns403Forbidden() throws Exception {
-        ProfessorDto professorDto = new ProfessorDto(null, prof0.getName(), prof0.getContactNumber());
+        ProfessorDto professorDto = new ProfessorDto(null, prof0.getName(), prof0.getContactNumber(), prof0.getEmail(), prof0.getProfile());
         String requestJson = mapper.writeValueAsString(professorDto);
 
         mockMvc.perform(post("/api/v1/professors")
@@ -232,7 +232,7 @@ class ProfessorControllerTest {
     @DisplayName("Create Professor with taken name using valid Auth")
     @WithMockUser(authorities = "STUDENT_ASSISTANT")
     void createProfessor_withTakenNameUsingValidAuth_returns400BadRequest() throws Exception {
-        ProfessorDto professorDto = new ProfessorDto(null, prof0.getName(), prof0.getContactNumber());
+        ProfessorDto professorDto = new ProfessorDto(null, prof0.getName(), prof0.getContactNumber(), prof0.getEmail(), prof0.getProfile());
         Professor professorToCreate = Professor.toProfessor(professorDto);
         when(service.create(professorToCreate)).thenThrow(new ApiException("Professor already exist", HttpStatus.BAD_REQUEST));
         String requestJson = mapper.writeValueAsString(professorDto);
@@ -247,7 +247,7 @@ class ProfessorControllerTest {
     @DisplayName("Create Professor malformed payload using valid Auth")
     @WithMockUser(authorities = "STUDENT_ASSISTANT")
     void createProfessor_withMalformedPayloadUsingValidAuth_returns400BadRequest() throws Exception {
-        ProfessorDto professorDto = new ProfessorDto(null, prof0.getName(), prof0.getContactNumber());
+        ProfessorDto professorDto = new ProfessorDto(null, prof0.getName(), prof0.getContactNumber(), prof0.getEmail(), prof0.getProfile());
         professorDto.setContactNumber("Invalid Contact number format");
         Professor professorToCreate = Professor.toProfessor(professorDto);
         when(service.create(professorToCreate)).thenThrow(new ApiException("Professor already exist", HttpStatus.BAD_REQUEST));
@@ -263,7 +263,7 @@ class ProfessorControllerTest {
     @DisplayName("Create Professor with available name using valid Auth")
     @WithMockUser(authorities = "STUDENT_ASSISTANT")
     void createProfessor_withAvailableNameUsingValidAuth_returns201Created() throws Exception {
-        ProfessorDto professorDto = new ProfessorDto(null, prof0.getName(), prof0.getContactNumber());
+        ProfessorDto professorDto = new ProfessorDto(null, prof0.getName(), prof0.getContactNumber(), prof0.getEmail(), prof0.getProfile());
         Professor professorToCreate = Professor.toProfessor(professorDto);
         Professor createdProfessor = Professor.toProfessor(professorDto);
         createdProfessor.setId(0L);
@@ -283,7 +283,7 @@ class ProfessorControllerTest {
     @DisplayName("Update Professor using invalid Auth")
     void updateProfessor_usingInvalidAuth_returns403Forbidden() throws Exception {
         String validName = prof0.getName();
-        ProfessorDto dtoRequest = new ProfessorDto(null, prof0.getName(), prof0.getContactNumber());
+        ProfessorDto dtoRequest = new ProfessorDto(null, prof0.getName(), prof0.getContactNumber(), prof0.getEmail(), prof0.getProfile());
         String requestJson = mapper.writeValueAsString(dtoRequest);
 
         mockMvc.perform(put("/api/v1/professors/" + validName)
@@ -297,7 +297,7 @@ class ProfessorControllerTest {
     @WithMockUser(authorities = "STUDENT_ASSISTANT")
     void updateProfessor_withMalformedPayloadUsingValidAuth_returns400BadRequest() throws Exception {
         String validName = prof0.getName();
-        ProfessorDto dtoRequest = new ProfessorDto(null, prof0.getName(), prof0.getContactNumber());
+        ProfessorDto dtoRequest = new ProfessorDto(null, prof0.getName(), prof0.getContactNumber(), prof0.getEmail(), prof0.getProfile());
         dtoRequest.setContactNumber("INVALID CONTACT NUMBER FORMAT");
         String requestJson = mapper.writeValueAsString(dtoRequest);
 
@@ -312,7 +312,7 @@ class ProfessorControllerTest {
     @WithMockUser(authorities = "STUDENT_ASSISTANT")
     void updateProfessor_withInvalidNameUsingValidAuth_returns404NotFound() throws Exception {
         String invalidName = prof0.getName();
-        ProfessorDto dtoRequest = new ProfessorDto(null, prof0.getName(), prof0.getContactNumber());
+        ProfessorDto dtoRequest = new ProfessorDto(null, prof0.getName(), prof0.getContactNumber(), prof0.getEmail(), prof0.getProfile());
         Professor professorForUpdate = Professor.toProfessor(dtoRequest);
         String requestJson = mapper.writeValueAsString(dtoRequest);
         when(service.update(professorForUpdate, invalidName)).thenThrow(new ApiException("Professor does not exist", HttpStatus.NOT_FOUND));
@@ -328,7 +328,7 @@ class ProfessorControllerTest {
     @WithMockUser(authorities = "STUDENT_ASSISTANT")
     void updateProfessor_withValidNameUsingValidAuth_returns200OK() throws Exception {
         String validName = prof0.getName();
-        ProfessorDto dtoRequest = new ProfessorDto(null, prof0.getName(), prof0.getContactNumber());
+        ProfessorDto dtoRequest = new ProfessorDto(null, prof0.getName(), prof0.getContactNumber(), prof0.getEmail(), prof0.getProfile());
         Professor professorForUpdate = Professor.toProfessor(dtoRequest);
         Professor updatedProfessor = Professor.toProfessor(dtoRequest);
         updatedProfessor.setContactNumber("+639062560690");
@@ -380,7 +380,7 @@ class ProfessorControllerTest {
             XSSFWorkbook workbook = new XSSFWorkbook();
             Sheet sheet = workbook.createSheet("Professors");
 
-            List<String> columns = List.of("ID", "Name", "Contact Number", "Delete flag");
+            List<String> columns = List.of("ID", "Name", "Contact Number", "Delete flag", "Email", "Profile image url");
 
             // Creating header row
             Row headerRow = sheet.createRow(0);
@@ -397,6 +397,8 @@ class ProfessorControllerTest {
                 dataRow.createCell(1).setCellValue(prof.getName());
                 dataRow.createCell(2).setCellValue(prof.getContactNumber());
                 dataRow.createCell(3).setCellValue(prof.getDeleteFlag());
+                dataRow.createCell(4).setCellValue(prof.getEmail());
+                dataRow.createCell(5).setCellValue(prof.getProfile());
             }
 
             // Making size of the columns auto resize to fit data

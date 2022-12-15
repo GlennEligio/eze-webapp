@@ -16,6 +16,8 @@ const DeleteProfessorModal: React.FC<DeleteProfessorModalProps> = (props) => {
   const auth = useSelector((state: IRootState) => state.auth);
   const [name, setName] = useState("");
   const [contactNumber, setContactNumber] = useState("");
+  const [email, setEmail] = useState("");
+  const [profile, setProfile] = useState("");
   const modal = useRef<HTMLDivElement | null>(null);
   const dispatch = useDispatch();
   const {
@@ -45,6 +47,8 @@ const DeleteProfessorModal: React.FC<DeleteProfessorModalProps> = (props) => {
     if (props.selectedProfessor) {
       setName(props.selectedProfessor.name);
       setContactNumber(props.selectedProfessor.contactNumber);
+      setProfile(props.selectedProfessor.profile);
+      setEmail(props.selectedProfessor.email);
     }
   }, [props.selectedProfessor]);
 
@@ -133,6 +137,29 @@ const DeleteProfessorModal: React.FC<DeleteProfessorModalProps> = (props) => {
                   Contact Number
                 </label>
               </div>
+              <div className="form-floating mb-3">
+                <input
+                  type="text"
+                  className="form-control"
+                  id="deleteProfessorEmail"
+                  value={email}
+                  disabled={true}
+                />
+                <label htmlFor="deleteProfessorEmail">Email</label>
+              </div>
+              <div className="form-floating mb-3">
+                <input
+                  type="text"
+                  className="form-control"
+                  id="deleteProfessorProfile"
+                  value={profile}
+                  disabled={true}
+                />
+                <label htmlFor="deleteProfessorProfile">
+                  Profile image url
+                </label>
+              </div>
+
               <div className="modal-footer">
                 <button
                   type="button"

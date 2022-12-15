@@ -1,13 +1,17 @@
 package com.eze.backend.spring.service;
 
+import com.eze.backend.spring.enums.AccountType;
 import com.eze.backend.spring.exception.ApiException;
+import com.eze.backend.spring.model.Account;
 import com.eze.backend.spring.model.Professor;
 import com.eze.backend.spring.repository.ProfessorRepository;
+import com.eze.backend.spring.util.ObjectIdGenerator;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.bson.codecs.IdGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -26,8 +30,15 @@ import java.util.Optional;
 @Slf4j
 public class ProfessorService implements IService<Professor>, IExcelService<Professor>{
 
-    @Autowired
     private ProfessorRepository repository;
+    private ObjectIdGenerator idGenerator;
+    private AccountService accountService;
+
+    public ProfessorService(ProfessorRepository repository, ObjectIdGenerator idGenerator, AccountService accountService) {
+        this.repository = repository;
+        this.idGenerator = idGenerator;
+        this.accountService = accountService;
+    }
 
     @Override
     public List<Professor> getAll() {
@@ -53,6 +64,20 @@ public class ProfessorService implements IService<Professor>, IExcelService<Prof
                 throw new ApiException(alreadyExist(professor.getName()), HttpStatus.BAD_REQUEST);
             }
         }
+        // Creating account alongside the Student Creation
+        Account account = new Account();
+        account.setUsername(professor.getName());
+        // TODO: Send this to the student's email via JavaMailSender
+        String randomPassword = idGenerator.createId();
+        account.setPassword(randomPassword);
+        account.setEmail(professor.getEmail());
+        account.setFullName(professor.getName());
+        // TODO: Set a proper default image url
+        account.setProfile(professor.getProfile());
+        account.setType(AccountType.PROF);
+        Account newAccount = accountService.create(account);
+        professor.setProfessorAccount(newAccount);
+
         professor.setDeleteFlag(false);
         return repository.save(professor);
     }
@@ -121,7 +146,7 @@ public class ProfessorService implements IService<Professor>, IExcelService<Prof
 
     @Override
     public ByteArrayInputStream listToExcel(List<Professor> professors) {
-        List<String> columnName = List.of("ID", "Name", "Contact Number", "Delete flag");
+        List<String> columnName = List.of("ID", "Name", "Contact Number", "Delete flag", "Email", "Profile image url");
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet("Professor");
 
@@ -139,6 +164,8 @@ public class ProfessorService implements IService<Professor>, IExcelService<Prof
                 dataRow.createCell(1).setCellValue(prof.getName());
                 dataRow.createCell(2).setCellValue(prof.getContactNumber());
                 dataRow.createCell(3).setCellValue(prof.getDeleteFlag());
+                dataRow.createCell(4).setCellValue(prof.getEmail());
+                dataRow.createCell(5).setCellValue(prof.getProfile());
             }
 
             // Making size of the columns auto resize to fit data
@@ -167,6 +194,8 @@ public class ProfessorService implements IService<Professor>, IExcelService<Prof
                 professor.setName(row.getCell(1).getStringCellValue());
                 professor.setContactNumber(row.getCell(2).getStringCellValue());
                 professor.setDeleteFlag(row.getCell(3).getBooleanCellValue());
+                professor.setEmail(row.getCell(4).getStringCellValue());
+                professor.setProfile(row.getCell(5).getStringCellValue());
                 professors.add(professor);
             }
             return professors;

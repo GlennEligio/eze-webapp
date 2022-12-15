@@ -261,7 +261,7 @@ const AddAccountModal = () => {
               </div>
               <div className="form-floating mb-3">
                 <input
-                  type="text"
+                  type="email"
                   className="form-control"
                   id="newAccountEmail"
                   onChange={(e) => setEmail(e.target.value)}
