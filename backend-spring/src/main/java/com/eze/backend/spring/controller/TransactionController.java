@@ -126,22 +126,41 @@ public class TransactionController {
         return ResponseEntity.ok(transactionListDtos);
     }
 
-    @GetMapping("/transactions/professor/{name}")
-    public ResponseEntity<List<?>> getProfessorTransactions(@PathVariable String name,
-                                                            @RequestParam(defaultValue = "false") boolean returned,
-                                                            @RequestParam(defaultValue = "false") boolean historical) {
-        Stream<Transaction> professorTransactions = service.getProfessorTransactions(name).stream();
-        if (returned) {
-            professorTransactions = professorTransactions.filter(t -> t.getEquipments().isEmpty());
-        } else {
-            professorTransactions = professorTransactions.filter(t -> !t.getEquipments().isEmpty());
+    @GetMapping("/transactions/professor/{profName}")
+    public ResponseEntity<List<?>> getProfessorTransactions(@PathVariable String profName,
+                                                          @RequestParam(defaultValue = "false") boolean returned,
+                                                          @RequestParam(defaultValue = "false") boolean historical,
+                                                          @RequestParam(required = false) String status,
+                                                          @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime toDate,
+                                                          @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime fromDate) {
+        log.info("Fetching Professor Transactions with following params");
+        log.info("Professor name: {}", profName);
+        Stream<Transaction> professorTransaction = service.getProfessorTransactions(profName).stream();
+
+        // if fromDate and toDate is present, filter the transactions again
+        log.info("To and From Dates {}, {}", toDate, fromDate);
+        if (fromDate != null && toDate != null) {
+            professorTransaction = professorTransaction.filter(t -> t.getBorrowedAt().isAfter(fromDate) && t.getBorrowedAt().isBefore(toDate));
         }
 
+        log.info("Status {}", status);
+        if (status != null && !status.isBlank()) {
+            professorTransaction = professorTransaction.filter(t -> t.getStatus().getName().equalsIgnoreCase(status));
+        }
+
+        log.info("Returned {}", returned);
+        if (returned) {
+            professorTransaction = professorTransaction.filter(t -> t.getEquipments().isEmpty());
+        } else {
+            professorTransaction = professorTransaction.filter(t -> !t.getEquipments().isEmpty());
+        }
+
+        log.info("Historical {}", historical);
         if (historical) {
-            List<TransactionHistListDto> transactionHistListDto = professorTransactions.map(Transaction::toTransactionHistListDto).toList();
+            List<TransactionHistListDto> transactionHistListDto = professorTransaction.map(Transaction::toTransactionHistListDto).toList();
             return ResponseEntity.ok(transactionHistListDto);
         }
-        List<TransactionListDto> transactionListDtos = professorTransactions.map(Transaction::toTransactionListDto).toList();
+        List<TransactionListDto> transactionListDtos = professorTransaction.map(Transaction::toTransactionListDto).toList();
         return ResponseEntity.ok(transactionListDtos);
     }
 
@@ -277,5 +296,14 @@ public class TransactionController {
         Transaction transaction = service.returnEquipments(borrower, professor, Arrays.stream(barcodes).toList());
         TransactionListDto transactionListDto = Transaction.toTransactionListDto(transaction);
         return ResponseEntity.ok(transactionListDto);
+    }
+
+    // TODO: Create test cases
+    @PutMapping("/transactions/status/{code}")
+    public ResponseEntity<TransactionListDto> updateTransactionStatus(@PathVariable String code,
+                                                                      @RequestParam String status) {
+        Transaction updatedTransaction = service.updateTransactionStatus(code, status);
+        TransactionListDto dtoResponse = Transaction.toTransactionListDto(updatedTransaction);
+        return ResponseEntity.ok(dtoResponse);
     }
 }

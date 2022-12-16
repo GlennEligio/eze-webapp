@@ -70,6 +70,29 @@ const App = () => {
                 />
               }
             />
+            <Route
+              path="/professor/current-transactions"
+              element={
+                <StudentTransactions
+                  historical="false"
+                  updateable={true}
+                  returned="false"
+                  type="BORROW/RETURN"
+                  pageTitle="Current Transactions"
+                />
+              }
+            />
+            <Route
+              path="/professor/history-transactions"
+              element={
+                <StudentTransactions
+                  historical="true"
+                  returned="true"
+                  type="HISTORY"
+                  pageTitle="Transaction History"
+                />
+              }
+            />
           </>
         )}
         <Route path="/loading" element={<LoginLoading />} />

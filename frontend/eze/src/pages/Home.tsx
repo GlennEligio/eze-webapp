@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import { Navigate } from "react-router-dom";
 import { IRootState } from "../store";
 import AdminMenu from "./AdminMenu";
+import ProfessorMenu from "./ProfessorMenu";
 import StudentAssistantMenu from "./StudentAssistantMenu";
 import StudentMenu from "./StudentMenu";
 
@@ -19,6 +20,8 @@ const Home = () => {
         setHomeDisplay(<StudentAssistantMenu />);
       } else if (auth.accountType === "STUDENT") {
         setHomeDisplay(<StudentMenu />);
+      } else if (auth.accountType === "PROF") {
+        setHomeDisplay(<ProfessorMenu />);
       }
     } else {
       setHomeDisplay(<Navigate to="/login" />);

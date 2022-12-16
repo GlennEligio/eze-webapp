@@ -30,7 +30,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -103,7 +102,7 @@ public class TransactionControllerTest {
         // eq0 is not returned yet
         tx1 = new Transaction(new ObjectId().toHexString(), List.of(eq0), List.of(eq0, eq1), student2, professor2, timeStamp, null, TxStatus.PENDING, false);
         // eq2 is not returned yet
-        tx2 = new Transaction(new ObjectId().toHexString(), List.of(eq2), List.of(eq1, eq2), student2, professor2, timeStamp2, null, TxStatus.PENDING, false);
+        tx2 = new Transaction(new ObjectId().toHexString(), List.of(eq2), List.of(eq1, eq2), student2, professor2, timeStamp2, null, TxStatus.ACCEPTED, false);
         transactionList = List.of(tx0, tx1, tx2);
     }
 
@@ -734,16 +733,16 @@ public class TransactionControllerTest {
     @DisplayName("Get Student's Transactions with status of ACCEPTED using valid Auth")
     @WithMockUser(authorities = "STUDENT_ASSISTANT")
     void getStudentTransactions_withStatusParamUsingValidAuth_returns200OkWithTransactionsOfSameStatus() throws Exception {
-        String returnedParam = "true";
-        String historicalParam = "true"; // default value of historical
+        String returnedParam = "false";
+        String historicalParam = "false"; // default value of historical
         String statusParam = "ACCEPTED";
-        String validStudentNumber = student.getStudentNumber();
+        String validStudentNumber = student2.getStudentNumber();
         List<Transaction> studentTransactions = transactionList.stream()
                 .filter(t -> !t.getDeleteFlag())
                 .filter(t -> t.getBorrower().getStudentNumber().equalsIgnoreCase(validStudentNumber)).toList();
         List<Transaction> acceptedTransactions = transactionList.stream().filter(t -> t.getStatus().getName().equalsIgnoreCase(statusParam)).toList();
-        List<Transaction> returnedStudentTransactions = acceptedTransactions.stream().filter(t -> t.getEquipments().isEmpty()).toList();
-        List<TransactionHistListDto> dtoResponse = returnedStudentTransactions.stream().map(Transaction::toTransactionHistListDto).toList();
+        List<Transaction> unreturnedStudentTransactions = acceptedTransactions.stream().filter(t -> !t.getEquipments().isEmpty()).toList();
+        List<TransactionListDto> dtoResponse = unreturnedStudentTransactions.stream().map(Transaction::toTransactionListDto).toList();
         when(service.getStudentTransactions(validStudentNumber)).thenReturn(studentTransactions);
         String responseJson = mapper.writeValueAsString(dtoResponse);
 
@@ -823,7 +822,7 @@ public class TransactionControllerTest {
 
     @Test
     @DisplayName("Get Student Transaction with from and to date range using valid Auth")
-    @WithMockUser(authorities = "STUDENT_ASSISTANT")
+    @WithMockUser(authorities = "STUDENT")
     void getStudentTransactions_withFromAndToParamsUsingValidAuth_returns200OKWithTransactionsWithinDateRange() throws Exception {
         LocalDateTime fromDate = LocalDateTime.of(2022, Month.APRIL, 22, 22, 12, 45);
         LocalDateTime toDate = LocalDateTime.of(2022, Month.APRIL, 27, 22, 12, 45);
@@ -858,7 +857,7 @@ public class TransactionControllerTest {
 
     @Test
     @DisplayName("Get returned Professor's Transactions with historical equipment using valid Auth")
-    @WithMockUser(authorities = "STUDENT_ASSISTANT")
+    @WithMockUser(authorities = "PROF")
     void getProfessorTransactions_withReturnedTrueUsingValidAuth_returns200OkWithHistoricalEquipments() throws Exception {
         String validName = professor1.getName();
         List<Transaction> professorTransactions = transactionList.stream()
@@ -880,7 +879,7 @@ public class TransactionControllerTest {
 
     @Test
     @DisplayName("Get returned Professor's Transactions with current equipment using valid Auth")
-    @WithMockUser(authorities = "STUDENT_ASSISTANT")
+    @WithMockUser(authorities = "PROF")
     void getProfessorTransactions_withReturnedTrueUsingValidAuth_returns200OkWithCurrentEquipments() throws Exception {
         String validName = professor1.getName();
         List<Transaction> professorTransactions = transactionList.stream()
@@ -902,7 +901,7 @@ public class TransactionControllerTest {
 
     @Test
     @DisplayName("Get unreturned Professor's Transactions with current equipment using valid Auth")
-    @WithMockUser(authorities = "STUDENT_ASSISTANT")
+    @WithMockUser(authorities = "PROF")
     void getProfessorTransactions_withUnreturnedFalseUsingValidAuth_returns200OkWithCurrentEquipments() throws Exception {
         String validName = professor1.getName();
         List<Transaction> professorTransactions = transactionList.stream()
@@ -924,7 +923,7 @@ public class TransactionControllerTest {
 
     @Test
     @DisplayName("Get unreturned Student's Transactions with historical equipment using valid Auth")
-    @WithMockUser(authorities = "STUDENT_ASSISTANT")
+    @WithMockUser(authorities = "PROF")
     void getProfessorTransactions_withUnreturnedFalseUsingValidAuth_returns200OkWithHistoricalEquipments() throws Exception {
         String validName = professor1.getName();
         List<Transaction> professorTransactions = transactionList.stream()
@@ -940,6 +939,59 @@ public class TransactionControllerTest {
         mockMvc.perform(get("/api/v1/transactions/professor/" + validName)
                         .param("returned", returnedParam)
                         .param("historical", historicalParam))
+                .andExpect(status().isOk())
+                .andExpect(content().json(responseJson));
+    }
+
+    @Test
+    @DisplayName("Get Professor Transaction with from and to date range using valid Auth")
+    @WithMockUser(authorities = "PROF")
+    void getProfessorTransactions_withFromAndToParamsUsingValidAuth_returns200OKWithTransactionsWithinDateRange() throws Exception {
+        LocalDateTime fromDate = LocalDateTime.of(2022, Month.APRIL, 22, 22, 12, 45);
+        LocalDateTime toDate = LocalDateTime.of(2022, Month.APRIL, 27, 22, 12, 45);
+        String validProfName = professor2.getName();
+        List<Transaction> professorTransactions = transactionList.stream()
+                .filter(t -> !t.getDeleteFlag())
+                .filter(t -> t.getProfessor().getName().equalsIgnoreCase(validProfName)).toList();
+        List<Transaction> unreturnedProfessorTransactions = professorTransactions.stream().filter(t -> !t.getEquipments().isEmpty()).toList();
+        List<Transaction> filteredFinalTransactions = unreturnedProfessorTransactions.stream().filter(t -> t.getBorrowedAt().isAfter(fromDate) && t.getBorrowedAt().isBefore(toDate)).toList();
+        List<TransactionHistListDto> dtoResponse = filteredFinalTransactions.stream().map(Transaction::toTransactionHistListDto).toList();
+        when(service.getProfessorTransactions(validProfName)).thenReturn(professorTransactions);
+        String returnedParam = "false"; //
+        String historicalParam = "true"; // default value of historical parameter is false
+        String responseJson = mapper.writeValueAsString(dtoResponse);
+
+        mockMvc.perform(get("/api/v1/transactions/professor/" + validProfName)
+                        .param("returned", returnedParam)
+                        .param("historical", historicalParam)
+                        .param("toDate", toDate.toString())
+                        .param("fromDate", fromDate.toString()))
+                .andExpect(status().isOk())
+                .andExpect(content().json(responseJson));
+    }
+
+    @Test
+    @DisplayName("Get Professor's Transactions with status of ACCEPTED using valid Auth")
+    @WithMockUser(authorities = "PROF")
+    void getProfessorTransactions_withStatusParamUsingValidAuth_returns200OkWithTransactionsOfSameStatus() throws Exception {
+        String returnedParam = "false";
+        String historicalParam = "false";
+        String statusParam = "ACCEPTED";
+        String validProfessorName = professor2.getName();
+        List<Transaction> professorTransactions = transactionList.stream()
+                .filter(t -> !t.getDeleteFlag())
+                .filter(t -> t.getProfessor().getName().equalsIgnoreCase(validProfessorName))
+                .toList();
+        List<Transaction> acceptedTransactions = transactionList.stream().filter(t -> t.getStatus().getName().equalsIgnoreCase(statusParam)).toList();
+        List<Transaction> unreturnedProfessorTransactions = acceptedTransactions.stream().filter(t -> !t.getEquipments().isEmpty()).toList();
+        List<TransactionListDto> dtoResponse = unreturnedProfessorTransactions.stream().map(Transaction::toTransactionListDto).toList();
+        when(service.getProfessorTransactions(validProfessorName)).thenReturn(professorTransactions);
+        String responseJson = mapper.writeValueAsString(dtoResponse);
+
+        mockMvc.perform(get("/api/v1/transactions/professor/" + validProfessorName)
+                        .param("returned", returnedParam)
+                        .param("historical", historicalParam)
+                        .param("status", statusParam))
                 .andExpect(status().isOk())
                 .andExpect(content().json(responseJson));
     }

@@ -165,6 +165,24 @@ const cancelTransaction = async (requestConfig: RequestConfig) => {
   return responseObj;
 };
 
+const updateTransactionStatus = async (requestConfig: RequestConfig) => {
+  const responseObj: boolean = await fetch(
+    !!requestConfig.relativeUrl
+      ? `${BACKEND_URI}${requestConfig.relativeUrl}`
+      : `${BACKEND_URI}/api/v1/transaction`,
+    {
+      method: requestConfig.method || "PUT",
+      headers: requestConfig.headers || {},
+    }
+  ).then((response) => {
+    if (response.ok) {
+      return true;
+    }
+    throw new ApiError("Failed to update transaction status");
+  });
+  return responseObj;
+};
+
 const upload = async (jwt: string, formData: FormData) => {
   return await fetch(`${BACKEND_URI}/api/v1/transactions/upload`, {
     method: "POST",
@@ -219,6 +237,7 @@ export default {
   getTransactionByCode,
   returnEquipments,
   cancelTransaction,
+  updateTransactionStatus,
   download,
   upload,
 };

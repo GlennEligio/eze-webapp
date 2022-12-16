@@ -448,4 +448,11 @@ public class TransactionService implements IService<Transaction>, IExcelService<
     public List<Transaction> getProfessorTransactions(String professorName) {
         return txRepo.findByProfessorName(professorName);
     }
+
+    // TODO: Create test cases for this
+    public Transaction updateTransactionStatus(String code, String status) {
+        Transaction transaction = get(code);
+        transaction.setStatus(TxStatus.of(status));
+        return txRepo.save(transaction);
+    }
 }

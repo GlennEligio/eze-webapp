@@ -14,6 +14,7 @@ import TransactionService, {
 import TransactionItem from "../components/Transaction/TransactionItem";
 import CancelTransactionModal from "../components/UI/Modal/CancelTransactionModal";
 import ShowTransactionDetails from "../components/UI/Modal/ShowTransactionDetails";
+import UpdateTransactionModal from "../components/UI/Modal/UpdateTransactionModal";
 import MiniClock from "../components/UI/Other/MiniClock";
 import useHttp, { RequestConfig } from "../hooks/useHttp";
 import { IRootState } from "../store";
@@ -22,9 +23,10 @@ import { transactionAction } from "../store/transactionSlice";
 interface StudentTransactionsProps {
   historical: "true" | "false";
   returned: "true" | "false";
-  cancellable: boolean;
+  cancellable?: boolean;
   type: "HISTORY" | "BORROW/RETURN";
   pageTitle: string;
+  updateable?: boolean;
 }
 
 const StudentTransactions: React.FC<StudentTransactionsProps> = (props) => {
@@ -312,6 +314,13 @@ const StudentTransactions: React.FC<StudentTransactionsProps> = (props) => {
             >
               Cancel
             </button>
+          )}
+          {props.updateable && (
+            <button
+              className="btn btn-success"
+              data-bs-toggle="modal"
+              data-bs-target="#updateTransactionStatusModal"
+            ></button>
           )}
         </ShowTransactionDetails>
         {props.cancellable && (
