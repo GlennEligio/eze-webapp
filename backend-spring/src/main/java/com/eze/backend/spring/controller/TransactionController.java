@@ -17,12 +17,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.CurrentSecurityContext;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.Pattern;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.Principal;
@@ -36,6 +38,7 @@ import java.util.stream.Stream;
 @RestController
 @RequestMapping("/api/v1")
 @Slf4j
+@Validated // validates method parameter constraints
 public class TransactionController {
 
     @Autowired
@@ -298,10 +301,17 @@ public class TransactionController {
         return ResponseEntity.ok(transactionListDto);
     }
 
-    // TODO: Create test cases
-    @PutMapping("/transactions/status/{code}")
+    @PutMapping("/transactions/professor/status/{code}")
     public ResponseEntity<TransactionListDto> updateTransactionStatus(@PathVariable String code,
-                                                                      @RequestParam String status) {
+                                                                      @RequestParam @Valid @Pattern (regexp = "^(PENDING|ACCEPTED|DENIED)", message = "Status can only be PENDING, ACCEPTED, or DENIED") String status,
+                                                                      @CurrentSecurityContext(expression = "authentication") Authentication authentication) {
+        log.info("Updating transaction with code {}, status {}", code, status);
+        Transaction transaction = service.get(code);
+        String profName = transaction.getProfessor().getName();
+        String profNameInAuth = ((UserDetails) authentication.getPrincipal()).getUsername();
+        if(!profNameInAuth.equals(profName)) {
+            throw new ApiException("Professor can only update status of Transaction they own", HttpStatus.FORBIDDEN);
+        }
         Transaction updatedTransaction = service.updateTransactionStatus(code, status);
         TransactionListDto dtoResponse = Transaction.toTransactionListDto(updatedTransaction);
         return ResponseEntity.ok(dtoResponse);

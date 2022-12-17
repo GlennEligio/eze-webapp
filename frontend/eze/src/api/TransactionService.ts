@@ -166,7 +166,7 @@ const cancelTransaction = async (requestConfig: RequestConfig) => {
 };
 
 const updateTransactionStatus = async (requestConfig: RequestConfig) => {
-  const responseObj: boolean = await fetch(
+  const responseObj: Transaction = await fetch(
     !!requestConfig.relativeUrl
       ? `${BACKEND_URI}${requestConfig.relativeUrl}`
       : `${BACKEND_URI}/api/v1/transaction`,
@@ -176,7 +176,7 @@ const updateTransactionStatus = async (requestConfig: RequestConfig) => {
     }
   ).then((response) => {
     if (response.ok) {
-      return true;
+      return response.json();
     }
     throw new ApiError("Failed to update transaction status");
   });

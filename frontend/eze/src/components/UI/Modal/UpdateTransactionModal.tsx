@@ -2,6 +2,7 @@ import React, {
   FormEventHandler,
   MouseEventHandler,
   useEffect,
+  useRef,
   useState,
 } from "react";
 import { useSelector } from "react-redux";
@@ -27,11 +28,13 @@ const UpdateTransactionModal: React.FC<UpdateTransactionModalProp> = (
 ) => {
   const auth = useSelector((state: IRootState) => state.auth);
   const dispatch = useDispatch();
+  const modal = useRef<HTMLDivElement | null>(null);
   const {
     data: updateTransactionData,
     error: updateTransactionError,
     status: updateTransactionStatus,
     sendRequest: updateTransactionStatusRequest,
+    resetHttpState: resetUpdateTransactionHttpState,
   } = useHttp<boolean>(TransactionService.updateTransactionStatus, false);
   const {
     value: status,
@@ -42,7 +45,11 @@ const UpdateTransactionModal: React.FC<UpdateTransactionModalProp> = (
     reset: resetStatusInput,
     errorMessage: statusErrorMessage,
   } = useInput(
-    validateContains("Status", [TxStatus.ACCEPTED, TxStatus.DENIED]),
+    validateContains("Status", [
+      TxStatus.ACCEPTED,
+      TxStatus.DENIED,
+      TxStatus.PENDING,
+    ]),
     TxStatus.PENDING,
     InputType.SELECT
   );
@@ -54,21 +61,35 @@ const UpdateTransactionModal: React.FC<UpdateTransactionModalProp> = (
       updateTransactionError === null &&
       updateTransactionStatus === "completed"
     ) {
+      console.log(updateTransactionData);
       dispatch(
         transactionAction.updateTransaction({
-          trnascation: props.selectedTxCode,
+          transaction: updateTransactionData,
         })
       );
       dispatch(
         transactionAction.updateSelectedTransaction({
-          selectedTransaction: { transaction: updateTransactionData },
+          selectedTransaction: updateTransactionData,
         })
       );
     }
   }, [updateTransactionData, updateTransactionError, updateTransactionStatus]);
 
+  // set up modal so that when hidden.bs.modal event is triggered, it will reset the useHttp and useInput states
+  useEffect(() => {
+    if (modal.current !== null && modal.current !== undefined) {
+      modal.current.addEventListener("hidden.bs.modal", () => {
+        resetUpdateTransactionHttpState();
+        resetStatusInput();
+      });
+    }
+  }, [modal.current]);
+
+  const completeFormInfo = !!statusIsValid && !!props.selectedTxCode;
+
   const updateTransactionStatusHandler: FormEventHandler = (event) => {
     event.preventDefault();
+    if (!completeFormInfo) return;
     const param = new URLSearchParams({
       status,
     }).toString();
@@ -77,7 +98,7 @@ const UpdateTransactionModal: React.FC<UpdateTransactionModalProp> = (
         Authorization: `Bearer ${auth.accessToken}`,
       },
       method: "PUT",
-      relativeUrl: `/api/v1/transactions/student/${props.selectedTxCode}?${param}`,
+      relativeUrl: `/api/v1/transactions/professor/status/${props.selectedTxCode}?${param}`,
     };
 
     updateTransactionStatusRequest(requestConfig);
@@ -90,6 +111,7 @@ const UpdateTransactionModal: React.FC<UpdateTransactionModalProp> = (
       tabIndex={-1}
       aria-labelledby="updateTransactionStatusModalLabel"
       aria-hidden="true"
+      ref={modal}
     >
       <div className="modal-dialog modal-dialog-centered">
         <div className="modal-content">

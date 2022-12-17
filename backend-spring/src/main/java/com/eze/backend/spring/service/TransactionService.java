@@ -450,9 +450,11 @@ public class TransactionService implements IService<Transaction>, IExcelService<
     }
 
     // TODO: Create test cases for this
+    @Transactional
     public Transaction updateTransactionStatus(String code, String status) {
-        Transaction transaction = get(code);
-        transaction.setStatus(TxStatus.of(status));
-        return txRepo.save(transaction);
+        log.info("Update transaction with code {} and status {}", code, status);
+        Transaction transactionToUpdate = txRepo.findByTxCode(code).orElseThrow(() -> new ApiException(notFound(code), HttpStatus.NOT_FOUND));
+        transactionToUpdate.setStatus(TxStatus.of(status));
+        return txRepo.save(transactionToUpdate);
     }
 }

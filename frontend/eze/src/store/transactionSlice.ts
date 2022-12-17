@@ -28,12 +28,16 @@ const transactionSlice = createSlice({
       ];
     },
     updateTransaction(state, action) {
-      state.transactions = state.transactions.map((t) => {
-        if (t.txCode === action.payload.transaction.txCode) {
-          return action.payload.transaction;
-        }
-        return t;
-      });
+      if (state.transactions.length > 0) {
+        let tempTxList = [...state.transactions];
+        tempTxList = tempTxList.map((t) => {
+          if (t.txCode === action.payload.transaction.txCode) {
+            return action.payload.transaction;
+          }
+          return t;
+        });
+        state.transactions = [...tempTxList];
+      }
     },
     removeTransaction(state, action) {
       state.transactions = state.transactions.filter(

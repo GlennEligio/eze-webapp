@@ -564,4 +564,28 @@ public class TransactionServiceTest {
         assertEquals(professorTransactions, transactionsResult);
         assertEquals(0, transactionsResult.stream().filter(t -> !t.getProfessor().getName().equalsIgnoreCase(professorName)).count());
     }
+
+    @Test
+    @DisplayName("Update Transaction Status using invalid code (non-existent transaction) throws ApiException")
+    void updateTransactionStatus_withInvalidTxCode_throwsException() {
+        String invalidTxCode = "INVALID TX CODE";
+        String status = tx0.getStatus().getName();
+        Mockito.when(repository.findByTxCode(invalidTxCode)).thenReturn(Optional.empty());
+
+        assertThrows(ApiException.class, () -> service.updateTransactionStatus(invalidTxCode, status));
+    }
+
+    @Test
+    @DisplayName("Update Transaction Status using valid code returns updated transaction")
+    void updateTransactionStatus_withValidTxCode_returnsUpdatedTransaction() {
+        String validTxCode = tx0.getTxCode();
+        String status = TxStatus.ACCEPTED.getName();
+        Transaction updatedTransaction = new Transaction(txCode0, List.of(eq0, eq1), List.of(eq0, eq1), student1, professor1, timeStamp, null, TxStatus.PENDING, false);
+        updatedTransaction.setStatus(TxStatus.ACCEPTED);
+        Mockito.when(repository.findByTxCode(validTxCode)).thenReturn(Optional.of(tx0));
+        Mockito.when(repository.save(updatedTransaction)).thenReturn(updatedTransaction);
+
+        Transaction transactionResult = service.updateTransactionStatus(validTxCode, status);
+        assertEquals(updatedTransaction, transactionResult);
+    }
 }

@@ -17,6 +17,7 @@ import TransactionHistory from "./pages/TransactionHistory";
 import StudentTransactions from "./pages/StudentTransactions";
 import StudentBorrowForm from "./pages/StudentBorrowForm";
 import AccountSetting from "./pages/AccountSetting";
+import { AccountType } from "./api/AccountService";
 
 const App = () => {
   const auth = useSelector((state: IRootState) => state.auth);
@@ -55,6 +56,7 @@ const App = () => {
                   returned="false"
                   type="BORROW/RETURN"
                   pageTitle="Current Transactions"
+                  transactionOf="student"
                 />
               }
             />
@@ -67,6 +69,7 @@ const App = () => {
                   returned="true"
                   type="HISTORY"
                   pageTitle="Transaction History"
+                  transactionOf="student"
                 />
               }
             />
@@ -79,6 +82,7 @@ const App = () => {
                   returned="false"
                   type="BORROW/RETURN"
                   pageTitle="Current Transactions"
+                  transactionOf="professor"
                 />
               }
             />
@@ -90,6 +94,7 @@ const App = () => {
                   returned="true"
                   type="HISTORY"
                   pageTitle="Transaction History"
+                  transactionOf="professor"
                 />
               }
             />

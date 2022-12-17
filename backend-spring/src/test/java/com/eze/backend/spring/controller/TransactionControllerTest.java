@@ -24,6 +24,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -1150,6 +1151,76 @@ public class TransactionControllerTest {
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(content().json(responseJson))
                 .andExpect(status().isCreated());
+    }
+
+    @Test
+    @DisplayName("Update Transaction Status with invalid Authority returns 403 Forbidden")
+    @WithAnonymousUser
+    void updateTransactionStatus_withInvalidAuth_returns403Forbidden() throws Exception{
+        String validCode = tx0.getTxCode();
+        String statusParam = TxStatus.ACCEPTED.getName();
+
+        mockMvc.perform(put("/api/v1/transactions/professor/status/" + validCode)
+                .param("status", statusParam))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("Update Transaction Status with valid Auth and invalid Status param returns 400 Bad Request")
+    @WithMockUser(authorities = "PROF", username = "Name1")
+    void updateTransactionStatus_withInvalidStatusParam_returns400BadRequest() throws Exception {
+        String validCode = tx0.getTxCode();
+        String invalidStatusParam = "INVALID STATUS";
+        when(service.get(validCode)).thenReturn(tx0);
+
+        mockMvc.perform(put("/api/v1/transactions/professor/status/" + validCode)
+                .param("status", invalidStatusParam))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("Update Transaction Status with valid Auth and invalid Code (non existent Transaction) returns 404 Not found")
+    @WithMockUser(authorities = "PROF", username = "Name1")
+    void updateTransactionStatus_withInvalidTxCode_returns404NotFound() throws Exception {
+        String invalidCode = tx0.getTxCode();
+        String validStatusParam = TxStatus.ACCEPTED.getName();
+        when(service.get(invalidCode)).thenThrow(new ApiException("Transaction not found", HttpStatus.NOT_FOUND));
+
+        mockMvc.perform(put("/api/v1/transactions/professor/status/" + invalidCode)
+                        .param("status", validStatusParam))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("Update Transaction Status with invalid Auth (mismatch Professor name in Transaction and Auth) returns 403 Forbidden")
+    @WithMockUser(authorities = "PROF", username = "INVALID NAME") // correct name is Name1
+    void updateTransactionStatus_withMismatchProfName_returns403Forbidden() throws Exception {
+        String validCode = tx0.getTxCode();
+        String validStatusParam = TxStatus.ACCEPTED.getName();
+        when(service.get(validCode)).thenReturn(tx0);
+
+        mockMvc.perform(put("/api/v1/transactions/professor/status/" + validCode)
+                .param("status", validStatusParam))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @DisplayName("Update Transaction Status with valid Auth, code, and status param returns 200OK with Updated Transaction")
+    @WithMockUser(authorities = "PROF", username = "Name1")
+    void updateTransactionStatus_withValidAuthCodeAndStatus_returns200OKWithUpdatedTransaction() throws Exception {
+        String validCode = tx0.getTxCode();
+        String validStatusParam = TxStatus.DENIED.getName();
+        Transaction updatedTransaction = tx0 = new Transaction(new ObjectId().toHexString(), new ArrayList<>(), List.of(eq0, eq1), student, professor1, timeStamp, null, TxStatus.ACCEPTED, false);
+        updatedTransaction.setStatus(TxStatus.DENIED);
+        TransactionListDto dtoResponse = Transaction.toTransactionListDto(updatedTransaction);
+        String responseJson = mapper.writeValueAsString(dtoResponse);
+        when(service.updateTransactionStatus(validCode, validStatusParam)).thenReturn(updatedTransaction);
+        when(service.get(validCode)).thenReturn(tx0);
+
+        mockMvc.perform(put("/api/v1/transactions/professor/status/" + validCode)
+                .param("status", validStatusParam))
+                .andExpect(status().isOk())
+                .andExpect(content().json(responseJson));
     }
 
     public MockMultipartFile createMultipartFile(List<Transaction> transactions, String contentType) {

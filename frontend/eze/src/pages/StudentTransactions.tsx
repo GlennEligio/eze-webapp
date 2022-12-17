@@ -7,6 +7,7 @@ import React, {
 import { useDispatch } from "react-redux";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { AccountType } from "../api/AccountService";
 import TransactionService, {
   Transaction,
   TxStatus,
@@ -27,6 +28,7 @@ interface StudentTransactionsProps {
   type: "HISTORY" | "BORROW/RETURN";
   pageTitle: string;
   updateable?: boolean;
+  transactionOf: "student" | "professor";
 }
 
 const StudentTransactions: React.FC<StudentTransactionsProps> = (props) => {
@@ -57,7 +59,8 @@ const StudentTransactions: React.FC<StudentTransactionsProps> = (props) => {
       },
       method: "GET",
       relativeUrl:
-        `/api/v1/transactions/student/${auth.username}?` + params.toString(),
+        `/api/v1/transactions/${props.transactionOf}/${auth.username}?` +
+        params.toString(),
     };
 
     getStudentTransactions(requestConfig);
@@ -108,7 +111,8 @@ const StudentTransactions: React.FC<StudentTransactionsProps> = (props) => {
       },
       method: "GET",
       relativeUrl:
-        `/api/v1/transactions/student/${auth.username}?` + params.toString(),
+        `/api/v1/transactions/${props.transactionOf}/${auth.username}?` +
+        params.toString(),
     };
 
     getStudentTransactions(requestConfig);
@@ -120,16 +124,6 @@ const StudentTransactions: React.FC<StudentTransactionsProps> = (props) => {
 
   // Transaction Item click Handler to update selectedTransaction in Redux Store
   const transactionItemClickHandler = (selectedTransaction: Transaction) => {
-    if (
-      selectedTransaction.txCode === transaction.selectedTransaction?.txCode
-    ) {
-      dispatch(
-        transactionAction.updateSelectedTransaction({
-          selectedTransaction: null,
-        })
-      );
-      return;
-    }
     dispatch(
       transactionAction.updateSelectedTransaction({
         selectedTransaction,
@@ -320,17 +314,21 @@ const StudentTransactions: React.FC<StudentTransactionsProps> = (props) => {
               className="btn btn-success"
               data-bs-toggle="modal"
               data-bs-target="#updateTransactionStatusModal"
-            ></button>
+            >
+              Update
+            </button>
           )}
         </ShowTransactionDetails>
         {props.cancellable && (
           <CancelTransactionModal
-            previousModalId="#cancelTransactionModal"
-            selectedTxCode={
-              transaction.selectedTransaction
-                ? transaction.selectedTransaction.txCode
-                : ""
-            }
+            previousModalId="#transactionDetailsModal"
+            selectedTxCode={transaction.selectedTransaction?.txCode || ""}
+          />
+        )}
+        {props.updateable && (
+          <UpdateTransactionModal
+            previousModalId="#transactionDetailsModal"
+            selectedTxCode={transaction.selectedTransaction?.txCode || ""}
           />
         )}
       </div>
