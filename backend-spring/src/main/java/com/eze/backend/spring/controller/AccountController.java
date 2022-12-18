@@ -131,6 +131,7 @@ public class AccountController {
     public ResponseEntity<Account> updateAccount(@Valid @RequestBody CreateUpdateAccountDto dto,
                                                  @PathVariable("username") String username,
                                                  @CurrentSecurityContext(expression = "authentication") Authentication authentication) {
+        log.info("Updating Account with username {} and details {}", username, dto.toString());
         Account accountToUpdate = Account.toAccount(dto);
         UsernamePasswordAuthenticationToken authenticationToken = (UsernamePasswordAuthenticationToken) authentication;
         String usernameInAuth = ((UserDetails) authenticationToken.getPrincipal()).getUsername();

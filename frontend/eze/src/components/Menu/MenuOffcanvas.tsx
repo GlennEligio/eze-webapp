@@ -30,8 +30,12 @@ const MenuOffcanvas: FC<MenuOffcanvasProps> = (props) => {
       <div className="offcanvas-body">
         <div>
           <nav className="nav flex-column">
-            <a className="nav-link disabled">Account Settings</a>
-            <a className="nav-link active">Main Menu</a>
+            <Link to={"/account/settings"} className="nav-link">
+              Account Settings
+            </Link>
+            <Link to={"/"} className="nav-link active">
+              Main Menu
+            </Link>
             <Link
               to={"/login"}
               className="nav-link"

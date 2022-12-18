@@ -35,7 +35,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         final String requestUri = request.getRequestURI();
         final String requestMethod = request.getMethod();
         log.info("{} {}", requestMethod, requestUri);
-        Pattern patPackageDescription = Pattern.compile("/api/v.*/accounts/[login|register]");
+        Pattern patPackageDescription = Pattern.compile("/api/v.*/accounts/(login|register)");
         Matcher matPackageDescription = patPackageDescription.matcher(requestUri);
         if(matPackageDescription.find()) {
             log.info("Login and register request, will not be processed");

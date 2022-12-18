@@ -1,9 +1,10 @@
 TODOS:
-1. Add function in softDelete service to throw ApiException if the resource to be soft deleted have their deleteFlag already set to true
-2. Add image input to the AddStudent and Update Student form modals and display them in the Borrow and Return forms
+1. DONE - Add function in softDelete service to throw ApiException if the resource to be soft deleted have their deleteFlag already set to true
+2. DONE - Add image input to the AddStudent and Update Student form modals and display them in the Borrow and Return forms
 3. Add functionality to capture Student images in the Admin Menu
 4. Add biometric functionlity to recognize the Student
 	> for now, we can use barcode(?) which should output student number to ease the inputting of student info in borrow and return form
 5. Add functionality for Room Scheduling (for room key borrow)
-6. Add functionality for Student to create Borrow Request
-7. Add functionality for Professor to to update Borrow Transactions status (PENDING, ACCEPTED, REJECTED)
+6. DONE - Add functionality for Student to create Borrow Request
+7. DONE - Add functionality for Professor to to update Borrow Transactions status (PENDING, ACCEPTED, REJECTED)
+8. Add Account Setting functionality in the SADMIN/ADMIN and StudentAssistant menu offcanvas

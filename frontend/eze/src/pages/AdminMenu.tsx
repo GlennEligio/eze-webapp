@@ -35,7 +35,7 @@ function AdminMenu() {
   };
 
   return (
-    <div className="container-md d-flex flex-column h-100">
+    <div className="container-lg d-flex flex-column h-100">
       <div className="row">
         <MenuHeader
           name={auth.fullName}
