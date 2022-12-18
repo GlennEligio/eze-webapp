@@ -95,7 +95,7 @@ const StudentAssistantMenu = () => {
                 <div className="row gx-0 gy-1 flex-grow-1 mt-1">
                   <EzeMenuButton
                     backgroundColor="#662d91"
-                    destPage="/"
+                    destPage="/calendar"
                     imageLoc="./img/Calendar.png"
                     title="Schedule"
                     key={"Schedule"}
@@ -128,7 +128,7 @@ const StudentAssistantMenu = () => {
                 <div className="row gx-0 gy-1 flex-grow-1 mt-1">
                   <EzeMenuButton
                     backgroundColor="#d24826"
-                    destPage="/"
+                    destPage="/camera"
                     imageLoc="/img/camera2.png"
                     title="Camera"
                     key={"Camera"}

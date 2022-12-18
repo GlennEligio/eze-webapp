@@ -188,19 +188,15 @@ const download = async (jwt: string) => {
 export const isValidAccount = (account: CreateUpdateAccountDto) => {
   let valid = true;
   if (validator.isEmpty(account.username)) {
-    console.log("Empty username");
     valid = false;
   }
   if (validator.isEmpty(account.password)) {
-    console.log("Empty password");
     valid = false;
   }
   if (validator.isEmpty(account.type || "")) {
-    console.log("Empty type");
     valid = false;
   }
   if (validator.isEmpty(account.fullName)) {
-    console.log("Empty full name");
     valid = false;
   }
   return valid;

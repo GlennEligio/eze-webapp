@@ -21,7 +21,7 @@ import useHttp, { RequestConfig } from "../hooks/useHttp";
 import { IRootState } from "../store";
 import { transactionAction } from "../store/transactionSlice";
 
-interface StudentTransactionsProps {
+interface StudentProfTransactionsProps {
   historical: "true" | "false";
   returned: "true" | "false";
   cancellable?: boolean;
@@ -31,7 +31,9 @@ interface StudentTransactionsProps {
   transactionOf: "student" | "professor";
 }
 
-const StudentTransactions: React.FC<StudentTransactionsProps> = (props) => {
+const StudentProfTransactions: React.FC<StudentProfTransactionsProps> = (
+  props
+) => {
   const auth = useSelector((state: IRootState) => state.auth);
   const transaction = useSelector((state: IRootState) => state.transaction);
   const dispatch = useDispatch();
@@ -336,4 +338,4 @@ const StudentTransactions: React.FC<StudentTransactionsProps> = (props) => {
   );
 };
 
-export default StudentTransactions;
+export default StudentProfTransactions;

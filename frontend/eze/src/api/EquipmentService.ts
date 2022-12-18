@@ -95,7 +95,6 @@ const createEquipment = async (requestConfig: RequestConfig) => {
 };
 
 const updateEquipment = async (requestConfig: RequestConfig) => {
-  console.log("Updating equipment", requestConfig);
   const responseObj: Equipment = await fetch(
     !!requestConfig.relativeUrl
       ? `${BACKEND_URI}${requestConfig.relativeUrl}`
@@ -156,19 +155,15 @@ const download = async (jwt: string) => {
 export const isValidEquipment = (eq: CreateUpdateEquipmentDto) => {
   let valid = true;
   if (validator.isEmpty(eq.name)) {
-    console.log("Empty name");
     valid = false;
   }
   if (validator.isEmpty(eq.barcode)) {
-    console.log("Empty barcode");
     valid = false;
   }
   if (validator.isEmpty(eq.status)) {
-    console.log("Empty status");
     valid = false;
   }
   if (eq.isDuplicable === undefined) {
-    console.log("Empty isDuplicable");
     valid = false;
   }
   return valid;

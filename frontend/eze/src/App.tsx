@@ -14,7 +14,7 @@ import Unauthorized from "./pages/Unauthorized";
 import Home from "./pages/Home";
 import Professors from "./pages/Professors";
 import TransactionHistory from "./pages/TransactionHistory";
-import StudentTransactions from "./pages/StudentTransactions";
+import StudentProfTransactions from "./pages/StudentProfTransactions";
 import StudentBorrowForm from "./pages/StudentBorrowForm";
 import AccountSetting from "./pages/AccountSetting";
 import { AccountType } from "./api/AccountService";
@@ -50,7 +50,7 @@ const App = () => {
             <Route
               path="/student/current-transactions"
               element={
-                <StudentTransactions
+                <StudentProfTransactions
                   historical="false"
                   cancellable={true}
                   returned="false"
@@ -63,7 +63,7 @@ const App = () => {
             <Route
               path="/student/history-transactions"
               element={
-                <StudentTransactions
+                <StudentProfTransactions
                   historical="true"
                   cancellable={false}
                   returned="true"
@@ -76,7 +76,7 @@ const App = () => {
             <Route
               path="/professor/current-transactions"
               element={
-                <StudentTransactions
+                <StudentProfTransactions
                   historical="false"
                   updateable={true}
                   returned="false"
@@ -89,7 +89,7 @@ const App = () => {
             <Route
               path="/professor/history-transactions"
               element={
-                <StudentTransactions
+                <StudentProfTransactions
                   historical="true"
                   returned="true"
                   type="HISTORY"
