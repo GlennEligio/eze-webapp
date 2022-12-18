@@ -69,7 +69,6 @@ const DeleteEquipmentModal = () => {
 
   const deleteEquipmentHandler = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log("Deleting Equipment");
 
     if (validator.isEmpty(equipment.selectedEquipment?.equipmentCode + ""))
       return;

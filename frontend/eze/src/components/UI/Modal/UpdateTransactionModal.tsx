@@ -61,7 +61,6 @@ const UpdateTransactionModal: React.FC<UpdateTransactionModalProp> = (
       updateTransactionError === null &&
       updateTransactionStatus === "completed"
     ) {
-      console.log(updateTransactionData);
       dispatch(
         transactionAction.updateTransaction({
           transaction: updateTransactionData,

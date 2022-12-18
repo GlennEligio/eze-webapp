@@ -253,7 +253,6 @@ function BorrowForm() {
       };
 
       if (!isValidTransaction(newTransaction)) {
-        console.log("Invalid transaction");
         return;
       }
 

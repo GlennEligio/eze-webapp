@@ -41,7 +41,6 @@ const useInput = <T, E>(
         };
       case InputType.SELECT:
         return (event: ChangeEvent<HTMLSelectElement>) => {
-          console.log(event.currentTarget.value);
           setEnteredValue(event.currentTarget.value as T);
         };
       default:

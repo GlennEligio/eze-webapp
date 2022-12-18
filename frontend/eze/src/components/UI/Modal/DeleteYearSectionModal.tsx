@@ -89,7 +89,6 @@ const DeleteYearSectionModal: FC<DeleteYearSectionModalProps> = (props) => {
     event: React.FormEvent<HTMLFormElement>
   ) => {
     event.preventDefault();
-    console.log("Deleting YearSection");
 
     if (validator.isEmpty(sectionName)) return;
 

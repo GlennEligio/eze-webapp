@@ -93,7 +93,6 @@ const AddProfessorModal = () => {
   // form submitHandler for adding Professor
   const addProfessorHandler = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log("Adding Professor");
     const newProfessor: CreateUpdateProfessor = {
       name,
       contactNumber,
@@ -102,7 +101,6 @@ const AddProfessorModal = () => {
     };
 
     if (!completeProfessorInfo) {
-      console.log("Invalid professor");
       return;
     }
 

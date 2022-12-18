@@ -120,7 +120,6 @@ const UpdateStudentModal: FC<UpdateStudentModalProps> = (props) => {
   // Update the Student in the Context API
   useEffect(() => {
     if (status === "completed" && error === null && data) {
-      console.log(data);
       dispatch(studentActions.updateStudent({ student: data }));
     }
   }, [data]);
@@ -203,7 +202,6 @@ const UpdateStudentModal: FC<UpdateStudentModalProps> = (props) => {
 
   const updateStudentHandler = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log("Updating Student");
     const updatedStudent: CreateUpdateStudentDto = {
       studentNumber,
       contactNumber,
@@ -230,7 +228,6 @@ const UpdateStudentModal: FC<UpdateStudentModalProps> = (props) => {
       !yearNumberIsValid ||
       !profileIsValid
     ) {
-      console.log("Invalid student");
       return;
     }
 

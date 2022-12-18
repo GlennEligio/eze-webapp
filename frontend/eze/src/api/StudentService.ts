@@ -187,23 +187,18 @@ export const isValidStudent = (student: CreateUpdateStudentDto) => {
       /^\d{4}-\d{5}-[(a-z)|(A-Z)]{2}-\d{2}$/
     )
   ) {
-    console.log("Not a valid student number");
     valid = false;
   }
   if (validator.isEmpty(student.fullName)) {
-    console.log("Empty name");
     valid = false;
   }
   if (validator.isEmpty(student.yearAndSection.sectionName)) {
-    console.log("Empty sectionName");
     valid = false;
   }
   if (!validator.isMobilePhone(student.contactNumber, "en-PH")) {
-    console.log("Not a valid phone number");
     valid = false;
   }
   if (!validator.isNumeric(student.yearLevel.yearNumber + "")) {
-    console.log("Invalid yearNumber");
     valid = false;
   }
   return valid;

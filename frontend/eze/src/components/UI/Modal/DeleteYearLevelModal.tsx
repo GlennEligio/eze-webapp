@@ -64,7 +64,6 @@ const DeleteYearLevelModal: FC<DeleteYearLevelModalProps> = (props) => {
 
   const deleteYearLevelHandler = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log("Deleting YearLevel");
 
     if (!validator.isNumeric(yearNumber + "")) return;
 

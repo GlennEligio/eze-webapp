@@ -164,7 +164,6 @@ const AddStudentModal: FC<AddStudentModalProps> = (props) => {
   // form submitHandler for adding Student
   const addStudentHandler = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log("Adding Student");
     const newStudent: CreateUpdateStudentDto = {
       studentNumber,
       contactNumber,
@@ -191,7 +190,6 @@ const AddStudentModal: FC<AddStudentModalProps> = (props) => {
       !yearNumberIsValid ||
       !profileIsValid
     ) {
-      console.log("Invalid student");
       return;
     }
 

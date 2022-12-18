@@ -94,7 +94,6 @@ const DeleteStudentModal = () => {
 
   const deleteStudentHandler = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log("Deleting Student");
 
     if (validator.isEmpty(studentNumber)) return;
 

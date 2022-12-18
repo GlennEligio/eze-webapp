@@ -206,25 +206,20 @@ const download = async (jwt: string, params: string) => {
 export const isValidTransaction = (t: CreateUpdateTransaction) => {
   let valid = true;
   if (t.equipments.length <= 0) {
-    console.log("Empty equipments");
     valid = false;
   }
   t.equipments.forEach((e) => {
     if (!isValidEquipment(e)) {
-      console.log("Not a valid equipment");
       valid = false;
     }
   });
   if (!isValidStudent(t.borrower)) {
-    console.log("Not a valid student");
     valid = false;
   }
   if (!isValidProfessor(t.professor)) {
-    console.log("Not a valid professor");
     valid = false;
   }
   if (validator.isEmpty(t.status)) {
-    console.log("Empty status");
     valid = false;
   }
   return valid;

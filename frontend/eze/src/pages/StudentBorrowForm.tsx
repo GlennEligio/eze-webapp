@@ -155,7 +155,6 @@ const StudentBorrowForm = () => {
   };
 
   const removeEquipmentItemHandler = (eqToRemove: Equipment) => {
-    console.log("Removing equipment");
     setSelectedEquipments((prevEqList) => {
       return prevEqList.filter(
         (eq) => eq.equipmentCode !== eqToRemove.equipmentCode

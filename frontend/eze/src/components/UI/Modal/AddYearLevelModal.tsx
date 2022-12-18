@@ -57,13 +57,11 @@ const AddYearLevelModal = () => {
 
   const addYearLevelHandler = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log("Adding YearLevel");
     const newYearNumber: CreateYearLevelDto = {
       yearNumber: Number.parseInt(yearNumber),
     };
 
     if (!yearNumberIsValid) {
-      console.log("Invalid YearLevel");
       return;
     }
 

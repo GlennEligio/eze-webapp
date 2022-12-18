@@ -12,7 +12,6 @@ const Home = () => {
   const [homeDisplay, setHomeDisplay] = useState<JSX.Element>(<></>);
 
   useEffect(() => {
-    console.log(auth);
     if (!!auth.accessToken) {
       if (auth.accountType === "ADMIN" || auth.accountType === "SADMIN") {
         setHomeDisplay(<AdminMenu />);

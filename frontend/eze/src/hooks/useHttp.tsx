@@ -122,11 +122,9 @@ function useHttp<T>(requestFunction: Function, startWithPending = false) {
 
   const sendRequest = useCallback(
     async function (requestConfig?: RequestConfig) {
-      console.log("Send request:", requestConfig);
       dispatch({ type: RequestActionKind.SEND });
       try {
         const responseData = await requestFunction(requestConfig);
-        console.log("Response Data: ", responseData);
         dispatch({ type: RequestActionKind.SUCCESS, responseData });
       } catch (error) {
         dispatch({

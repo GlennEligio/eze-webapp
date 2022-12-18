@@ -63,7 +63,6 @@ const DeleteAccountModal = () => {
 
   const deleteAccountHandler = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log("Deleting Account");
 
     if (validator.isEmpty(account.selectedAccount?.username + "")) return;
 

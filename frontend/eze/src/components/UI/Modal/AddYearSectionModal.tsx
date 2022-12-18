@@ -85,7 +85,6 @@ const AddYearSectionModal: FC<AddYearSectionModalProps> = (props) => {
 
   const addYearSectionHandler = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log("Adding YearSection");
     const newYearSection: CreateYearSection = {
       sectionName: sectionName,
       yearLevel: {
@@ -94,7 +93,6 @@ const AddYearSectionModal: FC<AddYearSectionModalProps> = (props) => {
     };
 
     if (!yearNumberIsValid || !sectionNameIsValid) {
-      console.log("Invalid YearSection");
       return;
     }
 

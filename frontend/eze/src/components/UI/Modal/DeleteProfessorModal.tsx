@@ -68,7 +68,6 @@ const DeleteProfessorModal: React.FC<DeleteProfessorModalProps> = (props) => {
   // form submitHandler for deleting Professor
   const deleteProfessorHandler = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log("Deleting Professor");
 
     if (validator.isEmpty(name)) return;
 

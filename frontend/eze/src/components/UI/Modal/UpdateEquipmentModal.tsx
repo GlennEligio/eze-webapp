@@ -138,7 +138,6 @@ const UpdateEquipmentModal = () => {
       !barcodeIsValid ||
       !isDuplicableIsValid
     ) {
-      console.log("Invalid equipment");
       return;
     }
 

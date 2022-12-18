@@ -103,7 +103,6 @@ const AddEquipmentModal = () => {
 
   const addEquipmentHandler = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log("Adding Equipment");
     const newEquipment: CreateUpdateEquipmentDto = {
       name: name,
       status: status,
@@ -118,7 +117,6 @@ const AddEquipmentModal = () => {
       !isDuplicableIsValid ||
       !statusIsValid
     ) {
-      console.log("Invalid equipment");
       return;
     }
 

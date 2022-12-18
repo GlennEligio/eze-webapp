@@ -131,7 +131,6 @@ const UpdateAccountModal = () => {
 
   const updateAccountHandler = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log("Updating Account");
     const updatedAccount: CreateUpdateAccountDto = {
       fullName,
       active,
@@ -149,7 +148,6 @@ const UpdateAccountModal = () => {
       !usernameIsValid ||
       !profileIsValid
     ) {
-      console.log("Invalid Account");
       return;
     }
 

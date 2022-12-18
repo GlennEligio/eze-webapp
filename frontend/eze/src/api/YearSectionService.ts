@@ -91,11 +91,9 @@ const download = async (jwt: string) => {
 export const isValidYearSection = (ys: CreateYearSection) => {
   let valid = true;
   if (validator.isEmpty(ys.sectionName)) {
-    console.log("Empty sectionName");
     valid = false;
   }
   if (!validator.isNumeric(ys.yearLevel.yearNumber + "")) {
-    console.log("Not a numeric yearNumber");
     valid = false;
   }
   return valid;

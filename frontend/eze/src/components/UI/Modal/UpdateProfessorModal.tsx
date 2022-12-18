@@ -110,7 +110,6 @@ const UpdateProfessorModal: React.FC<UpdateProfessorModalProps> = (props) => {
 
   const updateProfessorHandler = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    console.log("Updating Professor");
     const updatedProfessor: CreateUpdateProfessor = {
       name,
       contactNumber,
@@ -119,7 +118,6 @@ const UpdateProfessorModal: React.FC<UpdateProfessorModalProps> = (props) => {
     };
 
     if (!completeProfessorInfo) {
-      console.log("Invalid professor");
       return;
     }
 

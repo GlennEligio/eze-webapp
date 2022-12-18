@@ -75,7 +75,6 @@ const deleteYearLevel = async (requestConfig: RequestConfig) => {
       headers: requestConfig.headers != null ? requestConfig.headers : {},
     }
   ).then((response) => {
-    console.log(response);
     if (response.ok) {
       return true;
     }
@@ -87,7 +86,6 @@ const deleteYearLevel = async (requestConfig: RequestConfig) => {
 // for validation
 export const isValidYearLevel = (yl: CreateYearLevelDto) => {
   if (validator.isEmpty(yl.yearNumber + "")) {
-    console.log("Empty yearNumber");
     return false;
   }
   return true;
