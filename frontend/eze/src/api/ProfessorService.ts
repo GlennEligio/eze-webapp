@@ -148,11 +148,9 @@ const download = async (jwt: string) => {
 export const isValidProfessor = (prof: CreateUpdateProfessor) => {
   let valid = true;
   if (validator.isEmpty(prof.name!)) {
-    console.log("Empty name");
     valid = false;
   }
   if (!validator.isMobilePhone(prof.contactNumber, "en-PH")) {
-    console.log("Not a valid phone number");
     valid = false;
   }
   return valid;
