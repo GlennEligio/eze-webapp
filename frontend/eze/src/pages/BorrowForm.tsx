@@ -256,13 +256,18 @@ function BorrowForm() {
         return;
       }
 
+      const param = new URLSearchParams({
+        complete: "false",
+      }).toString();
+
       const requestConfig: RequestConfig = {
         body: newTransaction,
         headers: {
           Authorization: `Bearer ${auth.accessToken}`,
           "Content-type": "application/json",
         },
-        relativeUrl: `/api/v1/transactions?complete=true`,
+        relativeUrl: `/api/v1/transactions?${param}`,
+        method: "POST",
       };
       createTransaction(requestConfig);
     }

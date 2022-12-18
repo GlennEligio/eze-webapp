@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.eze</groupId>
 	<artifactId>backend-spring</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.2-SNAPSHOT</version>
 	<name>backend-spring</name>
 	<description>Eze Backend Spring</description>
 	<properties>

@@ -25,7 +25,7 @@ spec:
         app: eze-frontend
     spec:
       containers:
-        - image: "shuntjg/eze-frontend:0.0.1.PROD"
+        - image: "shuntjg/eze-frontend:0.0.2.PROD"
           name: eze-frontend
           envFrom:
             - configMapRef:
@@ -53,7 +53,8 @@ metadata:
   name: eze-frontend-configmap
   namespace: glenneligio
 data:
-  REACT_APP_BACKEND_SERVICE_URI_PROD: https://eze-glenneligio.cloud.okteto.net #DONT wrap in double quotes
+  REACT_APP_BACKEND_SERVICE_URI_PROD: https://eze-glenneligio.cloud.okteto.net
+  #change to the url where FRE is exposed
 
 ---
 # Service
@@ -66,7 +67,7 @@ metadata:
   namespace: glenneligio
 spec:
   ports:
-    - port: 80
+    - port: 50
       protocol: TCP
       targetPort: 80
   selector:

@@ -25,7 +25,7 @@ spec:
         app: eze-backend-spring
     spec:
       containers:
-        - image: shuntjg/eze-backend-spring:0.0.1-SNAPSHOT
+        - image: shuntjg/eze-backend-spring:0.0.2-SNAPSHOT
           imagePullPolicy: IfNotPresent
           name: eze-backend-spring
           envFrom:
@@ -48,7 +48,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: eze-backend-spring-service
+  name: eze-backend-spring-service # must match the proxy pass destination in nginx.conf of FRE
   namespace: glenneligio
 spec:
   ports:
