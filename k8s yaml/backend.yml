@@ -73,6 +73,8 @@ data:
   EZE_BACKEND_SADMIN_USERNAME: sadmin
   EZE_BACKEND_SADMIN_PASSWORD: pass
   EZE_BACKEND_SADMIN_EMAIL: glenneligio@gmail.com
+  EZE_BACKEND_EMAIL_SENDER_USERNAME: asadeased@gmail.com
+  EZE_BACKEND_EMAIL_SENDER_PASSWORD: echrhthbxxgkbvgo
 kind: ConfigMap
 metadata:
   name: eze-backend-spring-configmap

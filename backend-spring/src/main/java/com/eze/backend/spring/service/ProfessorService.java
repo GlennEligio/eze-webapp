@@ -33,11 +33,13 @@ public class ProfessorService implements IService<Professor>, IExcelService<Prof
     private ProfessorRepository repository;
     private ObjectIdGenerator idGenerator;
     private AccountService accountService;
+    private EmailService emailService;
 
-    public ProfessorService(ProfessorRepository repository, ObjectIdGenerator idGenerator, AccountService accountService) {
+    public ProfessorService(ProfessorRepository repository, ObjectIdGenerator idGenerator, AccountService accountService, EmailService emailService) {
         this.repository = repository;
         this.idGenerator = idGenerator;
         this.accountService = accountService;
+        this.emailService = emailService;
     }
 
     @Override
@@ -57,6 +59,7 @@ public class ProfessorService implements IService<Professor>, IExcelService<Prof
     }
 
     @Override
+    @Transactional
     public Professor create(Professor professor) {
         if(professor.getName() != null) {
             Optional<Professor> opProf = repository.findByName(professor.getName());
@@ -67,19 +70,24 @@ public class ProfessorService implements IService<Professor>, IExcelService<Prof
         // Creating account alongside the Student Creation
         Account account = new Account();
         account.setUsername(professor.getName());
-        // TODO: Send this to the student's email via JavaMailSender
         String randomPassword = idGenerator.createId();
         account.setPassword(randomPassword);
         account.setEmail(professor.getEmail());
         account.setFullName(professor.getName());
-        // TODO: Set a proper default image url
         account.setProfile(professor.getProfile());
         account.setType(AccountType.PROF);
         Account newAccount = accountService.create(account);
         professor.setProfessorAccount(newAccount);
 
         professor.setDeleteFlag(false);
-        return repository.save(professor);
+        Professor professor1 = repository.save(professor);
+
+        String emailMessage = "Hello " + professor1.getName() + ",\n" +
+                "Here is the password generated when your professor data is created in the system: " + randomPassword + ".\n" +
+                "Please login to the application and change your password immediately.\n\n";
+        emailService.sendEmail(professor1.getEmail(), "Intial Password for EZ-E account", emailMessage);
+
+        return professor1;
     }
 
     @Override

@@ -37,13 +37,15 @@ public class StudentService implements IService<Student>, IExcelService<Student>
     private final YearSectionService ysService;
     private final AccountService accountService;
     private final ObjectIdGenerator idGenerator;
+    private final EmailService emailService;
 
-    public StudentService(StudentRepository repository, YearLevelService ylService, YearSectionService ysService, AccountService accountService, ObjectIdGenerator idGenerator) {
+    public StudentService(StudentRepository repository, YearLevelService ylService, YearSectionService ysService, AccountService accountService, ObjectIdGenerator idGenerator, EmailService emailService) {
         this.repository = repository;
         this.ylService = ylService;
         this.ysService = ysService;
         this.accountService = accountService;
         this.idGenerator = idGenerator;
+        this.emailService = emailService;
     }
 
     @Override
@@ -92,7 +94,13 @@ public class StudentService implements IService<Student>, IExcelService<Student>
         Account newAccount = accountService.create(account);
         student.setStudentAccount(newAccount);
 
-        return repository.save(student);
+        Student student1 = repository.save(student);
+        String emailMessage = "Hello " + student1.getFullName() + ",\n" +
+                "Here is the password generated when your student data is created in the system: " + randomPassword + ".\n" +
+                "Please login to the application and change your password immediately.\n\n";
+        emailService.sendEmail(student1.getEmail(), "Intial Password for EZ-E account", emailMessage);
+
+        return repository.save(student1);
     }
 
     @Override
