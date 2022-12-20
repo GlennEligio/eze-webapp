@@ -12,8 +12,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: ${EZE_BACKEND_EMAIL_SENDER_USERNAME:asadeased@gmail.com}
-    password: ${EZE_BACKEND_EMAIL_SENDER_PASSWORD:echrhthbxxgkbvgo}
+    username: ${EZE_BACKEND_EMAIL_SENDER_USERNAME} #import the value from env var or java cmd args
+    password: ${EZE_BACKEND_EMAIL_SENDER_PASSWORD} #import the value from env var or java cmd args
     properties:
       mail:
         debug: true
